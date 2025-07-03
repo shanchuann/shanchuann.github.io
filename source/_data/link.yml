@@ -12,6 +12,12 @@
   link_list:
     - name: Fomalhaut🥝
       link: https://fomal.cc/
-      avatar: /assets/head.jpg
+      avatar: https://s2.loli.net/2024/12/31/EKxnzG8MPalmVe2.gif
       descr: Future is now 🍭🍭🍭
       siteshot: https://source.fomal.cc/siteshot/www.fomal.cn.jpg
+
+    - name: mcc
+      link: https://www.chengcc.cn/
+      avatar: https://s2.loli.net/2024/12/31/LsNtiRKnz61mOkh.jpg
+      descr: My friend (OvO)
+      siteshot: https://s2.loli.net/2024/12/31/FMrwqDaNxGEz9on.png

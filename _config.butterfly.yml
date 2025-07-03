@@ -1,28 +1,29 @@
 # Navigation bar settings (導航欄設置)
 # see https://butterfly.js.org/posts/4aa8abbe/##導航欄設置-Navigation-bar-settings
 # --------------------------------------
-
+# --------------------------------------
+# 导航设置
+# --------------------------------------
 nav:
+  # 导航栏 Logo 图片
   logo: # image
+  # 是否显示标题
   display_title: true
+  # 固定导航栏
   fixed: false # fixed navigation bar
 
 # Menu 目錄
 menu:
   首页: / || fas fa-home
   时间轴: /archives/ || fas fa-archive
-  标签: /tags/ || fas fa-tags
-  分类: /categories/ || fas fa-folder-open
-  清单||fa fa-heartbeat:
-    音乐: /music/ || fas fa-music
-    照片: /Gallery/ || fas fa-images
-    电影: /movies/ || fas fa-video
+  页面|| fa fa-file:
+    分类: /categories/ || fas fa-th
+    标签: /tags/ || fas fa-tags
   友链: /link/ || fas fa-link
-  关于: /about/ || fas fa-heart
+  关于我: /about/ || fas fa-heart
 
 # Code Blocks (代碼相關)
 # --------------------------------------
-
 highlight_theme: light #  darker / pale night / light / ocean / mac / mac light / false
 highlight_copy: true # copy button
 highlight_lang: true # show the code language
@@ -33,6 +34,9 @@ code_word_wrap: false
 # Social Settings (社交圖標設置)
 # formal:
 #   icon: link || the description || color
+# 社交媒体链接
+# 格式:
+#   icon: 链接 || 描述 || 颜色
 social:
   fab fa-github: https://github.com/shanchuann || Github || '#24292e'
   fas fa-envelope: mailto:1537521192@qq.com || Email || '#4a7dbe'
@@ -42,19 +46,19 @@ social:
 # --------------------------------------
 
 # Favicon（網站圖標）
-favicon: https://s2.loli.net/2024/12/07/g8Air5y6U3QHCRl.png
+favicon: https://s2.loli.net/2024/12/20/LZnzPSjitWAbr2u.png
 
 # Avatar (頭像)
 avatar:
   img: https://s2.loli.net/2024/12/07/CHnkYyJ7OWX65tw.jpg
   effect: false # true: circle / false: square
-
+# 禁用所有横幅图片
 # Disable all banner image
 disable_top_img: false
 
 # The banner image of home page
 index_img: https://s2.loli.net/2024/12/09/eEMobvt4BdsDP1A.jpg
-
+# 如果页面未设置横幅，则显示默认的横幅图片
 # If the banner of page not setting, it will show the top_img
 default_top_img: https://s2.loli.net/2024/12/09/eEMobvt4BdsDP1A.jpg
 
@@ -363,7 +367,11 @@ katex:
 algolia_search:
   enable: false
   hits:
-    per_page: 6
+    per_page: 10
+  labels:
+    input_placeholder: Search for Posts
+    hits_empty: "我们没有找到任何搜索结果: ${query}"
+    hits_stats: "找到${hits}条结果（用时${time} ms）"
 
 # Local search
 local_search:
@@ -378,10 +386,10 @@ local_search:
 
 # Docsearch
 docsearch:
-  enable: false
-  appId:
-  apiKey:
-  indexName:
+  enable: true
+  appId: L7P2ELNLTD
+  apiKey: d6168abb683b7c70b4ef9bbee1fa469a
+  indexName: Shanchuan
   option:
 
 # Share System (分享)
@@ -664,7 +672,7 @@ enter_transitions: true
 activate_power_mode:
   enable: true
   colorful: true # open particle animation (冒光特效)
-  shake: true #  open shake (抖動特效)
+  shake: false #  open shake (抖動特效)
   mobile: false
 
 # Background effects (背景特效)
@@ -738,9 +746,9 @@ font:
 
 # Font settings for the site title and site subtitle
 # 左上角網站名字 主頁居中網站名字
-blog_title_font:
-  font_link:
-  font-family:
+blog_title_font: 
+  font_link: 
+  font-family: 
 
 # The setting of divider icon (水平分隔線圖標設置)
 hr_icon:
