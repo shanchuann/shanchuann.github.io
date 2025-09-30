@@ -13,7 +13,7 @@ timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: http://shanchuann.cn
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -91,7 +91,7 @@ pagination_dir: page
 ## include:/exclude: options only apply to the 'source/' folder
 include: []
 exclude: []
-ignore: 
+ignore: []
 
 # Extensions
 ## Plugins: https://hexo.io/plugins/
@@ -110,18 +110,18 @@ menu:
   # 其他菜单项...
   关于: /about/ || fas fa-heart
 
-# algolia:
-#   appId: "L7P2ELNLTD"
-#   apiKey: "d6168abb683b7c70b4ef9bbee1fa469a"
-#   adminApiKey: "2926bdda9a7e1a7a4430624dc8fe99c2"
-#   chunkSize: 5000
-#   indexName: "Shanchuan"
-#   fields:
-#     - content:strip:truncate,0,500
-#     - excerpt:strip
-#     - gallery
-#     - permalink
-#     - photos
-#     - slug
-#     - tags
-#     - title
+algolia:
+  appId: "L7P2ELNLTD"
+  apiKey: "d6168abb683b7c70b4ef9bbee1fa469a"
+  adminApiKey: "2926bdda9a7e1a7a4430624dc8fe99c2"
+  chunkSize: 5000
+  indexName: "Shanchuan"
+  fields:
+    - content:strip:truncate,0,500
+    - excerpt:strip
+    - gallery
+    - permalink
+    - photos
+    - slug
+    - tags
+    - title
