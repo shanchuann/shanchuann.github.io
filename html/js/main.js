@@ -51,8 +51,8 @@ function init(){
   renderer = new THREE.WebGLRenderer({alpha: true, antialias: true });
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize(WIDTH, HEIGHT);
-  // compatibility: use renderer.shadowMap.enabled
-  renderer.shadowMap.enabled = true;
+  // use old shadowMap flag for older three.js builds
+  renderer.shadowMapEnabled = true;
   container = document.getElementById('world');
   container.appendChild(renderer.domElement);
   windowHalfX = WIDTH / 2;
