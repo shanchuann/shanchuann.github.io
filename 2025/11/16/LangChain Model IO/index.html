@@ -1,0 +1,423 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Model I/O | 山川不念旧</title><meta name="author" content="张念川"><meta name="copyright" content="张念川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="代码仓库ChainReaction  模型作为LangChain框架的底层核心组件，是构建基于语言模型（LLM）应用的关键要素。从技术本质来看，LangChain应用开发是以LangChain为技术框架，通过API调用大语言模型（LLM）解决特定业务问题的实现过程。 可以说，LangChain框架的整体运行逻辑均以LLM为核心驱动力。若脱离模型支撑，LangChain框架将丧失其核心应用价值，其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Model I&#x2F;O">
+<meta property="og:url" content="https://shanchuann.cn/2025/11/16/LangChain%20Model%20IO/index.html">
+<meta property="og:site_name" content="山川不念旧">
+<meta property="og:description" content="代码仓库ChainReaction  模型作为LangChain框架的底层核心组件，是构建基于语言模型（LLM）应用的关键要素。从技术本质来看，LangChain应用开发是以LangChain为技术框架，通过API调用大语言模型（LLM）解决特定业务问题的实现过程。 可以说，LangChain框架的整体运行逻辑均以LLM为核心驱动力。若脱离模型支撑，LangChain框架将丧失其核心应用价值，其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png">
+<meta property="article:published_time" content="2025-11-16T13:43:54.000Z">
+<meta property="article:modified_time" content="2025-11-16T14:42:21.900Z">
+<meta property="article:author" content="张念川">
+<meta property="article:tag" content="LangChain">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Model I/O",
+  "url": "https://shanchuann.cn/2025/11/16/LangChain%20Model%20IO/",
+  "image": "https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png",
+  "datePublished": "2025-11-16T13:43:54.000Z",
+  "dateModified": "2025-11-16T14:42:21.900Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "张念川",
+      "url": "https://shanchuann.cn"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2025/09/25/NAM3XhUgxbjpVrJ.png"><link rel="canonical" href="https://shanchuann.cn/2025/11/16/LangChain%20Model%20IO/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: {"appId":"L7P2ELNLTD","apiKey":"d6168abb683b7c70b4ef9bbee1fa469a","indexName":"Shanchuan","hitsPerPage":6,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，耗时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Model I/O',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.0.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background: linear-gradient(46deg,#c4f4fe 0%,#fdefbe 100%);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">38</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">山川不念旧</span></a><a class="nav-page-title" href="/"><span class="site-name">Model I/O</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Model I/O</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-11-16T13:43:54.000Z" title="发表于 2025-11-16 21:43:54">2025-11-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-11-16T14:42:21.900Z" title="更新于 2025-11-16 22:42:21">2025-11-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LangChain/">LangChain</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>代码仓库<a target="_blank" rel="noopener" href="https://github.com/shanchuann/ChainReaction">ChainReaction</a></p>
+</blockquote>
+<p>模型作为LangChain框架的底层核心组件，是构建基于语言模型（LLM）应用的关键要素。从技术本质来看，LangChain应用开发是以LangChain为技术框架，通过API调用大语言模型（LLM）解决特定业务问题的实现过程。</p>
+<p>可以说，LangChain框架的整体运行逻辑均以LLM为核心驱动力。若脱离模型支撑，LangChain框架将丧失其核心应用价值，其存在的意义也无从谈起。</p>
+<h2 id="Model-I-O"><a href="#Model-I-O" class="headerlink" title="Model I&#x2F;O"></a>Model I&#x2F;O</h2><p>对模型的使用流程可拆解为三个核心环节，分别是<strong>输入提示（Format）</strong>、<strong>模型调用（Predict）</strong> 与<strong>输出解析（Parse）</strong>。上述三个环节构成有机整体，在LangChain框架中，该过程被统一定义为<strong>Model I&#x2F;O（Input&#x2F;Output，即输入&#x2F;输出）</strong>。</p>
+<p><img src="https://s2.loli.net/2025/11/16/Gfd6IZWKPM5kF1o.png" alt="image-20251116210701867"></p>
+<p>在Model I&#x2F;O的各环节中，LangChain均提供标准化模板与工具组件，可快速构建适配各类语言模型的调用接口，降低模型集成与应用开发的技术门槛。具体环节功能如下：</p>
+<ol>
+<li><p><strong>提示模板</strong>：作为模型使用的首个环节，需向模型输入提示信息。基于LangChain可构建标准化提示模板，该模板能够根据实际业务需求动态选择输入内容，并针对特定任务与应用场景对输入信息进行精准适配调整，确保提示信息与模型能力、业务目标高度匹配。</p>
+</li>
+<li><p><strong>语言模型</strong>：LangChain支持通过通用接口实现对语言模型的调用。这一特性意味着，无论开发过程中选用何种类型的语言模型，均能通过统一的调用方式完成交互，无需针对不同模型单独开发适配逻辑，显著提升了开发过程的灵活性与便捷性。</p>
+</li>
+<li><p><strong>输出解析</strong>：LangChain同时提供模型输出信息提取功能。借助输出解析器，开发人员可从模型输出结果中精准提取核心需求信息，无需处理冗余或无关数据；更重要的是，其能够将大语言模型返回的非结构化文本，转换为程序可直接处理的结构化数据（如JSON、表格等格式），为后续业务逻辑的自动化处理提供关键支撑。</p>
+</li>
+</ol>
+<h2 id="提示模板"><a href="#提示模板" class="headerlink" title="提示模板"></a>提示模板</h2><p>在大语言模型（LLM）的应用实践中，高质量的提示是确保模型输出贴合需求、提升响应精准度的关键前提。结合行业实践与技术沉淀，构建有效提示的核心逻辑可提炼为两大核心原则，二者共同作用于 “让模型精准理解需求、高效输出结果” 的目标：</p>
+<p><strong>原则一：传递清晰、明确的指令</strong></p>
+<p>模型对需求的理解依赖于提示中指令的明确性 —— 模糊的表述易导致模型误判任务边界，或输出偏离预期的内容。因此，构建提示时需聚焦 “降低模型理解成本”，具体可通过以下方式落地：</p>
+<ul>
+<li><strong>明确任务定位</strong>：清晰告知模型需扮演的角色（如 “专业产品文案师”“技术文档译者”）、核心任务（如 “撰写产品卖点”“解释技术概念”），避免模型因角色或任务模糊而输出泛化内容；</li>
+<li><strong>界定输出标准</strong>：若需特定格式（如列表、表格、JSON）、篇幅（如 “300 字以内”“分 3 点阐述”）或风格（如 “正式商务风”“口语化科普风”），需在提示中明确标注，减少后续对输出的调整成本；</li>
+<li><strong>补充关键约束</strong>：针对任务中的核心限制条件（如 “避免使用专业术语”“需包含 XX 数据”）进行明确说明，防止模型忽略关键需求而产生无效输出。</li>
+</ul>
+<p><strong>原则二：引导模型进行逐步、严谨的推理</strong></p>
+<p>面对复杂任务（如逻辑分析、问题拆解、多步骤计算），直接要求模型输出最终结果易导致推理跳跃、漏洞或错误。此时需通过提示引导模型 “慢思考”，模拟人类解决复杂问题的分步逻辑，具体路径包括：</p>
+<ul>
+<li><strong>拆解任务步骤</strong>：将复杂任务拆分为可执行的子步骤，让模型按步骤推导（如 “先分析用户需求痛点，再对应产品功能提出解决方案，最后总结核心价值”）；</li>
+<li><strong>要求展示推理过程</strong>：在提示中明确 “需先说明推理思路，再给出最终结论”，例如解决数学问题时，引导模型先列出公式与计算步骤，再输出结果，既便于验证逻辑正确性，也能减少模型 “凭直觉输出” 的误差；</li>
+<li><strong>提供中间锚点</strong>：对于极复杂任务，可在提示中给出部分中间结论或参考方向（如 “在分析市场趋势时，需重点考虑政策影响与用户需求变化两个维度”），帮助模型锚定推理方向，避免偏离核心逻辑。</li>
+</ul>
+<p>这两大原则并非孤立存在：“清晰指令” 为模型划定了 “做什么、怎么做” 的边界，“引导逐步推理” 则为模型提供了 “如何做好” 的路径。二者结合，可大幅降低模型输出的随机性，让响应更贴合实际应用场景的需求。</p>
+<h3 id="提示模板构建示例"><a href="#提示模板构建示例" class="headerlink" title="提示模板构建示例"></a>提示模板构建示例</h3><p>以 “为鲜花销售场景生成产品简介文案” 为例，需构建适配的提示模板：当员工或顾客查询特定鲜花信息时，调用该模板可快速生成符合营销需求的描述文本。其技术实现流程如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 导入LangChain框架中的提示模板模块</span><br><span class="line">from langchain_core.prompts import PromptTemplate # 定义原始模板字符串，明确提示逻辑与变量占位</span><br><span class="line">template = &quot;&quot;&quot;您是一位专业的鲜花店文案撰写员。\n</span><br><span class="line">对于售价为 &#123;price&#125; 元的 &#123;flower_name&#125; ，您能提供一个吸引人的简短描述吗？</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line"># 通过PromptTemplate类的from_template方法，将原始字符串模板转化为LangChain提示模板对象</span><br><span class="line">prompt = PromptTemplate.from_template(template)</span><br><span class="line"># 打印提示模板对象，查看其核心属性配置</span><br><span class="line">print(prompt)</span><br></pre></td></tr></table></figure>
+
+<h4 id="模板核心属性解析"><a href="#模板核心属性解析" class="headerlink" title="模板核心属性解析"></a>模板核心属性解析</h4><p>上述代码生成的 PromptTemplate 对象，其具体内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">input_variables=[&#x27;flower_name&#x27;, &#x27;price&#x27;] input_types=&#123;&#125; partial_variables=&#123;&#125; template=&#x27;您是一位专业的鲜花店文案撰写员。\n\n对于售价为 &#123;price&#125; 元的 &#123;flower_name&#125; ，您能提供一个吸引人的简短描述吗？\n&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>模板格式与变量</strong>：该模板以 “f-string” 为格式标准，包含<code>{flower_name}</code>（鲜花名称）与<code>{price}</code>（售价）两个输入变量（input_variables），二者作为占位符，在实际调用时将被具体业务数据（如 “玫瑰”“99”）替换，实现提示的动态适配；</li>
+<li><strong>核心方法作用</strong>：<code>from_template</code>是 PromptTemplate 类的核心类方法，支持直接从字符串模板生成功能完备的 PromptTemplate 对象，无需手动配置所有属性，简化开发流程；</li>
+<li><strong>辅助配置项</strong>：<code>output_parser</code>（输出解析器）本例中未指定，故为 None；<code>validate_template=True</code>表示启用模板验证机制，确保模板语法合规、变量配置无误；<code>partial_variables</code>（部分变量）暂为空，支持后续按需预设部分固定值。</li>
+</ul>
+<p>LangChain 框架围绕提示模板提供了多类专用类、函数及工具，并针对客服对话、内容生成、数据分析等<strong>典型应用场景设计了丰富的内置模板</strong>。这些资源可大幅降低提示构建的技术门槛，帮助开发者快速实现 “模板复用” 与 “场景适配”，提升大语言模型应用的开发效率。</p>
+<h2 id="语言模型体系与调用实践"><a href="#语言模型体系与调用实践" class="headerlink" title="语言模型体系与调用实践"></a>语言模型体系与调用实践</h2><p>在LangChain框架中，语言模型作为Model I&#x2F;O环节的核心执行单元，其体系覆盖了不同功能定位的模型类型，可满足多样化的业务场景需求。同时，LangChain通过标准化的调用逻辑与工具封装，显著提升了模型应用的效率与灵活性。</p>
+<h3 id="LangChain支持的三类核心语言模型"><a href="#LangChain支持的三类核心语言模型" class="headerlink" title="LangChain支持的三类核心语言模型"></a>LangChain支持的三类核心语言模型</h3><p>LangChain针对不同任务场景，对语言模型进行了清晰分类，三类核心模型的功能定位、输入输出格式及典型示例如下：</p>
+<table>
+<thead>
+<tr>
+<th>模型类型</th>
+<th>功能定位</th>
+<th>输入&#x2F;输出格式</th>
+<th>典型示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>大语言模型（LLM&#x2F;Text Model）</strong></td>
+<td>处理通用文本生成、理解任务，适用于无固定交互格式的文本需求</td>
+<td>输入：文本字符串<br>输出：文本字符串</td>
+<td>OpenAI text-davinci-003、Meta LLaMA、Anthropic Claude</td>
+</tr>
+<tr>
+<td><strong>聊天模型（Chat Model）</strong></td>
+<td>适配对话类场景，支持结构化交互，模拟多轮对话逻辑</td>
+<td>输入：聊天消息列表（含角色、内容等结构化信息）<br>输出：聊天消息（含角色与响应内容）</td>
+<td>OpenAI ChatGPT系列（gpt-3.5-turbo、gpt-4）</td>
+</tr>
+<tr>
+<td><strong>文本嵌入模型（Embedding Model）</strong></td>
+<td>将文本转化为高维向量（Embedding），用于文本相似度计算、向量数据库存储，支撑检索增强等场景</td>
+<td>输入：文本字符串<br>输出：浮点数向量列表</td>
+<td>OpenAI text-embedding-ada-002、Hugging Face BERT Embedding</td>
+</tr>
+</tbody></table>
+<p>需说明的是，文本嵌入模型核心作用于“文本向量化”环节，与本次聚焦的“提示工程与文案生成”场景关联度较低，后续内容将以大语言模型的调用实践为核心展开。</p>
+<p>以“生成鲜花产品文案”为典型场景，通过LangChain调用大语言模型的完整流程如下，涵盖API配置、模型实例化、提示模板适配及结果输出全环节：</p>
+<h4 id="单条文案生成实现"><a href="#单条文案生成实现" class="headerlink" title="单条文案生成实现"></a>单条文案生成实现</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># # 1. 配置OpenAI API密钥（环境变量注入方式）</span><br><span class="line">import os</span><br><span class="line"># os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;你的OpenAI API Key&quot;</span><br><span class="line"></span><br><span class="line"># 2. 导入LangChain的Ollama模型接口模块  </span><br><span class="line"># from langchain_openai import OpenAI</span><br><span class="line">from langchain_openai import ChatOpenAI</span><br><span class="line"></span><br><span class="line"># 3. 实例化大语言模型（指定模型版本）</span><br><span class="line">model = model = ChatOpenAI(</span><br><span class="line">    api_key=os.getenv(&#x27;DEEPSEEK_API_KEY&#x27;),</span><br><span class="line">    base_url=&quot;https://api.deepseek.com/v1&quot;,</span><br><span class="line">    model=&quot;deepseek-chat&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 4. 基于已定义的提示模板生成具体输入（模板复用前文“鲜花文案”模板）</span><br><span class="line">input_prompt = prompt.format(flower_name=&quot;玫瑰&quot;, price=&quot;50&quot;)</span><br><span class="line"></span><br><span class="line"># 5. 调用模型接口获取输出</span><br><span class="line">output = model.invoke(input_prompt)</span><br><span class="line"></span><br><span class="line"># 6. 输出结果</span><br><span class="line">print(output)  </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content=&#x27;【50元心动玫瑰】 \n不凋零的浪漫，只为值得的时刻绽放 \n精选A级红玫瑰，丝绒花瓣包裹炽热爱意 \n每一支皆由花艺师亲手修剪 \n让50元的价值 \n在拆开包装的瞬间 \n化作她眼底的星光 \n· 周一清晨的办公桌惊喜 \n· 晚餐时突然变出袖口的温柔 \n· 纪念日里不说抱歉的拥抱 \n今日订购即赠手写卡片 \n让价格成为秘密，让爱意成为宣告&#x27; additional_kwargs=&#123;&#x27;refusal&#x27;: None&#125; response_metadata=&#123;&#x27;token_usage&#x27;: &#123;&#x27;completion_tokens&#x27;: 108, &#x27;prompt_tokens&#x27;: 32, &#x27;total_tokens&#x27;: 140, &#x27;completion_tokens_details&#x27;: None, &#x27;prompt_tokens_details&#x27;: &#123;&#x27;audio_tokens&#x27;: None, &#x27;cached_tokens&#x27;: 0&#125;, &#x27;prompt_cache_hit_tokens&#x27;: 0, &#x27;prompt_cache_miss_tokens&#x27;: 32&#125;, &#x27;model_provider&#x27;: &#x27;openai&#x27;, &#x27;model_name&#x27;: &#x27;deepseek-chat&#x27;, &#x27;system_fingerprint&#x27;: &#x27;fp_ffc7281d48_prod0820_fp8_kvcache&#x27;, &#x27;id&#x27;: &#x27;05b91e36-c303-4adc-885d-83a8ef72452f&#x27;, &#x27;finish_reason&#x27;: &#x27;stop&#x27;, &#x27;logprobs&#x27;: None&#125; id=&#x27;lc_run--263f3b8b-34b7-4019-9c1e-c4e0159bf775-0&#x27; usage_metadata=&#123;&#x27;input_tokens&#x27;: 32, &#x27;output_tokens&#x27;: 108, &#x27;total_tokens&#x27;: 140, &#x27;input_token_details&#x27;: &#123;&#x27;cache_read&#x27;: 0&#125;, &#x27;output_token_details&#x27;: &#123;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>提示模板实例化</strong>：通过<code>prompt.format()</code>方法，将模板中的占位符<code>{flower_name}</code>与<code>{price}</code>替换为具体值（“玫瑰”“50”），生成符合模型输入要求的文本指令，最终指令为：“您是一位专业的鲜花店文案撰写员。对于售价为 50 元的玫瑰，您能提供一个吸引人的简短描述吗？”</li>
+<li><strong>模型调用</strong>：通过<code>model.invoke()</code>方法发起同步调用，LangChain已封装底层API交互逻辑，无需手动处理请求参数拼接、响应解析等细节。</li>
+<li><strong>典型输出结果</strong>：<code>让你心动！50元就可以拥有这支充满浪漫气息的玫瑰花束，让TA感受你的真心爱意。</code></li>
+</ul>
+<h4 id="批量文案生成实现"><a href="#批量文案生成实现" class="headerlink" title="批量文案生成实现"></a>批量文案生成实现</h4><p>基于同一提示模板，可快速扩展至多类鲜花的批量文案生成，核心逻辑为通过循环遍历数据列表，复用模板与模型实例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"># 1. 复用提示模板（与前文一致，无需重复定义）</span><br><span class="line"># 导入LangChain框架中的提示模板模块</span><br><span class="line">from langchain_core.prompts import PromptTemplate # 定义原始模板字符串，明确提示逻辑与变量占位</span><br><span class="line"></span><br><span class="line">template = &quot;&quot;&quot;您是一位专业的鲜花店文案撰写员。\n对于售价为 &#123;price&#125; 元的 &#123;flower_name&#125; ，您能提供一个吸引人的简短描述吗？&quot;&quot;&quot;</span><br><span class="line">prompt = PromptTemplate.from_template(template)</span><br><span class="line"></span><br><span class="line"># 2. 配置API密钥与实例化模型（复用单条生成逻辑）</span><br><span class="line">import os</span><br><span class="line">from langchain_openai import ChatOpenAI</span><br><span class="line"></span><br><span class="line"># 3. 实例化大语言模型（指定模型版本）</span><br><span class="line">model = ChatOpenAI(</span><br><span class="line">    api_key=os.getenv(&#x27;DEEPSEEK_API_KEY&#x27;),</span><br><span class="line">    base_url=&quot;https://api.deepseek.com/v1&quot;,</span><br><span class="line">    model=&quot;deepseek-chat&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"># 3. 准备批量数据（鲜花名称与对应售价列表）</span><br><span class="line">flowers = [&quot;玫瑰&quot;, &quot;百合&quot;, &quot;康乃馨&quot;]</span><br><span class="line">prices = [&quot;50&quot;, &quot;30&quot;, &quot;20&quot;]</span><br><span class="line"></span><br><span class="line"># 4. 循环生成批量文案</span><br><span class="line">for flower, price in zip(flowers, prices):</span><br><span class="line">    # 模板实例化（动态注入当前鲜花数据）</span><br><span class="line">    input_prompt = prompt.format(flower_name=flower, price=price)</span><br><span class="line">    # 模型调用</span><br><span class="line">    output = model.invoke(input_prompt)</span><br><span class="line">    # 输出结果</span><br><span class="line">    print(output)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">content=&#x27;【50元心动玫瑰】 \n✨ 不凋谢的浪漫 只为悦己盛放 ✨\n\n精选A级红玫瑰·每日限定\n每一瓣都裹着晨曦的露水感\n丝绒质感花瓣与哑光绿枝的碰撞\n—— 比口红更提气色，比情话更触手可及\n\n▫️办公室治愈系能量站\n▫️闺蜜暗语小花束\n▫️自购生活仪式感\n（搭配雾面英文报包装 解锁电影感日常）\n\n#50元把高级感带回家 #玫瑰无需等节日&#x27; additional_kwargs=&#123;&#x27;refusal&#x27;: None&#125; response_metadata=&#123;&#x27;token_usage&#x27;: &#123;&#x27;completion_tokens&#x27;: 126, &#x27;prompt_tokens&#x27;: 32, &#x27;total_tokens&#x27;: 158, &#x27;completion_tokens_details&#x27;: None, &#x27;prompt_tokens_details&#x27;: &#123;&#x27;audio_tokens&#x27;: None, &#x27;cached_tokens&#x27;: 0&#125;, &#x27;prompt_cache_hit_tokens&#x27;: 0, &#x27;prompt_cache_miss_tokens&#x27;: 32&#125;, &#x27;model_provider&#x27;: &#x27;openai&#x27;, &#x27;model_name&#x27;: &#x27;deepseek-chat&#x27;, &#x27;system_fingerprint&#x27;: &#x27;fp_ffc7281d48_prod0820_fp8_kvcache&#x27;, &#x27;id&#x27;: &#x27;66598d8b-debc-486f-82dc-e6816d80e40e&#x27;, &#x27;finish_reason&#x27;: &#x27;stop&#x27;, &#x27;logprobs&#x27;: None&#125; id=&#x27;lc_run--93efa155-58ea-43d2-a57c-1d73034cbffb-0&#x27; usage_metadata=&#123;&#x27;input_tokens&#x27;: 32, &#x27;output_tokens&#x27;: 126, &#x27;total_tokens&#x27;: 158, &#x27;input_token_details&#x27;: &#123;&#x27;cache_read&#x27;: 0&#125;, &#x27;output_token_details&#x27;: &#123;&#125;&#125;</span><br><span class="line">content=&#x27;【清雅百合 · 30元带走一室芬芳】  \n✨ 晨露浸润的纯白花瓣，悄然绽放温柔弧度  \n✨ 每支含2-3个花头 花期长达10天  \n✨ 搭配翠绿茎叶 治愈系天然香氛  \n🎯 办公室点睛/书房雅趣/赠人佳品  \n「30元解锁春日柔软时光」&#x27; additional_kwargs=&#123;&#x27;refusal&#x27;: None&#125; response_metadata=&#123;&#x27;token_usage&#x27;: &#123;&#x27;completion_tokens&#x27;: 83, &#x27;prompt_tokens&#x27;: 32, &#x27;total_tokens&#x27;: 115, &#x27;completion_tokens_details&#x27;: None, &#x27;prompt_tokens_details&#x27;: &#123;&#x27;audio_tokens&#x27;: None, &#x27;cached_tokens&#x27;: 0&#125;, &#x27;prompt_cache_hit_tokens&#x27;: 0, &#x27;prompt_cache_miss_tokens&#x27;: 32&#125;, &#x27;model_provider&#x27;: &#x27;openai&#x27;, &#x27;model_name&#x27;: &#x27;deepseek-chat&#x27;, &#x27;system_fingerprint&#x27;: &#x27;fp_ffc7281d48_prod0820_fp8_kvcache&#x27;, &#x27;id&#x27;: &#x27;791f73bd-b18e-40c9-8843-fd21813e40e7&#x27;, &#x27;finish_reason&#x27;: &#x27;stop&#x27;, &#x27;logprobs&#x27;: None&#125; id=&#x27;lc_run--336a64b7-4b17-4d62-8bb6-fdd76ea9d311-0&#x27; usage_metadata=&#123;&#x27;input_tokens&#x27;: 32, &#x27;output_tokens&#x27;: 83, &#x27;total_tokens&#x27;: 115, &#x27;input_token_details&#x27;: &#123;&#x27;cache_read&#x27;: 0&#125;, &#x27;output_token_details&#x27;: &#123;&#125;&#125;</span><br><span class="line">content=&#x27;【暖爱如馨 · 康乃馨】  \n20元，把温柔捧在掌心！这束康乃馨瓣瓣饱满，缀着晨露般的生机，粉糯色泽如母亲微笑的温度。不论赠予挚爱、致敬恩师，或为自己点亮一隅春光，它都在轻声说：你值得被美好簇拥。✨&#x27; additional_kwargs=&#123;&#x27;refusal&#x27;: None&#125; response_metadata=&#123;&#x27;token_usage&#x27;: &#123;&#x27;completion_tokens&#x27;: 75, &#x27;prompt_tokens&#x27;: 34, &#x27;total_tokens&#x27;: 109, &#x27;completion_tokens_details&#x27;: None, &#x27;prompt_tokens_details&#x27;: &#123;&#x27;audio_tokens&#x27;: None, &#x27;cached_tokens&#x27;: 0&#125;, &#x27;prompt_cache_hit_tokens&#x27;: 0, &#x27;prompt_cache_miss_tokens&#x27;: 34&#125;, &#x27;model_provider&#x27;: &#x27;openai&#x27;, &#x27;model_name&#x27;: &#x27;deepseek-chat&#x27;, &#x27;system_fingerprint&#x27;: &#x27;fp_ffc7281d48_prod0820_fp8_kvcache&#x27;, &#x27;id&#x27;: &#x27;4e1b1fa9-f0c9-4324-939c-6c8a22f9bc94&#x27;, &#x27;finish_reason&#x27;: &#x27;stop&#x27;, &#x27;logprobs&#x27;: None&#125; id=&#x27;lc_run--665c1ef9-37f9-4e08-9e30-6c3edb40346a-0&#x27; usage_metadata=&#123;&#x27;input_tokens&#x27;: 34, &#x27;output_tokens&#x27;: 75, &#x27;total_tokens&#x27;: 109, &#x27;input_token_details&#x27;: &#123;&#x27;cache_read&#x27;: 0&#125;, &#x27;output_token_details&#x27;: &#123;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>玫瑰：<code>这支玫瑰，深邃的红色，传递着浓浓的深情与浪漫，令人回味无穷！</code></li>
+<li>百合：<code>百合：美丽的花朵，多彩的爱恋！30元让你拥有它！</code></li>
+<li>康乃馨：<code>康乃馨—20元，象征爱的祝福，送给你最真挚的祝福。</code></li>
+</ul>
+<h3 id="LangChain与直接调用API的核心差异的优势"><a href="#LangChain与直接调用API的核心差异的优势" class="headerlink" title="LangChain与直接调用API的核心差异的优势"></a>LangChain与直接调用API的核心差异的优势</h3><p>在上述场景中，直接调用OpenAI API（非LangChain框架）也可实现类似功能，其核心代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">import openai</span><br><span class="line"># 配置API密钥</span><br><span class="line">openai.api_key = &quot;Your-OpenAI-API-Key&quot;</span><br><span class="line"></span><br><span class="line"># 定义字符串模板</span><br><span class="line">prompt_text = &quot;您是一位专业的鲜花店文案撰写员。对于售价为&#123;&#125;元的&#123;&#125;，您能提供一个吸引人的简短描述吗？&quot;</span><br><span class="line"></span><br><span class="line"># 批量生成逻辑</span><br><span class="line">flowers = [&quot;玫瑰&quot;, &quot;百合&quot;, &quot;康乃馨&quot;]</span><br><span class="line">prices = [&quot;50&quot;, &quot;30&quot;, &quot;20&quot;]</span><br><span class="line">for flower, price in zip(flowers, prices):</span><br><span class="line">    # 字符串格式化生成提示</span><br><span class="line">    prompt = prompt_text.format(price, flower)</span><br><span class="line">    # 调用OpenAI Completions API</span><br><span class="line">    response = openai.completions.create(</span><br><span class="line">        engine=&quot;gpt-3.5-turbo-instruct&quot;,</span><br><span class="line">        prompt=prompt,</span><br><span class="line">        max_tokens=100</span><br><span class="line">    )</span><br><span class="line">    # 解析输出结果</span><br><span class="line">    print(response.choices[0].text.strip())</span><br></pre></td></tr></table></figure>
+
+<p>尽管直接调用API可实现基础功能，但LangChain的核心优势体现在<strong>工程化效率提升</strong>与<strong>扩展性</strong>上，具体可归纳为三点：</p>
+<h4 id="模板的“一次定义，多场景复用”"><a href="#模板的“一次定义，多场景复用”" class="headerlink" title="模板的“一次定义，多场景复用”"></a>模板的“一次定义，多场景复用”</h4><p>LangChain的<code>PromptTemplate</code>对象将模板逻辑与数据注入解耦，只需定义一次模板结构，即可在不同模块、不同数据集中复用，无需重复编写字符串格式化逻辑。相比直接使用<code>f-string</code>或<code>{}</code>占位符的原生字符串，LangChain模板更便于维护（如统一修改模板风格、补充约束条件），尤其适用于大型项目中多模块共用提示逻辑的场景。</p>
+<h4 id="内置功能的集成化支持"><a href="#内置功能的集成化支持" class="headerlink" title="内置功能的集成化支持"></a>内置功能的集成化支持</h4><p>LangChain的<code>PromptTemplate</code>内置了三类关键功能，无需手动开发：</p>
+<ul>
+<li><strong>模板验证（validate_template）</strong>：自动校验模板语法正确性（如占位符是否完整、格式是否合规），避免因字符串格式化错误导致的模型调用失败；</li>
+<li><strong>输出解析器（output_parser）</strong>：可直接关联输出解析器，将模型返回的非结构化文本转化为JSON、列表等结构化数据，省去手动解析响应的步骤；</li>
+<li><strong>部分变量预设（partial_variables）</strong>：支持预设部分固定变量（如“文案风格&#x3D;正式营销风”），仅动态注入可变变量（如鲜花名称、价格），进一步简化调用逻辑。</li>
+</ul>
+<h4 id="跨模型适配的“无感知切换”"><a href="#跨模型适配的“无感知切换”" class="headerlink" title="跨模型适配的“无感知切换”"></a>跨模型适配的“无感知切换”</h4><p>若需将当前调用的“gpt-3.5-turbo-instruct”切换为其他模型（如Anthropic Claude、Meta LLaMA），LangChain无需修改提示模板与调用逻辑——仅需替换模型实例化代码（如<code>from langchain_anthropic import Anthropic</code>），即可实现模型切换。而直接调用API时，需针对不同模型的请求格式（如Anthropic的<code>messages</code>参数、OpenAI的<code>prompt</code>参数）重新适配代码，扩展性显著低于LangChain。</p>
+<p>综上，LangChain并非简单封装模型API，而是通过“模板标准化”“功能集成化”“模型适配灵活化”，为语言模型的工程化应用提供了更高效、更可维护的解决方案，尤其适用于复杂场景下的模型应用开发。</p>
+<p>从本次实践及前文案例可进一步提炼LangChain的核心价值：其定位类似机器学习领域的PyTorch、TensorFlow框架——<strong>模型可按需选择（商业&#x2F;开源、不同厂商）、自主优化（训练&#x2F;微调），而调用模型的工程化逻辑（模板定义、参数传递、结果获取）具备标准化、可复用的章法</strong>。</p>
+<p>具体而言，LangChain结合提示模板的优势可归纳为五大工程化价值：</p>
+<ol>
+<li><strong>提升代码可读性</strong>：针对复杂提示或多变量场景，模板将提示文本与变量逻辑分离，结构更清晰，便于团队协作与代码复盘。</li>
+<li><strong>强化逻辑可复用性</strong>：模板可在多模块、多任务中直接调用，无需重复构造提示字符串，显著简化代码冗余。</li>
+<li><strong>降低维护成本</strong>：若需调整提示逻辑（如优化文案风格、补充约束条件），仅需修改模板本身，无需在代码中逐一查找所有调用节点，减少维护风险。</li>
+<li><strong>简化变量处理</strong>：自动完成多变量的注入与格式校验，避免手动字符串拼接导致的语法错误（如变量遗漏、格式错乱）。</li>
+<li><strong>支持参数化生成</strong>：基于同一模板，通过动态传入不同参数（如鲜花名称、价格、风格要求），可快速实现个性化文本生成，适配多样化业务需求。</li>
+</ol>
+<h2 id="输出解析"><a href="#输出解析" class="headerlink" title="输出解析"></a>输出解析</h2><p>在基于语言模型的应用开发中，模型输出的结构化处理是衔接“自然语言响应”与“程序自动化处理”的关键环节。LangChain提供的输出解析器（Output Parser）功能，可将模型返回的非结构化文本高效转换为程序可直接处理的结构化数据（如字典、表格等），显著降低开发复杂度，提升应用落地效率。</p>
+<h3 id="从非结构化到结构化"><a href="#从非结构化到结构化" class="headerlink" title="从非结构化到结构化"></a>从非结构化到结构化</h3><p>在实际开发场景中，仅获取模型生成的文本字符串（如前文的鲜花文案）往往无法满足需求。多数应用需基于模型输出进行进一步计算、存储或展示，这要求输出数据具备明确的字段定义与格式规范。</p>
+<p>以鲜花文案场景为例，若需同时获取“文案内容”与“创作理由”，模型可能返回如下非结构化文本（示例A）：<br><strong>示例A</strong>：“文案是：让你心动！50元就可以拥有这支充满浪漫气息的玫瑰花束，让TA感受你的真心爱意。为什么这样写呢？因为爱情是无价的，50元对应热恋中的情侣也会觉得值得。”  </p>
+<p>此类输出需人工提取关键信息，无法直接被程序处理。而通过输出解析器，可将其转换为如下结构化数据（示例B）：<br><strong>示例B</strong>：  </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;description&quot;</span>: <span class="string">&quot;让你心动！50元就可以拥有这支充满浪漫气息的玫瑰花束，让TA感受你的真心爱意。&quot;</span>,</span><br><span class="line">    <span class="string">&quot;reason&quot;</span>: <span class="string">&quot;因为爱情是无价的，50元对应热恋中的情侣也会觉得值得。&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种结构化转换实现了“模型输出”到“程序可用数据”的无缝衔接，为后续数据存储（如CSV、数据库）、逻辑处理（如条件判断）、可视化展示等环节提供了基础支撑。</p>
+<h3 id="基于LangChain的全流程实践"><a href="#基于LangChain的全流程实践" class="headerlink" title="基于LangChain的全流程实践"></a>基于LangChain的全流程实践</h3><p>以下以“生成鲜花文案及创作理由，并存储为CSV文件”为例，详细说明LangChain输出解析器的使用流程，涵盖响应模式定义、解析器配置、提示模板整合及结果处理全环节。</p>
+<h4 id="环境配置与依赖导入"><a href="#环境配置与依赖导入" class="headerlink" title="环境配置与依赖导入"></a>环境配置与依赖导入</h4><p>首先完成OpenAI API密钥配置，并导入核心模块（提示模板、模型接口、输出解析器、数据处理工具等）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 配置OpenAI API密钥（注入环境变量）</span><br><span class="line">import os</span><br><span class="line"># os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;你的OpenAI API Key&quot;</span><br><span class="line"></span><br><span class="line"># 导入LangChain核心组件</span><br><span class="line">from langchain_core.prompts import PromptTemplate # 定义原始模板字符串，明确提示逻辑与变量占位</span><br><span class="line"># from langchain_openai import OpenAI  # OpenAI模型接口</span><br><span class="line">from langchain_ollama import ChatOllama # Import ChatOllama</span><br><span class="line">from langchain_classic.output_parsers import StructuredOutputParser, ResponseSchema</span><br><span class="line">import pandas as pd  # 数据处理与存储</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="定义响应模式与输出解析器"><a href="#定义响应模式与输出解析器" class="headerlink" title="定义响应模式与输出解析器"></a>定义响应模式与输出解析器</h4><p>通过<code>ResponseSchema</code>定义预期输出的字段结构（名称与描述），再基于该结构创建<code>StructuredOutputParser</code>，明确解析规则：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 定义响应模式（规范输出字段的名称与含义）</span><br><span class="line">response_schemas = [</span><br><span class="line">    ResponseSchema(</span><br><span class="line">        name=&quot;description&quot;, </span><br><span class="line">        description=&quot;鲜花的描述文案，需简洁且具有吸引力&quot;</span><br><span class="line">    ),</span><br><span class="line">    ResponseSchema(</span><br><span class="line">        name=&quot;reason&quot;, </span><br><span class="line">        description=&quot;解释该文案的创作逻辑或设计思路&quot;</span><br><span class="line">    )</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"># 基于响应模式创建结构化输出解析器</span><br><span class="line">output_parser = StructuredOutputParser.from_response_schemas(response_schemas)</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="整合输出格式说明到提示模板"><a href="#整合输出格式说明到提示模板" class="headerlink" title="整合输出格式说明到提示模板"></a>整合输出格式说明到提示模板</h4><p>通过解析器的<code>get_format_instructions()</code>方法生成格式约束说明，并将其嵌入提示模板，引导模型按指定结构输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 定义原始提示模板（包含格式说明占位符）</span><br><span class="line">prompt_template = &quot;&quot;&quot;您是一位专业的鲜花店文案撰写员。</span><br><span class="line">对于售价为 &#123;price&#125; 元的 &#123;flower_name&#125; ，请提供：</span><br><span class="line">1. 吸引人的简短描述文案；</span><br><span class="line">2. 该文案的创作理由。</span><br><span class="line">&#123;format_instructions&#125;&quot;&quot;&quot;  # 格式说明占位符</span><br><span class="line"></span><br><span class="line"># 获取解析器生成的格式约束说明（指导模型输出结构）</span><br><span class="line">format_instructions = output_parser.get_format_instructions()</span><br><span class="line"></span><br><span class="line"># 创建最终提示模板（整合原始模板与格式说明）</span><br><span class="line">prompt = PromptTemplate(</span><br><span class="line">    template=prompt_template,</span><br><span class="line">    input_variables=[&quot;flower_name&quot;, &quot;price&quot;],  # 动态变量：鲜花名称、价格</span><br><span class="line">    partial_variables=&#123;&quot;format_instructions&quot;: format_instructions&#125;  # 固定变量：格式说明</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="模型调用与输出解析"><a href="#模型调用与输出解析" class="headerlink" title="模型调用与输出解析"></a>模型调用与输出解析</h4><p>实例化模型，循环处理多组鲜花数据，通过解析器将模型输出转换为结构化字典，并整合为DataFrame：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"># 实例化模型</span><br><span class="line">model=ChatOllama(</span><br><span class="line">        model=&quot;llama2:latest&quot;,</span><br><span class="line">        base_url=&quot;http://localhost:11434&quot;  # 默认地址</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"># 准备批量处理数据（鲜花名称与对应价格）</span><br><span class="line">flowers = [&quot;玫瑰&quot;, &quot;百合&quot;, &quot;康乃馨&quot;]</span><br><span class="line">prices = [&quot;50&quot;, &quot;30&quot;, &quot;20&quot;]</span><br><span class="line"></span><br><span class="line"># 初始化DataFrame用于存储结果（定义字段：鲜花名称、价格、文案、理由）</span><br><span class="line">df = pd.DataFrame(columns=[&quot;flower&quot;, &quot;price&quot;, &quot;description&quot;, &quot;reason&quot;])</span><br><span class="line"></span><br><span class="line"># 循环生成并解析文案</span><br><span class="line">for flower, price in zip(flowers, prices) :</span><br><span class="line">    # 基于模板生成模型输入（注入当前鲜花名称与价格）</span><br><span class="line">    input_prompt = prompt.format(flower_name=flower, price=price)</span><br><span class="line"></span><br><span class="line">    # 调用模型获取原始输出（非结构化文本）</span><br><span class="line">    output = model.invoke(input_prompt)</span><br><span class="line">    # 解析原始输出为结构化字典（匹配response_schemas定义）</span><br><span class="line">    parsed_output = output_parser.parse(output.content)</span><br><span class="line">    # 补充鲜花名称与价格字段</span><br><span class="line">    parsed_output[&quot;flower&quot;] = flower</span><br><span class="line">    parsed_output[&quot;price&quot;] = price</span><br><span class="line"></span><br><span class="line">    # 将结构化数据添加到DataFrame</span><br><span class="line">    df.loc[len(df)] = parsed_output</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="结果存储与验证"><a href="#结果存储与验证" class="headerlink" title="结果存储与验证"></a>结果存储与验证</h4><p>将整合后的DataFrame保存为CSV文件，并打印验证结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 打印结构化数据（字典格式）</span><br><span class="line">print(&quot;结构化输出结果：\n&quot;, df.to_dict(orient=&quot;records&quot;))</span><br><span class="line"></span><br><span class="line"># 保存为CSV文件（便于后续分析或系统集成）</span><br><span class="line">df.to_csv(&quot;flowers_with_descriptions.csv&quot;, index=False)</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="输出解析的关键成果与技术价值"><a href="#输出解析的关键成果与技术价值" class="headerlink" title="输出解析的关键成果与技术价值"></a>输出解析的关键成果与技术价值</h3><h4 id="典型输出结果"><a href="#典型输出结果" class="headerlink" title="典型输出结果"></a>典型输出结果</h4><p>解析后的数据结构清晰，可直接被程序处理，示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;flower&quot;: &quot;玫瑰&quot;,</span><br><span class="line">        &quot;price&quot;: &quot;50&quot;,</span><br><span class="line">        &quot;description&quot;: &quot;Unlock the secrets of rose beauty with our exquisite bouquet! 🌹💖 Hand-picked from the finest fields, these stems are bursting with charm and grace. From delicate pastels to bold, eye-catching hues, each bloom is a work of art in its own right. Indulge in their sweet fragrance and let yourself be transported to a world of tranquility and elegance. Treat yourself or a loved one to the ultimate rose experience! 💖🥳&quot;,</span><br><span class="line">        &quot;reason&quot;: &quot;Based on customer feedback and market trends, we&#x27;ve found that customers are increasingly interested in unique and personalized flower arrangements. Our bouquet offers a range of colors and styles to choose from, allowing customers to create a customized gift that&#x27;s tailored to their tastes and preferences. By emphasizing the hand-picked nature of our stems and the artistry involved in crafting each bouquet, we aim to appeal to customers who value quality, craftsmanship, and personalization. Additionally, the use of emojis and playful language helps to create a more approachable and friendly tone, which can help to build trust and rapport with our audience.&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;flower&quot;: &quot;百合&quot;,</span><br><span class="line">        &quot;price&quot;: &quot;30&quot;,</span><br><span class="line">        &quot;description&quot;: &quot;Unlock the beauty of nature with our premium lily bouquet! 💐 Each stem is carefully curated to bring you a unique and mesmerizing display of colors, shapes, and textures. Whether it&#x27;s for a special occasion or simply to brighten up your day, this stunning arrangement is sure to impress. 🎁&quot;,</span><br><span class="line">        &quot;reason&quot;: &quot;Based on the product&#x27;s high-end quality and unique feature of being able to customize the bouquet with different colors and styles, we want to highlight the exclusivity and personalization of the item in the description. The use of emojis and playful language adds a touch of friendliness and approachability to the copy, while still conveying the luxury and sophistication of the product.&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;flower&quot;: &quot;康乃馨&quot;,</span><br><span class="line">        &quot;price&quot;: &quot;20&quot;,</span><br><span class="line">        &quot;description&quot;: &quot;🌼 Discover the sweet fragrance of Konigsberg&#x27;s finest roses! Our carefully selected blooms are sure to brighten up any room with their vibrant colors and enchanting aroma. Treat yourself or gift them to someone special today! 💖&quot;,</span><br><span class="line">        &quot;reason&quot;: &quot;We wanted to create a playful and inviting description that would appeal to customers looking for a unique and memorable gift experience. The use of emojis adds a fun and lighthearted touch, while the emphasis on the rose&#x27;s fragrance helps to evoke a sense of nostalgia and romanticism. The inclusion of &#x27;treat yourself or gift them&#x27; creates a sense of urgency and encourages customers to take action, making it more likely that they will make a purchase.&quot;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>生成的CSV文件结构如下（部分内容）：</p>
+<table>
+<thead>
+<tr>
+<th>flower</th>
+<th>price</th>
+<th>description</th>
+<th>reason</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>玫瑰</td>
+<td>50</td>
+<td>Unlock the secrets of rose beauty with our exquisite bouquet…</td>
+<td>Based on customer feedback and market trends…</td>
+</tr>
+</tbody></table>
+<h4 id="核心技术价值"><a href="#核心技术价值" class="headerlink" title="核心技术价值"></a>核心技术价值</h4><p>输出解析器在流程中发挥的关键作用可归纳为三点：  </p>
+<ul>
+<li><strong>规范输出结构</strong>：通过<code>ResponseSchema</code>与格式说明，强制模型输出符合预期字段定义的内容，避免非结构化文本的歧义性；  </li>
+<li><strong>自动化解析转换</strong>：无需人工干预，直接将模型输出转换为Python字典、DataFrame等结构化格式，大幅降低数据处理成本；  </li>
+<li><strong>支撑下游集成</strong>：结构化数据可直接对接数据库存储、前端展示、业务逻辑判断等下游环节，实现“模型调用-数据处理-应用落地”的全流程自动化。</li>
+</ul>
+<p>通过输出解析机制，LangChain有效解决了“模型非结构化输出与程序结构化需求”的适配问题，为语言模型在实际应用中的规模化落地提供了关键技术支撑。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://shanchuann.cn">张念川</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://shanchuann.cn/2025/11/16/LangChain%20Model%20IO/">https://shanchuann.cn/2025/11/16/LangChain%20Model%20IO/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://shanchuann.cn" target="_blank">山川不念旧</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/LangChain/">LangChain</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/11/15/LangChain%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" title="LangChain快速开始"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">LangChain快速开始</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  本指南将帮助你在几分钟内从简单的设置到构建一个功能完整的AI智能体。 构建基础智能体 Quickstart.py  首先创建一个简单的智能体，能够回答问题并调用工具。该智能体将使用DeepSeek作为语言模型，一个基础的天气函数作为工具，以及一个简单的提示来指导其行为。 对于此示例，你需要设置一个 DeepSeek 账户并获取API密钥。然后，在你的终端中设置 DEEPSEEK_API_KEY 环境变量，或创建.env文件，通过 python-dotenv 加载它。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051import os # 导入操作系统接口模块，用于访问环境变量等系统功能from langchain_openai import ChatOpenAI # 导入LangChain的OpenAI聊天模型类，用于与AI模型进行交互from dotenv import load_dotenv # 导入...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/11/15/LangChain%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" title="LangChain快速开始"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-15</div><div class="info-item-2">LangChain快速开始</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  本指南将帮助你在几分钟内从简单的设置到构建一个功能完整的AI智能体。 构建基础智能体 Quickstart.py  首先创建一个简单的智能体，能够回答问题并调用工具。该智能体将使用DeepSeek作为语言模型，一个基础的天气函数作为工具，以及一个简单的提示来指导其行为。 对于此示例，你需要设置一个 DeepSeek 账户并获取API密钥。然后，在你的终端中设置 DEEPSEEK_API_KEY 环境变量，或创建.env文件，通过 python-dotenv 加载它。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051import os # 导入操作系统接口模块，用于访问环境变量等系统功能from langchain_openai import ChatOpenAI # 导入LangChain的OpenAI聊天模型类，用于与AI模型进行交互from dotenv import load_dotenv # 导入...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">张念川</div><div class="author-info-description">玉袍长剑堪风流，山川不念旧</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">38</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/shanchuann"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">由于极为严重的失误，个人网站代码包括内容完全丢失，正在重建中</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Model-I-O"><span class="toc-number">1.</span> <span class="toc-text">Model I&#x2F;O</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E7%A4%BA%E6%A8%A1%E6%9D%BF"><span class="toc-number">2.</span> <span class="toc-text">提示模板</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E7%A4%BA%E6%A8%A1%E6%9D%BF%E6%9E%84%E5%BB%BA%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.1.</span> <span class="toc-text">提示模板构建示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E6%A0%B8%E5%BF%83%E5%B1%9E%E6%80%A7%E8%A7%A3%E6%9E%90"><span class="toc-number">2.1.1.</span> <span class="toc-text">模板核心属性解析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E4%BD%93%E7%B3%BB%E4%B8%8E%E8%B0%83%E7%94%A8%E5%AE%9E%E8%B7%B5"><span class="toc-number">3.</span> <span class="toc-text">语言模型体系与调用实践</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LangChain%E6%94%AF%E6%8C%81%E7%9A%84%E4%B8%89%E7%B1%BB%E6%A0%B8%E5%BF%83%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">LangChain支持的三类核心语言模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E6%9D%A1%E6%96%87%E6%A1%88%E7%94%9F%E6%88%90%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.1.1.</span> <span class="toc-text">单条文案生成实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E9%87%8F%E6%96%87%E6%A1%88%E7%94%9F%E6%88%90%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.1.2.</span> <span class="toc-text">批量文案生成实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LangChain%E4%B8%8E%E7%9B%B4%E6%8E%A5%E8%B0%83%E7%94%A8API%E7%9A%84%E6%A0%B8%E5%BF%83%E5%B7%AE%E5%BC%82%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="toc-number">3.2.</span> <span class="toc-text">LangChain与直接调用API的核心差异的优势</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E7%9A%84%E2%80%9C%E4%B8%80%E6%AC%A1%E5%AE%9A%E4%B9%89%EF%BC%8C%E5%A4%9A%E5%9C%BA%E6%99%AF%E5%A4%8D%E7%94%A8%E2%80%9D"><span class="toc-number">3.2.1.</span> <span class="toc-text">模板的“一次定义，多场景复用”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E7%BD%AE%E5%8A%9F%E8%83%BD%E7%9A%84%E9%9B%86%E6%88%90%E5%8C%96%E6%94%AF%E6%8C%81"><span class="toc-number">3.2.2.</span> <span class="toc-text">内置功能的集成化支持</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%A8%E6%A8%A1%E5%9E%8B%E9%80%82%E9%85%8D%E7%9A%84%E2%80%9C%E6%97%A0%E6%84%9F%E7%9F%A5%E5%88%87%E6%8D%A2%E2%80%9D"><span class="toc-number">3.2.3.</span> <span class="toc-text">跨模型适配的“无感知切换”</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E8%A7%A3%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">输出解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E9%9D%9E%E7%BB%93%E6%9E%84%E5%8C%96%E5%88%B0%E7%BB%93%E6%9E%84%E5%8C%96"><span class="toc-number">4.1.</span> <span class="toc-text">从非结构化到结构化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8ELangChain%E7%9A%84%E5%85%A8%E6%B5%81%E7%A8%8B%E5%AE%9E%E8%B7%B5"><span class="toc-number">4.2.</span> <span class="toc-text">基于LangChain的全流程实践</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BE%9D%E8%B5%96%E5%AF%BC%E5%85%A5"><span class="toc-number">4.2.1.</span> <span class="toc-text">环境配置与依赖导入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E5%93%8D%E5%BA%94%E6%A8%A1%E5%BC%8F%E4%B8%8E%E8%BE%93%E5%87%BA%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="toc-number">4.2.2.</span> <span class="toc-text">定义响应模式与输出解析器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E5%90%88%E8%BE%93%E5%87%BA%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E%E5%88%B0%E6%8F%90%E7%A4%BA%E6%A8%A1%E6%9D%BF"><span class="toc-number">4.2.3.</span> <span class="toc-text">整合输出格式说明到提示模板</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E4%B8%8E%E8%BE%93%E5%87%BA%E8%A7%A3%E6%9E%90"><span class="toc-number">4.2.4.</span> <span class="toc-text">模型调用与输出解析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C%E5%AD%98%E5%82%A8%E4%B8%8E%E9%AA%8C%E8%AF%81"><span class="toc-number">4.2.5.</span> <span class="toc-text">结果存储与验证</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E8%A7%A3%E6%9E%90%E7%9A%84%E5%85%B3%E9%94%AE%E6%88%90%E6%9E%9C%E4%B8%8E%E6%8A%80%E6%9C%AF%E4%BB%B7%E5%80%BC"><span class="toc-number">4.3.</span> <span class="toc-text">输出解析的关键成果与技术价值</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B8%E5%9E%8B%E8%BE%93%E5%87%BA%E7%BB%93%E6%9E%9C"><span class="toc-number">4.3.1.</span> <span class="toc-text">典型输出结果</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E4%BB%B7%E5%80%BC"><span class="toc-number">4.3.2.</span> <span class="toc-text">核心技术价值</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/11/16/LangChain%20Model%20IO/" title="Model I/O"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Model I/O"/></a><div class="content"><a class="title" href="/2025/11/16/LangChain%20Model%20IO/" title="Model I/O">Model I/O</a><time datetime="2025-11-16T13:43:54.000Z" title="发表于 2025-11-16 21:43:54">2025-11-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/15/LangChain%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" title="LangChain快速开始"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain快速开始"/></a><div class="content"><a class="title" href="/2025/11/15/LangChain%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" title="LangChain快速开始">LangChain快速开始</a><time datetime="2025-11-15T08:11:25.000Z" title="发表于 2025-11-15 16:11:25">2025-11-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/11/%E5%8F%8B%E5%85%83/" title="友元"><img src="https://s2.loli.net/2025/10/25/qrsz8JmlHfKQNxt.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="友元"/></a><div class="content"><a class="title" href="/2025/11/11/%E5%8F%8B%E5%85%83/" title="友元">友元</a><time datetime="2025-11-11T11:56:32.000Z" title="发表于 2025-11-11 19:56:32">2025-11-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/03/Linux%E8%BF%9B%E7%A8%8B%E5%A4%8D%E5%88%B6%E4%B8%8E%E6%9B%BF%E6%8D%A2/" title="Linux进程复制与替换"><img src="https://s2.loli.net/2025/10/31/kD4Jh1YrOp2RCws.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux进程复制与替换"/></a><div class="content"><a class="title" href="/2025/11/03/Linux%E8%BF%9B%E7%A8%8B%E5%A4%8D%E5%88%B6%E4%B8%8E%E6%9B%BF%E6%8D%A2/" title="Linux进程复制与替换">Linux进程复制与替换</a><time datetime="2025-11-03T12:09:24.000Z" title="发表于 2025-11-03 20:09:24">2025-11-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/01/Linux%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E5%BA%93%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E4%B8%8E%E4%BD%BF%E7%94%A8/" title="Linux系统上的库文件生成与使用"><img src="https://s2.loli.net/2025/10/31/kD4Jh1YrOp2RCws.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux系统上的库文件生成与使用"/></a><div class="content"><a class="title" href="/2025/11/01/Linux%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84%E5%BA%93%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E4%B8%8E%E4%BD%BF%E7%94%A8/" title="Linux系统上的库文件生成与使用">Linux系统上的库文件生成与使用</a><time datetime="2025-11-01T09:54:13.000Z" title="发表于 2025-11-01 17:54:13">2025-11-01</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2025 By 张念川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.0.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div><div class="footer_custom_text">满堂花醉三千客，一剑霜寒十四州</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="聊天" style="display:none"><i class="fas fa-message"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '1kGP51o4WjaiJX72Yfdy5T6k-gzGzoHsz',
+      appKey: 'OeiTKeZqnH8VrxSF1s69kyOf',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="255,0178,102" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script>(() => {
+  window.$crisp = ['safe', true]
+  window.CRISP_WEBSITE_ID = "2f8661da-b522-4dfb-a0f3-ce177151f169"
+
+  btf.getScript('https://client.crisp.chat/l.js').then(() => {
+    const isChatBtn = true
+    const isChatHideShow = false
+
+    if (isChatBtn) {
+      const open = () => {
+        $crisp.push(["do", "chat:show"])
+        $crisp.push(["do", "chat:open"])
+      }
+
+      const close = () => $crisp.push(["do", "chat:hide"])
+
+      close()
+
+      $crisp.push(["on", "chat:closed", close])
+
+      window.chatBtnFn = () => $crisp.is("chat:visible") ? close() : open()
+
+      document.getElementById('chat-btn').style.display = 'block'
+    } else if (isChatHideShow) {
+      window.chatBtn = {
+        hide: () => $crisp.push(["do", "chat:hide"]),
+        show: () => $crisp.push(["do", "chat:show"])
+      }
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div id="algolia-search-input"><div class="ais-SearchBox"><form class="ais-SearchBox-form" action="" role="search" novalidate=""><input class="ais-SearchBox-input" type="search" placeholder="搜索文章" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="512" aria-label="Search"/><button class="ais-SearchBox-submit" type="submit" title="Submit the search query" style="display:none;"><svg class="ais-SearchBox-submitIcon" width="10" height="10" viewBox="0 0 40 40" aria-hidden="true"><path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"></path></svg></button></form></div><hr/><div id="algolia-search-results"><div id="algolia-hits"><div id="algolia-hits-empty" style="display:none;"></div><div class="ais-Hits" style="display:none;"><ol class="ais-Hits-list"></ol></div></div><div class="ais-Pagination" id="algolia-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="algolia-info"><span class="ais-Stats-text"></span><a class="algolia-poweredBy" href="https://www.algolia.com/?utm_source=algoliasearch.js&amp;utm_medium=website&amp;utm_content=localhost&amp;utm_campaign=poweredby" target="_blank" aria-label="Search by Algolia" rel="noopener noreferrer"><svg class="ais-PoweredBy-logo" height="1.2em" viewBox="0 0 572 64" style="width: auto;"><path fill="#36395A" d="M16 48.3c-3.4 0-6.3-.6-8.7-1.7A12.4 12.4 0 0 1 1.9 42C.6 40 0 38 0 35.4h6.5a6.7 6.7 0 0 0 3.9 6c1.4.7 3.3 1.1 5.6 1.1 2.2 0 4-.3 5.4-1a7 7 0 0 0 3-2.4 6 6 0 0 0 1-3.4c0-1.5-.6-2.8-1.9-3.7-1.3-1-3.3-1.6-5.9-1.8l-4-.4c-3.7-.3-6.6-1.4-8.8-3.4a10 10 0 0 1-3.3-7.9c0-2.4.6-4.6 1.8-6.4a12 12 0 0 1 5-4.3c2.2-1 4.7-1.6 7.5-1.6s5.5.5 7.6 1.6a12 12 0 0 1 5 4.4c1.2 1.8 1.8 4 1.8 6.7h-6.5a6.4 6.4 0 0 0-3.5-5.9c-1-.6-2.6-1-4.4-1s-3.2.3-4.4 1c-1.1.6-2 1.4-2.6 2.4-.5 1-.8 2-.8 3.1a5 5 0 0 0 1.5 3.6c1 1 2.6 1.7 4.7 1.9l4 .3c2.8.2 5.2.8 7.2 1.8 2.1 1 3.7 2.2 4.9 3.8a9.7 9.7 0 0 1 1.7 5.8c0 2.5-.7 4.7-2 6.6a13 13 0 0 1-5.6 4.4c-2.4 1-5.2 1.6-8.4 1.6Zm35.6 0c-2.6 0-4.8-.4-6.7-1.3a13 13 0 0 1-4.7-3.5 17.1 17.1 0 0 1-3.6-10.4v-1c0-2 .3-3.8 1-5.6a13 13 0 0 1 7.3-8.3 15 15 0 0 1 6.3-1.4A13.2 13.2 0 0 1 64 24.3c1 2.2 1.6 4.6 1.6 7.2V34H39.4v-4.3h21.8l-1.8 2.2c0-2-.3-3.7-.9-5.1a7.3 7.3 0 0 0-2.7-3.4c-1.2-.7-2.7-1.1-4.6-1.1s-3.4.4-4.7 1.3a8 8 0 0 0-2.9 3.6c-.6 1.5-.9 3.3-.9 5.4 0 2 .3 3.7 1 5.3a7.9 7.9 0 0 0 2.8 3.7c1.3.8 3 1.3 5 1.3s3.8-.5 5.1-1.3c1.3-1 2.1-2 2.4-3.2h6a11.8 11.8 0 0 1-7 8.7 16 16 0 0 1-6.4 1.2ZM80 48c-2.2 0-4-.3-5.7-1a8.4 8.4 0 0 1-3.7-3.3 9.7 9.7 0 0 1-1.3-5.2c0-2 .5-3.8 1.5-5.2a9 9 0 0 1 4.3-3.1c1.8-.7 4-1 6.7-1H89v4.1h-7.5c-2 0-3.4.5-4.4 1.4-1 1-1.6 2.1-1.6 3.6s.5 2.7 1.6 3.6c1 1 2.5 1.4 4.4 1.4 1.1 0 2.2-.2 3.2-.7 1-.4 1.9-1 2.6-2 .6-1 1-2.4 1-4.2l1.7 2.1c-.2 2-.7 3.8-1.5 5.2a9 9 0 0 1-3.4 3.3 12 12 0 0 1-5.3 1Zm9.5-.7v-8.8h-1v-10c0-1.8-.5-3.2-1.4-4.1-1-1-2.4-1.4-4.2-1.4a142.9 142.9 0 0 0-10.2.4v-5.6a74.8 74.8 0 0 1 8.6-.4c3 0 5.5.4 7.5 1.2s3.4 2 4.4 3.6c1 1.7 1.4 4 1.4 6.7v18.4h-5Zm12.9 0V17.8h5v12.3h-.2c0-4.2 1-7.4 2.8-9.5a11 11 0 0 1 8.3-3.1h1v5.6h-2a9 9 0 0 0-6.3 2.2c-1.5 1.5-2.2 3.6-2.2 6.4v15.6h-6.4Zm34.4 1a15 15 0 0 1-6.6-1.3c-1.9-.9-3.4-2-4.7-3.5a15.5 15.5 0 0 1-2.7-5c-.6-1.7-1-3.6-1-5.4v-1c0-2 .4-3.8 1-5.6a15 15 0 0 1 2.8-4.9c1.3-1.5 2.8-2.6 4.6-3.5a16.4 16.4 0 0 1 13.3.2c2 1 3.5 2.3 4.8 4a12 12 0 0 1 2 6H144c-.2-1.6-1-3-2.2-4.1a7.5 7.5 0 0 0-5.2-1.7 8 8 0 0 0-4.7 1.3 8 8 0 0 0-2.8 3.6 13.8 13.8 0 0 0 0 10.3c.6 1.5 1.5 2.7 2.8 3.6s2.8 1.3 4.8 1.3c1.5 0 2.7-.2 3.8-.8a7 7 0 0 0 2.6-2c.7-1 1-2 1.2-3.2h6.2a11 11 0 0 1-2 6.2 15.1 15.1 0 0 1-11.8 5.5Zm19.7-1v-40h6.4V31h-1.3c0-3 .4-5.5 1.1-7.6a9.7 9.7 0 0 1 3.5-4.8A9.9 9.9 0 0 1 172 17h.3c3.5 0 6 1.1 7.9 3.5 1.7 2.3 2.6 5.7 2.6 10v16.8h-6.4V29.6c0-2.1-.6-3.8-1.8-5a6.4 6.4 0 0 0-4.8-1.8c-2 0-3.7.7-5 2a7.8 7.8 0 0 0-1.9 5.5v17h-6.4Zm63.8 1a12.2 12.2 0 0 1-10.9-6.2 19 19 0 0 1-1.8-7.3h1.4v12.5h-5.1v-40h6.4v19.8l-2 3.5c.2-3.1.8-5.7 1.9-7.7a11 11 0 0 1 4.4-4.5c1.8-1 3.9-1.5 6.1-1.5a13.4 13.4 0 0 1 12.8 9.1c.7 1.9 1 3.8 1 6v1c0 2.2-.3 4.1-1 6a13.6 13.6 0 0 1-13.2 9.4Zm-1.2-5.5a8.4 8.4 0 0 0 7.9-5c.7-1.5 1.1-3.3 1.1-5.3s-.4-3.8-1.1-5.3a8.7 8.7 0 0 0-3.2-3.6 9.6 9.6 0 0 0-9.2-.2 8.5 8.5 0 0 0-3.3 3.2c-.8 1.4-1.3 3-1.3 5v2.3a9 9 0 0 0 1.3 4.8 9 9 0 0 0 3.4 3c1.4.7 2.8 1 4.4 1Zm27.3 3.9-10-28.9h6.5l9.5 28.9h-6Zm-7.5 12.2v-5.7h4.9c1 0 2-.1 2.9-.4a4 4 0 0 0 2-1.4c.4-.7.9-1.6 1.2-2.7l8.6-30.9h6.2l-9.3 32.4a14 14 0 0 1-2.5 5 8.9 8.9 0 0 1-4 2.8c-1.5.6-3.4.9-5.6.9h-4.4Zm9-12.2v-5.2h6.4v5.2H248Z"></path><path fill="#003DFF" d="M534.4 9.1H528a.8.8 0 0 1-.7-.7V1.8c0-.4.2-.7.6-.8l6.5-1c.4 0 .8.2.9.6v7.8c0 .4-.4.7-.8.7zM428 35.2V.8c0-.5-.3-.8-.7-.8h-.2l-6.4 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.5 0 .8-.4.8-.8V43c0-.4-.3-.7-.6-.8-4.5-.5-4.5-6-4.5-7zm106.5-21.8H528c-.4 0-.7.4-.7.8v34c0 .4.3.8.7.8h6.5c.4 0 .8-.4.8-.8v-34c0-.5-.4-.8-.8-.8zm-17.7 21.8V.8c0-.5-.3-.8-.8-.8l-6.5 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.4 0 .8-.4.8-.8V43c0-.4-.3-.7-.7-.8-4.4-.5-4.4-6-4.4-7zm-22.2-20.6a16.5 16.5 0 0 1 8.6 9.3c.8 2.2 1.3 4.8 1.3 7.5a19.4 19.4 0 0 1-4.6 12.6 14.8 14.8 0 0 1-5.2 3.6c-2 .9-5.2 1.4-6.8 1.4a21 21 0 0 1-6.7-1.4 15.4 15.4 0 0 1-8.6-9.3 21.3 21.3 0 0 1 0-14.4 15.2 15.2 0 0 1 8.6-9.3c2-.8 4.3-1.2 6.7-1.2s4.6.4 6.7 1.2zm-6.7 27.6c2.7 0 4.7-1 6.2-3s2.2-4.3 2.2-7.8-.7-6.3-2.2-8.3-3.5-3-6.2-3-4.7 1-6.1 3c-1.5 2-2.2 4.8-2.2 8.3s.7 5.8 2.2 7.8 3.5 3 6.2 3zm-88.8-28.8c-6.2 0-11.7 3.3-14.8 8.2a18.6 18.6 0 0 0 4.8 25.2c1.8 1.2 4 1.8 6.2 1.7s.1 0 .1 0h.9c4.2-.7 8-4 9.1-8.1v7.4c0 .4.3.7.8.7h6.4a.7.7 0 0 0 .7-.7V14.2c0-.5-.3-.8-.7-.8h-13.5zm6.3 26.5a9.8 9.8 0 0 1-5.7 2h-.5a10 10 0 0 1-9.2-14c1.4-3.7 5-6.3 9-6.3h6.4v18.3zm152.3-26.5h13.5c.5 0 .8.3.8.7v33.7c0 .4-.3.7-.8.7h-6.4a.7.7 0 0 1-.8-.7v-7.4c-1.2 4-4.8 7.4-9 8h-.1a4.2 4.2 0 0 1-.5.1h-.9a10.3 10.3 0 0 1-7-2.6c-4-3.3-6.5-8.4-6.5-14.2 0-3.7 1-7.2 3-10 3-5 8.5-8.3 14.7-8.3zm.6 28.4c2.2-.1 4.2-.6 5.7-2V21.7h-6.3a9.8 9.8 0 0 0-9 6.4 10.2 10.2 0 0 0 9.1 13.9h.5zM452.8 13.4c-6.2 0-11.7 3.3-14.8 8.2a18.5 18.5 0 0 0 3.6 24.3 10.4 10.4 0 0 0 13 .6c2.2-1.5 3.8-3.7 4.5-6.1v7.8c0 2.8-.8 5-2.2 6.3-1.5 1.5-4 2.2-7.5 2.2l-6-.3c-.3 0-.7.2-.8.5l-1.6 5.5c-.1.4.1.8.5 1h.1c2.8.4 5.5.6 7 .6 6.3 0 11-1.4 14-4.1 2.7-2.5 4.2-6.3 4.5-11.4V14.2c0-.5-.4-.8-.8-.8h-13.5zm6.3 8.2v18.3a9.6 9.6 0 0 1-5.6 2h-1a10.3 10.3 0 0 1-8.8-14c1.4-3.7 5-6.3 9-6.3h6.4zM291 31.5A32 32 0 0 1 322.8 0h30.8c.6 0 1.2.5 1.2 1.2v61.5c0 1.1-1.3 1.7-2.2 1l-19.2-17a18 18 0 0 1-11 3.4 18.1 18.1 0 1 1 18.2-14.8c-.1.4-.5.7-.9.6-.1 0-.3 0-.4-.2l-3.8-3.4c-.4-.3-.6-.8-.7-1.4a12 12 0 1 0-2.4 8.3c.4-.4 1-.5 1.6-.2l14.7 13.1v-46H323a26 26 0 1 0 10 49.7c.8-.4 1.6-.2 2.3.3l3 2.7c.3.2.3.7 0 1l-.2.2a32 32 0 0 1-47.2-28.6z"></path></svg></a></div></div></div></div><div id="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/algoliasearch/dist/lite/builds/browser.umd.min.js"></script><script src="/js/search/algolia.js"></script></div></div></body></html>
