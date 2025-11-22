@@ -1,570 +1,971 @@
-<html lang="en"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zhang Nianchuan | Software Developer Portfolio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#1a1a1a',
-            secondary: '#f5f5f5',
-            accent: '#e0e0e0',
-            dark: '#0a0a0a',
-            light: '#ffffff'
-          },
-          fontFamily: {
-            inter: ['Inter', 'sans-serif'],
-          },
-        },
-      }
-    }
-  </script>
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .text-balance {
-        text-wrap: balance;
-      }
-      .transition-transform-opacity {
-        transition-property: transform, opacity;
-      }
-      .section-hidden {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-      }
-      .section-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
-</head>
-<body class="font-inter bg-light text-primary antialiased">
-  <!-- Header/Navigation -->
-  <header class="fixed w-full top-0 z-50 transition-all duration-300" id="navbar">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-6">
-        <a href="#" class="text-2xl font-semibold tracking-tight" style="font-size: 36px;">张 念 川 Shanchuan</a>
-        <nav class="hidden md:flex space-x-8">
-          <a href="#projects" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">Projects</a>
-          <a href="#about" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">About</a>
-          <a href="#skills" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">Skills</a>
-          <a href="#contact" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">Contact</a>
-        </nav>
-        <button class="md:hidden text-xl" id="menu-toggle">
-          <i class="fa fa-bars"></i>
-        </button>
-      </div>
-    </div>
-    <!-- Mobile Menu -->
-    <div class="md:hidden hidden bg-light border-t border-accent/30" id="mobile-menu">
-      <div class="container mx-auto px-4 py-4 space-y-4">
-        <a href="#projects" class="block text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">Projects</a>
-        <a href="#about" class="block text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">About</a>
-        <a href="#skills" class="block text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">Skills</a>
-        <a href="#contact" class="block text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">Contact</a>
-      </div>
-    </div>
-  </header>
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhang Nianchuan | Developer Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 
-  <main>
-    <!-- Hero Section -->
-    <section class="h-screen flex items-center justify-center relative overflow-hidden">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 z-10">
-        <div class="max-w-4xl mx-auto text-center">
-          <h1 class="text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-tight text-balance mb-8">
-            Software Developer <br class="hidden sm:block">Specializing in C/C++
-          </h1>
-          <p class="text-[clamp(1rem,2vw,1.25rem)] text-primary/70 leading-relaxed mb-12 max-w-2xl mx-auto">
-            Experienced in system programming, network development, and high-performance applications with a focus on clean code and efficient algorithms.
-          </p>
-          <a href="#projects" class="inline-block border border-primary px-8 py-3 text-sm uppercase tracking-widest hover:bg-primary hover:text-light transition-colors">
-            View My Work
-          </a>
+    <!-- Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            
+            /* Light Mode Vars */
+            --bg-base: #f8fafc;
+            --text-base: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        .dark {
+            /* Dark Mode Vars */
+            --bg-base: #0f172a;
+            --text-base: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-base);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* Artistic Logo Font */
+        .font-art {
+            font-family: 'Syne', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* --- Glassmorphism Utilities --- */
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dark .glass-panel {
+             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-glass {
+            background: var(--nav-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* --- Animations --- */
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Typewriter Cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+            color: #a855f7;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* --- Interactive Card (Tilt) --- */
+        .tilt-card {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+        .tilt-content {
+            transform: translateZ(20px);
+        }
+
+        /* --- Primary Button --- */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        /* Light Mode */
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Dark Mode */
+        .dark .btn-primary {
+            background: var(--primary-gradient);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+        .dark .btn-primary:hover {
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        }
+
+        /* --- Skill Bar --- */
+        .skill-progress {
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        /* --- Mouse Follower Glow --- */
+        #cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            transition: background 0.3s ease;
+        }
+        
+        /* Light Mode Glow - Increased Opacity to 0.35 */
+        html:not(.dark) #cursor-glow {
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        /* --- Profile Image Interaction Styles --- */
+        #profile-container {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        #profile-image {
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+        }
+        #profile-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 10;
+            border-radius: 0.75rem; /* Match rounded-xl */
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Interactive Background Glow -->
+    <div id="cursor-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 nav-glass transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="#" class="text-2xl md:text-3xl font-extrabold tracking-tight font-art text-slate-900 dark:text-white hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors flex items-center h-full">
+                    ZhangNianchuan
+                </a>
+                
+                <div class="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide text-slate-600 dark:text-slate-300 h-full">
+                    <a href="#projects" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors relative group h-full flex items-center">
+                        Projects
+                        <span class="absolute bottom-6 left-0 w-0 h-0.5 bg-indigo-500 transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#about" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors relative group h-full flex items-center">
+                        About
+                        <span class="absolute bottom-6 left-0 w-0 h-0.5 bg-indigo-500 transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#skills" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors relative group h-full flex items-center">
+                        Skills
+                        <span class="absolute bottom-6 left-0 w-0 h-0.5 bg-indigo-500 transition-all group-hover:w-full"></span>
+                    </a>
+                    
+                    <button id="theme-toggle" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition-colors">
+                        <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="icon-moon" class="w-5 h-5 block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+
+                    <div class="flex items-center pl-2">
+                        <a href="#contact" class="px-5 py-2.5 rounded-full border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all duration-300 flex items-center">
+                            Contact
+                        </a>
+                    </div>
+                </div>
+
+                <button id="menu-btn" class="md:hidden text-slate-900 dark:text-white focus:outline-none p-2">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
         </div>
-      </div>
-      
-      <!-- Scroll Indicator -->
-      <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <a href="#projects" class="text-primary/70 hover:text-primary transition-colors">
-          <i class="fa fa-chevron-down text-2xl"></i>
-        </a>
-      </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-slate-800 shadow-2xl">
+            <div class="flex flex-col px-4 py-6 space-y-4 text-base font-medium text-slate-600 dark:text-slate-300">
+                <a href="#projects" class="mobile-link block hover:text-indigo-500">Projects</a>
+                <a href="#about" class="mobile-link block hover:text-indigo-500">About</a>
+                <a href="#skills" class="mobile-link block hover:text-indigo-500">Skills</a>
+                <a href="#contact" class="mobile-link block hover:text-indigo-500">Contact</a>
+                <button id="mobile-theme-toggle" class="text-left flex items-center gap-2 hover:text-indigo-500">
+                    <span>Toggle Theme</span>
+                    <i class="fa fa-adjust"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10">
+            <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-400/30 dark:bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 dark:opacity-20 animate-blob"></div>
+            <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-indigo-400/30 dark:bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 dark:opacity-20 animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-blue-400/30 dark:bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 dark:opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-4 text-center z-10">
+            <div class="inline-block mb-4 px-5 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-sm font-medium fade-up tracking-wide">
+                Available for new projects
+            </div>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 font-heading fade-up text-slate-900 dark:text-white" style="transition-delay: 100ms;">
+                Building the <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x">Digital Future</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 font-light fade-up" style="transition-delay: 200ms;">
+                I am <span class="text-slate-900 dark:text-white font-semibold">Zhang Nianchuan</span>. <br>
+                <span id="typewriter" class="typing-cursor text-indigo-600 dark:text-indigo-400"></span>
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-5 justify-center fade-up" style="transition-delay: 300ms;">
+                <a href="#projects" class="btn-primary px-10 py-4 rounded-full text-lg font-bold tracking-wide shadow-lg">
+                    View Work
+                </a>
+                <a href="#contact" class="px-10 py-4 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center group shadow-sm">
+                    Contact Me <i class="fa fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+        </div>
     </section>
 
     <!-- Projects Section -->
-    <section id="projects" class="py-20 bg-secondary section-hidden">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-light mb-4">Featured Projects</h2>
-          <p class="text-primary/70 max-w-2xl mx-auto">A selection of my recent projects, showcasing my skills in C/C++ development and system programming.</p>
+    <section id="projects" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 fade-up">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white">Featured Projects</h2>
+                <div class="h-1 w-20 bg-indigo-500 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="fade-up">
+                    <a href="https://github.com/shanchuann/ChainReaction.git" target="_blank" class="block group tilt-card glass-panel rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-colors">
+                        <div class="h-56 overflow-hidden relative">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
+                            <img src="https://s2.loli.net/2025/11/17/YkemEv7ncKrt9uh.png" alt="ChainReaction" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                        <div class="p-8 relative z-20 tilt-content">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-3 py-1 bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs font-bold rounded-full">AI & Python</span>
+                                <i class="fa fa-github text-2xl text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">ChainReaction</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                                Next-gen study tool leveraging Deepseek and Ollama LLMs for intelligent chain-of-thought processing.
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="fade-up" style="transition-delay: 100ms;">
+                    <a href="https://github.com/shanchuann/ETOCK-Reservation-System.git" target="_blank" class="block group tilt-card glass-panel rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-colors">
+                        <div class="h-56 overflow-hidden relative bg-slate-100 dark:bg-slate-800 transition-colors duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
+                            <img src="https://s2.loli.net/2025/11/11/DlFCuogPvrQmhdz.png" alt="ETOCK" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                        <div class="p-8 relative z-20 tilt-content">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-3 py-1 bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-bold rounded-full">Distributed System</span>
+                                <i class="fa fa-github text-2xl text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-purple-500 dark:group-hover:text-purple-400 transition-colors">ETOCK System</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                                High-concurrency reservation system architected with C++11, Libevent, and MySQL optimization.
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="fade-up" style="transition-delay: 200ms;">
+                    <a href="https://github.com/shanchuann/CStudy.git" target="_blank" class="block group tilt-card glass-panel rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-colors">
+                        <!-- FIXED: Removed the delay from this inner element, it's now on the wrapper div -->
+                        <div class="h-56 overflow-hidden relative bg-slate-100 dark:bg-slate-800 transition-colors duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
+                            <img src="https://s2.loli.net/2025/11/11/snp7iPLMWXlcrzD.png" alt="CStudy" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                        <div class="p-8 relative z-20 tilt-content">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-3 py-1 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-bold rounded-full">EdTech</span>
+                                <i class="fa fa-github text-2xl text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">CStudy Platform</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                                Interactive C Language learning environment powered by local AI models for real-time code assistance.
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- Project 1 -->
-          <div class="group">
-            <div class="overflow-hidden mb-4">
-              <img src="https://s2.loli.net/2025/11/17/YkemEv7ncKrt9uh.png" alt="ChainReaction for Langchain" class="w-full h-80 object-cover object-center transition-transform duration-500 group-hover:scale-105">
-            </div>
-            <h3 class="text-lg font-medium mb-1">ChainReaction for Langchain</h3>
-            <p class="text-sm text-primary/70 mb-3">AI &amp; Study</p>
-            <p class="text-sm text-primary/80 mb-3">LangChain,Deepseek, Ollama, Python</p>
-            <a href="https://github.com/shanchuann/ChainReaction.git" target="_blank" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">View Project <i class="fa fa-long-arrow-right ml-2"></i></a>
-          </div>
-          
-          <!-- Project 2 -->
-          <div class="group">
-            <div class="overflow-hidden mb-4">
-              <img src="https://s2.loli.net/2025/11/11/DlFCuogPvrQmhdz.png" alt="ETOCK Reservation System" class="w-full h-80 object-cover object-center transition-transform duration-500 group-hover:scale-105">
-            </div>
-            <h3 class="text-lg font-medium mb-1">ETOCK Reservation System</h3>
-            <p class="text-sm text-primary/70 mb-3">Distributed System</p>
-            <p class="text-sm text-primary/80 mb-3">C++11, SQL, libevent, jsoncpp, mysqlclient</p>
-            <a href="https://github.com/shanchuann/ETOCK-Reservation-System.git" target="_blank" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">View Project <i class="fa fa-long-arrow-right ml-2"></i></a>
-          </div>
-          
-          <!-- Project 3 -->
-          <div class="group">
-            <div class="overflow-hidden mb-4">
-              <img src="https://s2.loli.net/2025/11/11/snp7iPLMWXlcrzD.png" alt="CStudy - C Language Learning Platform" class="w-full h-80 object-cover object-center transition-transform duration-500 group-hover:scale-105">
-            </div>
-            <h3 class="text-lg font-medium mb-1">CStudy Learning Platform</h3>
-            <p class="text-sm text-primary/70 mb-3">Education Technology</p>
-            <p class="text-sm text-primary/80 mb-3">spec-kit, Powershell, Bash, C, Ollama</p>
-            <a href="https://github.com/shanchuann/CStudy.git" target="_blank" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">View Project <i class="fa fa-long-arrow-right ml-2"></i></a>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-20 section-hidden">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-light mb-6">About Me</h2>
-            <p class="text-primary/80 mb-6 leading-relaxed">
-              Hello, I'm Zhang Nianchuan, a software developer with a strong background in C/C++ programming and system development. I graduated from Xi'an University of Finance and Economics with a degree in Software Engineering.
-            </p>
-            <p class="text-primary/80 mb-6 leading-relaxed">
-              I specialize in building high-performance applications, distributed systems, and network programming. My technical expertise includes data structures, algorithms, and system optimization.
-            </p>
-            <p class="text-primary/80 mb-8 leading-relaxed">
-              In my free time, I enjoy technical writing, contributing to open source projects, and exploring new technologies. I'm passionate about creating efficient, reliable software solutions that solve real-world problems.
-            </p>
-            <div class="flex flex-wrap gap-4">
-              <a href="https://github.com/shanchuann" target="_blank" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">
-                <i class="fa fa-github mr-2"></i> GitHub
-              </a>
-              <a href="https://shanchuann.cn" target="_blank" class="text-sm uppercase tracking-widest hover:text-primary/70 transition-colors">
-                <i class="fa fa-globe mr-2"></i> Blog
-              </a>
+    <section id="about" class="py-32 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="w-full max-w-md lg:w-1/2 fade-up">
+                    <div id="profile-container" class="relative group">
+                        <div class="relative glass-panel p-2 rounded-2xl aspect-square overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/30">
+                            <div id="profile-shine"></div>
+                            <img id="profile-image" src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" alt="Zhang Nianchuan" class="w-full h-full object-cover rounded-xl grayscale group-hover:grayscale-0 transition-all duration-500">
+                            <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-white/90 dark:from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                <p class="text-slate-900 dark:text-white font-mono text-sm">> System Architect</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 fade-up" style="transition-delay: 200ms;">
+                    <h2 class="text-4xl font-bold mb-6 text-slate-900 dark:text-white">Architecting the <br><span class="text-indigo-600 dark:text-indigo-400">Invisible Foundation</span>.</h2>
+                    <div class="space-y-6 text-lg text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+                        <p>
+                            Graduate of <strong class="text-slate-900 dark:text-white">Xi'an University of Finance and Economics</strong>. While others focus on the surface, I dive deep into the kernel.
+                        </p>
+                        <p>
+                            My expertise lies in the raw power of <strong class="text-slate-900 dark:text-white">C/C++</strong>, crafting robust network protocols, and optimizing system performance down to the last byte. I build the engines that drive modern applications.
+                        </p>
+                        <div class="glass-panel p-6 rounded-xl border-l-4 border-indigo-500 my-8">
+                            <p class="italic text-slate-700 dark:text-slate-300 font-medium">
+                                "我生怕自己本非美玉，故而不敢加以刻苦琢磨; 却又半信自己是块美玉，故又不肯庸庸碌碌，与瓦砾为伍。"
+                            </p>
+                            <p class="text-sm mt-3 text-indigo-600 dark:text-indigo-400">— 山月记 (The Tiger Poet)</p>
+                        </div>
+                        <div class="flex gap-6 pt-2">
+                            <a href="https://github.com/shanchuann" target="_blank" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors transform hover:scale-110 duration-200"><i class="fa fa-github text-3xl"></i></a>
+                            <a href="https://shanchuann.cn" target="_blank" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors transform hover:scale-110 duration-200"><i class="fa fa-globe text-3xl"></i></a>
+                            <a href="mailto:1537521192@qq.com" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors transform hover:scale-110 duration-200"><i class="fa fa-envelope text-3xl"></i></a>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="relative">
-            <img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" alt="Zhang Nianchuan" class="w-full h-auto max-w-md mx-auto rounded-lg shadow-lg">
-            <div class="absolute -bottom-6 -left-6 bg-light p-6 max-w-xs border border-accent">
-              <p class="italic text-primary/80">" 我生怕自己本非美玉，故而不敢加以刻苦琢磨;却又半信自己是块美玉，故又不肯庸庸碌碌，与瓦砾为伍。"</p>
-              <p class="text-sm font-medium mt-2">— 山月记</p>
-            </div>
-          </div>
         </div>
-      </div>
     </section>
 
-        <!-- Skills Section -->
-    <section id="skills" class="py-20 bg-secondary section-hidden">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-light mb-4">My Skills</h2>
-          <p class="text-primary/70 max-w-2xl mx-auto">Technical expertise and programming skills I bring to every project.</p>
+    <!-- Skills Section (Enriched) -->
+    <section id="skills" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20 fade-up">
+                <h2 class="text-4xl font-bold mb-4 text-slate-900 dark:text-white">Tech Arsenal</h2>
+                <p class="text-slate-600 dark:text-slate-400">Tools tailored for performance.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <!-- Left Column: Languages & Tools -->
+                <div class="space-y-10 fade-up">
+                    <!-- Panel 1: Core Languages -->
+                    <div class="glass-panel p-10 rounded-3xl">
+                        <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
+                            <i class="fa fa-terminal text-indigo-500 mr-4"></i> Core Languages
+                        </h3>
+                        <div class="space-y-8">
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
+                                    <span>C/C++</span>
+                                    <span class="text-indigo-600 dark:text-indigo-400">95%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-progress h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full relative" data-width="95%"></div>
+                                </div>
+                            </div>
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
+                                    <span>Python</span>
+                                    <span class="text-indigo-600 dark:text-indigo-400">80%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-progress h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" data-width="80%"></div>
+                                </div>
+                            </div>
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
+                                    <span>Database Architecture</span>
+                                    <span class="text-indigo-600 dark:text-indigo-400">75%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-progress h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" data-width="75%"></div>
+                                </div>
+                            </div>
+                            <!-- Added AI Concepts -->
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
+                                    <span>AI Concepts</span>
+                                    <span class="text-indigo-600 dark:text-indigo-400">60%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-progress h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" data-width="60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Technologies & Frameworks (Tag Cloud Style) -->
+                    <div class="glass-panel p-10 rounded-3xl">
+                        <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
+                            <i class="fa fa-code text-purple-500 mr-4"></i> Technologies & Tools
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">STL Containers</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">C++11/14/17</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">MySQL</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">LangChain</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">Docker</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">Redis</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">Git</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">CMake</span>
+                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">GDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: System Mastery (Vertical List) -->
+                <div class="glass-panel p-10 rounded-3xl fade-up" style="transition-delay: 100ms;">
+                    <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
+                        <i class="fa fa-cogs text-indigo-500 mr-4"></i> System Mastery
+                    </h3>
+                    <div class="space-y-4">
+                        
+                        <!-- New Card: Data Structures -->
+                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center text-green-600 dark:text-green-400 text-xl">
+                                <i class="fa fa-sitemap"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">Algorithms & Data Structures</h4>
+                                    <span class="text-xs font-mono text-green-500 bg-green-500/10 px-2 py-0.5 rounded">Foundational</span>
+                                </div>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Solid foundation in computer science fundamentals.</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Red-Black Trees</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Hash Tables</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Dynamic Programming</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Card 1: Linux (Enriched) -->
+                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xl">
+                                <i class="fa fa-linux"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">Linux System Programming</h4>
+                                    <span class="text-xs font-mono text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded">Advanced</span>
+                                </div>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Kernel APIs, memory management, and scheduling.</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">IPC</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Process Mgmt</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Signals</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Card 2: Network (Enriched) -->
+                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xl">
+                                <i class="fa fa-server"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">High-Performance Net</h4>
+                                    <span class="text-xs font-mono text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded">Expert</span>
+                                </div>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Non-blocking I/O & TCP/IP optimization.</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Epoll/Reactor</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">TCP/IP Stack</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">HTTP/HTTPS</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Card 3: Concurrency (Enriched) -->
+                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xl">
+                                <i class="fa fa-cubes"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">Concurrency & Sync</h4>
+                                    <span class="text-xs font-mono text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">Proficient</span>
+                                </div>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Multithreading patterns and resource locking.</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Thread Pool</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Mutex/CondVar</span>
+                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Deadlock Avoidance</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Programming Languages -->
-          <div class="bg-white p-8 border border-accent/30 hover:border-primary/30 transition-colors">
-            <h3 class="text-xl font-medium mb-6">Programming Languages</h3>
-            <div class="space-y-4">
-              <div>
-                <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium">C/C++</span>
-                  <span class="text-sm font-medium">95%</span>
-                </div>
-                <div class="w-full bg-accent rounded-full h-2">
-                  <div class="bg-primary h-2 rounded-full" style="width: 95%"></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium">Python</span>
-                  <span class="text-sm font-medium">80%</span>
-                </div>
-                <div class="w-full bg-accent rounded-full h-2">
-                  <div class="bg-primary h-2 rounded-full" style="width: 80%"></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium">SQL</span>
-                  <span class="text-sm font-medium">75%</span>
-                </div>
-                <div class="w-full bg-accent rounded-full h-2">
-                  <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium">AI</span>
-                  <span class="text-sm font-medium">60%</span>
-                </div>
-                <div class="w-full bg-accent rounded-full h-2">
-                  <div class="bg-primary h-2 rounded-full" style="width: 60%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Technologies & Frameworks -->
-          <div class="bg-white p-8 border border-accent/30 hover:border-primary/30 transition-colors">
-            <h3 class="text-xl font-medium mb-6">Technologies &amp; Frameworks</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>STL Containers</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>C++11+ Features</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Linux System Programming</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Network Programming (TCP/IP)</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>LangChain</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>MySQL</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Redis</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Docker</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Data Structures & Algorithms -->
-          <div class="bg-white p-8 border border-accent/30 hover:border-primary/30 transition-colors">
-            <h3 class="text-xl font-medium mb-6">Data Structures &amp; Algorithms</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Arrays &amp; Linked Lists</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Stacks &amp; Queues</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Trees (Binary, Red-Black)</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Hash Tables</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Sorting &amp; Searching</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Dynamic Programming</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- System & Network -->
-          <div class="bg-white p-8 border border-accent/30 hover:border-primary/30 transition-colors">
-            <h3 class="text-xl font-medium mb-6">System &amp; Network</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Process &amp; Thread Management</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Inter-process Communication</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>Thread Synchronization</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>I/O Multiplexing (select, poll, epoll)</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>TCP/IP Protocol Stack</span>
-              </div>
-              <div class="flex items-center">
-                <i class="fa fa-check-circle text-primary mr-2"></i>
-                <span>HTTP/HTTPS</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-secondary section-hidden">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-light mb-4">Get In Touch</h2>
-          <p class="text-primary/70 max-w-2xl mx-auto">I'm currently seeking new opportunities and would love to hear from you. Whether you have a project idea, job offer, or just want to connect, feel free to reach out.</p>
-        </div>
-        
-        <div class="max-w-5xl mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div class="flex flex-col">
-              <div class="bg-white p-8 rounded-lg shadow-sm flex-grow">
-                <h3 class="text-xl font-medium mb-6">Contact Information</h3>
-                <div class="space-y-6">
-                  <div class="flex items-start">
-                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4 flex-shrink-0">
-                      <i class="fa fa-envelope text-primary"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-medium mb-1">Email</h4>
-                      <p class="text-primary/70">1537521192@qq.com</p>
-                    </div>
-                  </div>
-                  <div class="flex items-start">
-                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4 flex-shrink-0">
-                      <i class="fa fa-github text-primary"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-medium mb-1">GitHub</h4>
-                      <p class="text-primary/70">github.com/shanchuann</p>
-                    </div>
-                  </div>
-                  <div class="flex items-start">
-                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4 flex-shrink-0">
-                      <i class="fa fa-globe text-primary"></i>
-                    </div>
-                    <div>
-                      <h4 class="font-medium mb-1">Blog</h4>
-                      <p class="text-primary/70">shanchuann.cn</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="mt-8">
-                  <h4 class="font-medium mb-4">Connect with me</h4>
-                  <div class="flex space-x-4">
-                    <a href="https://github.com/shanchuann" target="_blank" class="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center hover:bg-primary hover:text-light hover:border-primary transition-colors">
-                      <i class="fa fa-github"></i>
-                    </a>
-                    <a href="mailto:1537521192@qq.com" class="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center hover:bg-primary hover:text-light hover:border-primary transition-colors">
-                      <i class="fa fa-envelope"></i>
-                    </a>
-                    <a href="https://shanchuann.cn" target="_blank" class="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center hover:bg-primary hover:text-light hover:border-primary transition-colors">
-                      <i class="fa fa-globe"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
+    <section id="contact" class="py-32 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20 fade-up">
+                <h2 class="text-4xl font-bold mb-4 text-slate-900 dark:text-white">Initialize Handshake</h2>
+                <p class="text-slate-600 dark:text-slate-400">Establish connection and start collaboration.</p>
             </div>
-            
-            <div class="flex flex-col">
-              <div class="bg-white p-8 rounded-lg shadow-sm flex-grow">
-                <h3 class="text-xl font-medium mb-6">Send Me a Message</h3>
-                <form class="space-y-6" id="contact-form" action="https://formspree.io/f/xwpakqwk" method="POST">
-                  <!-- Formspree required fields -->
-                  <input type="hidden" name="_subject" value="New message from portfolio website">
-                  <input type="hidden" name="_replyto" id="form-replyto">
-                  
-                  <!-- Honey pot field to prevent spam -->
-                  <input type="text" name="_gotcha" style="display: none;">
-                  
-                  <div>
-                    <label for="name" class="block text-sm font-medium mb-2">Name</label>
-                    <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-accent focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors" placeholder="Your name">
-                  </div>
-                  <div>
-                    <label for="email" class="block text-sm font-medium mb-2">Email</label>
-                    <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-accent focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors" placeholder="Your email" oninput="document.getElementById('form-replyto').value = this.value">
-                  </div>
-                  <div>
-                    <label for="message" class="block text-sm font-medium mb-2">Message</label>
-                    <textarea id="message" name="message" rows="5" class="w-full px-4 py-3 border border-accent focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors" placeholder="Your message"></textarea>
-                  </div>
-                  <button type="submit" class="w-full bg-primary text-light px-8 py-3 text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors">
-                    SEND MESSAGE
-                  </button>
-                </form>
-              </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                <!-- Left Column: Contact Info -->
+                <div class="fade-up">
+                    <div class="glass-panel p-8 rounded-3xl h-full">
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Contact Information</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
+                            I am currently open for new opportunities. Whether you have a question about my stack, a project idea, or just want to say hi, feel free to drop a message.
+                        </p>
+
+                        <div class="space-y-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <i class="fa fa-envelope text-xl"></i>
+                                </div>
+                                <div class="ml-6">
+                                    <h4 class="text-slate-900 dark:text-white font-medium">Email Address</h4>
+                                    <a href="mailto:1537521192@qq.com" class="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mt-1 block">1537521192@qq.com</a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                    <i class="fa fa-globe text-xl"></i>
+                                </div>
+                                <div class="ml-6">
+                                    <h4 class="text-slate-900 dark:text-white font-medium">Personal Blog</h4>
+                                    <a href="https://shanchuann.cn" target="_blank" class="text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors mt-1 block">shanchuann.cn</a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center text-green-600 dark:text-green-400">
+                                    <i class="fa fa-map-marker text-xl"></i>
+                                </div>
+                                <div class="ml-6">
+                                    <h4 class="text-slate-900 dark:text-white font-medium">Location</h4>
+                                    <p class="text-slate-600 dark:text-slate-400 mt-1">Xi'an, China</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700 flex gap-6">
+                            <a href="https://github.com/shanchuann" target="_blank" class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                                <i class="fa fa-github text-lg"></i>
+                            </a>
+                            <a href="https://shanchuann.cn" target="_blank" class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white transition-all">
+                                <i class="fa fa-rss text-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Form -->
+                <div class="fade-up" style="transition-delay: 100ms;">
+                     <div class="glass-panel p-8 md:p-10 rounded-3xl">
+                        <form id="contact-form" action="https://formspree.io/f/xwpakqwk" method="POST" class="space-y-6">
+                            <input type="hidden" name="_subject" value="New Connection Request">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Your Name</label>
+                                <input type="text" id="name" name="name" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="Enter your name" required>
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Email Address</label>
+                                <input type="email" id="email" name="email" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="Enter your email" required>
+                            </div>
+
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Message</label>
+                                <textarea id="message" name="message" rows="5" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="What's on your mind?" required></textarea>
+                            </div>
+
+                            <!-- Enhanced Button -->
+                            <button type="submit" class="w-full btn-primary py-4 rounded-xl font-bold text-white tracking-wide uppercase text-sm flex justify-center items-center gap-2">
+                                Send Transmission <i class="fa fa-paper-plane text-xs"></i>
+                            </button>
+                        </form>
+                     </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </section>
-  </main>
 
-  <!-- Footer -->
-  <footer class="py-12 border-t border-accent/30">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <a href="#" class="text-xl font-semibold mb-4 md:mb-0" style="font-size: 24px;">山川不念旧</a>
-        <p class="text-sm text-primary/70 text-center md:text-right">
-          © 2025 Zhang Nianchuan. All rights reserved.
-        </p>
-      </div>
-    </div>
-  </footer>
+    <!-- Footer (Immersive) -->
+    <footer class="py-16 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+                <!-- Brand Col -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-2">
+                    <a href="#" class="text-2xl font-extrabold tracking-tight font-art text-slate-900 dark:text-white block mb-6">
+                        ZhangNianchuan
+                    </a>
+                    <p class="text-slate-500 dark:text-slate-500 text-sm leading-relaxed mb-6">
+                        Architecting robust systems and digital experiences. Focused on high-performance C++ backends and clean, modern frontends.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="https://github.com/shanchuann" target="_blank" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa fa-github"></i></a>
+                        <a href="https://shanchuann.cn" target="_blank" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa fa-globe"></i></a>
+                        <a href="mailto:1537521192@qq.com" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa fa-envelope"></i></a>
+                    </div>
+                </div>
 
-  <script>
-    // Navbar scroll effect
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) {
-        navbar.classList.add('bg-white', 'shadow-md');
-      } else {
-        navbar.classList.remove('bg-white', 'shadow-md');
-      }
-    });
+                <!-- Links Col 1 -->
+                <div>
+                    <h4 class="text-slate-900 dark:text-white font-bold mb-6">Navigation</h4>
+                    <ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+                        <li><a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a></li>
+                        <li><a href="#projects" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Projects</a></li>
+                        <li><a href="#about" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About Me</a></li>
+                        <li><a href="#skills" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Skills & Tech</a></li>
+                    </ul>
+                </div>
 
-    // Mobile menu toggle
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    menuToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-      menuToggle.innerHTML = mobileMenu.classList.contains('hidden') 
-        ? '<i class="fa fa-bars"></i>' 
-        : '<i class="fa fa-times"></i>';
-    });
+                <!-- Links Col 2 -->
+                <div>
+                    <h4 class="text-slate-900 dark:text-white font-bold mb-6">Resources</h4>
+                    <ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+                        <li><a href="https://shanchuann.cn" target="_blank" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Tech Blog</a></li>
+                        <li><a href="https://github.com/shanchuann" target="_blank" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">GitHub Repo</a></li>
+                        <li><a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Resume</a></li>
+                    </ul>
+                </div>
 
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          window.scrollTo({
-            top: target.offsetTop - 80,
-            behavior: 'smooth'
-          });
-          
-          // Close mobile menu if open
-          if (!mobileMenu.classList.contains('hidden')) {
-            mobileMenu.classList.add('hidden');
-            menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
-          }
+                <!-- Contact Col -->
+                <div>
+                    <h4 class="text-slate-900 dark:text-white font-bold mb-6">Status</h4>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span class="text-slate-500 dark:text-slate-400 text-sm">Open to Work</span>
+                    </div>
+                    <p class="text-slate-500 dark:text-slate-500 text-sm">
+                        Currently exploring Artificial Intelligence and developing applications with LangChain.
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight font-heading">山川不念旧</p>
+                <p class="text-xs text-slate-500 dark:text-slate-600">
+                    &copy; 2025 Zhang Nianchuan. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Theme Toggle Logic ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const mobileThemeToggleBtn = document.getElementById('mobile-theme-toggle');
+        const iconSun = document.getElementById('icon-sun');
+        const iconMoon = document.getElementById('icon-moon');
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            updateIcon(true);
+        } else {
+            document.documentElement.classList.remove('dark');
+            updateIcon(false);
         }
-      });
-    });
 
-    // Reveal sections on scroll
-    const sections = document.querySelectorAll('.section-hidden');
-    
-    const revealSection = function() {
-      const windowHeight = window.innerHeight;
-      const revealPoint = 150; // Distance from bottom of viewport
-      
-      sections.forEach(section => {
-        const sectionTop = section.getBoundingClientRect().top;
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                updateIcon(false);
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                updateIcon(true);
+            }
+        }
+
+        function updateIcon(isDark) {
+            if (isDark) {
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+            } else {
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        mobileThemeToggleBtn.addEventListener('click', toggleTheme);
+
+        // --- Typewriter Effect ---
+        const texts = ["C++ Developer", "System Architect", "Network Engineer"];
+        let count = 0;
+        let index = 0;
+        let currentText = "";
+        let letter = "";
         
-        if (sectionTop < windowHeight - revealPoint) {
-          section.classList.add('section-visible');
-        }
-      });
-    };
-    
-    window.addEventListener('scroll', revealSection);
-    revealSection(); // Check on page load
+        (function type() {
+            if (count === texts.length) {
+                count = 0;
+            }
+            currentText = texts[count];
+            letter = currentText.slice(0, ++index);
+            
+            document.getElementById("typewriter").textContent = letter;
+            
+            if (letter.length === currentText.length) {
+                setTimeout(() => {
+                    count++;
+                    index = 0;
+                    type();
+                }, 2000);
+            } else {
+                setTimeout(type, 150); 
+            }
+        })();
 
-    // Contact form submission with Formspree
-    const contactForm = document.getElementById('contact-form');
-    contactForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Get form values
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const message = document.getElementById('message').value;
-      
-      // Validate form
-      if (!name || !email || !message) {
-        alert('Please fill in all fields');
-        return;
-      }
-      
-      // Get submit button and change text
-      const submitButton = contactForm.querySelector('button[type="submit"]');
-      const originalText = submitButton.textContent;
-      submitButton.disabled = true;
-      submitButton.textContent = 'Sending...';
-      
-      try {
-        // Submit form data to Formspree
-        const response = await fetch(contactForm.action, {
-          method: contactForm.method,
-          body: new FormData(contactForm),
-          headers: {
-            'Accept': 'application/json'
-          }
+        // --- Intersection Observer ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    if(entry.target.querySelector('.skill-progress')) {
+                        const bars = entry.target.querySelectorAll('.skill-progress');
+                        bars.forEach(bar => {
+                            bar.style.width = bar.getAttribute('data-width');
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- Tilt Effect ---
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -5;
+                const rotateY = ((x - centerX) / centerX) * 5;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        });
+
+        // --- Mouse Follower ---
+        const cursorGlow = document.getElementById('cursor-glow');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            const dx = mouseX - cursorX;
+            const dy = mouseY - cursorY;
+            cursorX += dx * 0.1;
+            cursorY += dy * 0.1;
+            cursorGlow.style.left = cursorX + 'px';
+            cursorGlow.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // --- Mobile Menu ---
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = menuBtn.querySelector('i');
+            if(mobileMenu.classList.contains('hidden')){
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            } else {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            }
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                menuBtn.querySelector('i').classList.remove('fa-times');
+                menuBtn.querySelector('i').classList.add('fa-bars');
+            });
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        if (response.ok) {
-          // Show success message
-          alert('Thank you for your message! I will get back to you soon.');
-          contactForm.reset();
-        } else {
-          // Get error details
-          let errorDetails = await response.text();
-          console.log('Error response:', errorDetails);
-          
-          try {
-            const error = JSON.parse(errorDetails);
-            throw new Error(error.error || `Form submission failed with status ${response.status}`);
-          } catch (jsonError) {
-            throw new Error(`Form submission failed with status ${response.status}: ${errorDetails}`);
-          }
+        // --- Form Handling ---
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'TRANSMITTING... <i class="fa fa-spinner fa-spin ml-2"></i>';
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: contactForm.method,
+                    body: new FormData(contactForm),
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    alert('Message Transmitted Successfully.');
+                    contactForm.reset();
+                } else {
+                    alert("Transmission Failed.");
+                }
+            } catch (error) {
+                alert("Network Error.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        });
+
+        // --- Profile Image Interactive Effect ---
+        const profileContainer = document.getElementById('profile-container');
+        const profileImage = document.getElementById('profile-image');
+        const profileShine = document.getElementById('profile-shine');
+
+        if (profileContainer && profileImage && profileShine) {
+            profileContainer.addEventListener('mousemove', (e) => {
+                const rect = profileContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                // Calculate rotation (limited to 15 degrees)
+                const rotateX = ((y - centerY) / centerY) * -15;
+                const rotateY = ((x - centerX) / centerX) * 15;
+
+                // Apply transformation
+                profileImage.style.transform = `
+                    perspective(1000px) 
+                    rotateX(${rotateX}deg) 
+                    rotateY(${rotateY}deg) 
+                    scale3d(1.05, 1.05, 1.05)
+                `;
+
+                // Move shine effect
+                profileShine.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.2), transparent 60%)`;
+                profileShine.style.opacity = '1';
+            });
+
+            profileContainer.addEventListener('mouseleave', () => {
+                profileImage.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                profileShine.style.opacity = '0';
+            });
         }
-      } catch (error) {
-        console.error('Form submission error:', error);
-        alert(`Error: ${error.message}\nPlease try again later or contact me directly at 1537521192@qq.com`);
-      } finally {
-        // Reset button
-        submitButton.disabled = false;
-        submitButton.textContent = originalText;
-      }
-    });
-  </script>
-
-
-</body></html>
+    </script>
+</body>
+</html>
