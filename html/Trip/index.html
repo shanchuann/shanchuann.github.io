@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* 全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "PingFang SC", sans-serif;
+}
+/* body {
+  padding-top: 70px; 
+} */
+/* 头部：吸顶 */
+header {
+  position: sticky;
+  top: 0;
+  background-color: #333;
+  color: white;
+  padding: 20px;
+  height: 60px;
+  line-height: 20px; /* 垂直居中 */
+  z-index: 999; /* 确保在最上层 */
+}
+/* 内容区：两列布局 */
+.content {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  gap: 20px;
+  padding: 0 20px;
+}
+.left-column, .right-column {
+  flex: 1; /* 等分宽度 */
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+/* 底部 */
+footer {
+  background-color: #f8f9fa;
+  text-align: center;
+  padding: 20px;
+  margin-top: 30px;
+  color: #666;
+}
+/* 响应式：屏幕<600px时单列 */
+@media (max-width: 600px) {
+  .content {
+    flex-direction: column;
+  }
+  .left-column, .right-column {
+    margin-bottom: 10px;
+  }
+}
+</style>
+</head>
+<body>
+  <!-- 头部 -->
+  <header>这是吸顶头部</header>
+
+  <!-- 内容区 -->
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="left-column">
+      <h2>左列内容</h2>
+      <p>这是响应式布局的左列，屏幕宽度小于600px时会自动变为单列布局。</p>
+    </div>
+    <div class="right-column">
+      <h2>右列内容</h2>
+      <p>这是响应式布局的右列，使用Flex布局实现等分宽度，媒体查询实现自适应。</p>
+    </div>
+  </div>
+
+  <!-- 底部 -->
+  <footer>© 2024 CSS学习笔记 - 响应式页面实战</footer>
+</body>
+</html>
