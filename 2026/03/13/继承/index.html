@@ -1,0 +1,311 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>继承 | 山川不念旧</title><meta name="author" content="张念川"><meta name="copyright" content="张念川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="代码仓库shanchuann&#x2F;CPP-Learninng  在面向对象的三大特性中，封装（Encapsulation）是面向对象程序设计最基本的特性，把数据（属性）和函数（方法，操作）合成一个整体，这在计算机世界中是用类与对象实现的。继承和派生一体两面，**继承（inheritance）**是类型层次结构设计中实现代码复用的重要手段。派生是保持原有类特性的基础上进行扩展，增加新属性和新">
+<meta property="og:type" content="article">
+<meta property="og:title" content="继承">
+<meta property="og:url" content="https://shanchuann.cn/2026/03/13/%E7%BB%A7%E6%89%BF/index.html">
+<meta property="og:site_name" content="山川不念旧">
+<meta property="og:description" content="代码仓库shanchuann&#x2F;CPP-Learninng  在面向对象的三大特性中，封装（Encapsulation）是面向对象程序设计最基本的特性，把数据（属性）和函数（方法，操作）合成一个整体，这在计算机世界中是用类与对象实现的。继承和派生一体两面，**继承（inheritance）**是类型层次结构设计中实现代码复用的重要手段。派生是保持原有类特性的基础上进行扩展，增加新属性和新">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png">
+<meta property="article:published_time" content="2026-03-13T06:13:43.000Z">
+<meta property="article:modified_time" content="2026-03-13T08:09:44.071Z">
+<meta property="article:author" content="张念川">
+<meta property="article:tag" content="C++面向对象">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "继承",
+  "url": "https://shanchuann.cn/2026/03/13/%E7%BB%A7%E6%89%BF/",
+  "image": "https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png",
+  "datePublished": "2026-03-13T06:13:43.000Z",
+  "dateModified": "2026-03-13T08:09:44.071Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "张念川",
+      "url": "https://shanchuann.cn"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2025/09/25/NAM3XhUgxbjpVrJ.png"><link rel="canonical" href="https://shanchuann.cn/2026/03/13/%E7%BB%A7%E6%89%BF/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: {"appId":"L7P2ELNLTD","apiKey":"d6168abb683b7c70b4ef9bbee1fa469a","indexName":"Shanchuan","hitsPerPage":6,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，耗时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '继承',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.0.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background: linear-gradient(46deg,#c4f4fe 0%,#fdefbe 100%);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">55</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" href="/html/Trip/index.html"><i class="fa-fw fas fa-code"></i><span> 携程前端</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">山川不念旧</span></a><a class="nav-page-title" href="/"><span class="site-name">继承</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" href="/html/Trip/index.html"><i class="fa-fw fas fa-code"></i><span> 携程前端</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">继承</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-13T06:13:43.000Z" title="发表于 2026-03-13 14:13:43">2026-03-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-13T08:09:44.071Z" title="更新于 2026-03-13 16:09:44">2026-03-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C-%E8%BF%98%E5%AD%A6%E4%B8%8D%E4%BC%9A%EF%BC%9F/">C++还学不会？</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>代码仓库<a target="_blank" rel="noopener" href="https://github.com/shanchuann/CPP-Learninng">shanchuann&#x2F;CPP-Learninng</a></p>
+</blockquote>
+<p>在面向对象的三大特性中，封装（Encapsulation）是面向对象程序设计最基本的特性，把数据（属性）和函数（方法，操作）合成一个整体，这在计算机世界中是用类与对象实现的。继承和派生一体两面，**继承（inheritance）**是类型层次结构设计中实现代码复用的重要手段。<strong>派生</strong>是保持原有类特性的基础上进行扩展，增加新属性和新方法，从而产生新的类型。在面向对象程序设计中，继承和派生是构造出新类型的过程。呈现类型设计的层次结构，体现了程序设计人员对现实世界由简单到复杂的认识过程。</p>
+<p><strong>多态（Polymorphism）<strong>则是同一个接口（方法）在不同子类对象上会表现出不同的行为。分为</strong>编译时多态</strong>（如函数重载、运算符重载）和<strong>运行时多态</strong>（如通过虚函数实现的动态绑定），让程序更灵活、易于扩展。</p>
+<h2 id="继承的概念与定义"><a href="#继承的概念与定义" class="headerlink" title="继承的概念与定义"></a>继承的概念与定义</h2><p>C++ 通过类派生（class derivation）的机制来支持继承。被继承的类称为基类（base class）或超类（superclass），新产生的类为派生类（derived class）或子类（subclass）。基类和派生类的集合称作类继承层次结构（hierarchy）。</p>
+<blockquote>
+<p>层次概念是计算机的重要概念</p>
+</blockquote>
+<p>由基类派生出，派生类的使用如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> 派生类名 : 访问限定符 基类名</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    成员表<span class="number">1</span>;  <span class="comment">// 派生类新增或替代的私有成员</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    成员表<span class="number">2</span>;  <span class="comment">// 派生类新增或替代的公有成员</span></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    成员表<span class="number">3</span>;  <span class="comment">// 派生类新增或替代的保护成员</span></span><br><span class="line">&#125;; <span class="comment">// 分号不可少</span></span><br></pre></td></tr></table></figure>
+
+<p>在C++的继承机制中，访问限定符扮演着至关重要的角色，它直接决定了基类成员在派生类中的访问权限。常见的访问限定符有<strong>public</strong>、<strong>protected</strong>和<strong>private</strong>三种，不同的选择会塑造出完全不同的继承关系。</p>
+<ul>
+<li>public继承：基类的public成员和protected成员在派生类中会保持原有的访问权限，这意味着基类的public成员在派生类中仍然可以被外部代码直接访问，而protected成员则只能在派生类内部及其子类中被访问。这种方式是最常用的继承模式，因为它既保留了基类的接口特性，又允许派生类在其基础上自由扩展功能，很好地体现了“is-a”的类属关系：如学生类继承自人类，则表示学生是一个人，但不能反过来说人是学生。</li>
+<li>protected继承：基类的public成员和protected成员在派生类中都会被调整为protected成员。此时，这些成员只能在派生类内部及其子类中访问，外部代码无法通过派生类的对象直接接触到它们。这种继承方式适用于希望将基类的接口隐藏起来，仅让派生类家族内部使用的场景，它在一定程度上限制了基类的开放性，但也为后续的扩展提供了更灵活的控制。</li>
+<li>private继承：是最为严格的一种方式，基类的public成员和protected成员在派生类中都会变为private成员。这意味着这些成员只能在当前派生类的内部被访问，就连派生类的子类也无法触及它们。private继承通常用于实现“基于基类实现派生类”的场景，而非为了复用基类的接口，它更像是一种实现细节的复用，而非接口的继承。</li>
+</ul>
+<p>为了更直观地理解这三种继承方式的差异，我们可以通过一个简单的代码示例来展示。假设我们有一个基类Base，其中包含public、protected和private三种不同访问权限的成员：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> public_var;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="type">int</span> protected_var;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> private_var;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>当我们以public方式继承Base时，派生类Derived_Public的成员访问权限会保持原样：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Derived_Public</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line">    <span class="comment">// public_var 仍然是 public 权限</span></span><br><span class="line">    <span class="comment">// protected_var 仍然是 protected 权限</span></span><br><span class="line">    <span class="comment">// private_var 完全不可访问</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>此时，在Derived_Public的外部可以直接访问public_var，protected_var则只能在Derived_Public内部访问，private_var则对派生类完全不可见。如果我们将继承方式改为protected，情况就会发生变化：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Derived_Protected</span> : <span class="keyword">protected</span> Base &#123;</span><br><span class="line">    <span class="comment">// public_var 变为 protected 权限</span></span><br><span class="line">    <span class="comment">// protected_var 仍然是 protected 权限</span></span><br><span class="line">    <span class="comment">// private_var 完全不可访问</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这时，Derived_Protected的外部无法再访问public_var，只有Derived_Protected及其子类才能访问public_var和protected_var。而如果使用private继承，限制会更加严格：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Derived_Private</span> : <span class="keyword">private</span> Base &#123;</span><br><span class="line">    <span class="comment">// public_var 变为 private 权限</span></span><br><span class="line">    <span class="comment">// protected_var 变为 private 权限</span></span><br><span class="line">    <span class="comment">// private_var 完全不可访问</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>此时，只有Derived_Private内部可以访问public_var和protected_var，就连Derived_Private的子类也无法访问这些成员，基类的实现细节被完全封装在当前派生类中。</p>
+<p>派生反映了事物之间的联系，事物的共性与个性之间的联系。派生类与设计独立的若干相关类，后者工作量要明显大于前者。</p>
+<p>派生类的编写可以分为四个步骤：</p>
+<ol>
+<li>吸收基类的成员：不论是数据成员还是函数成员，除了构造与析构函数外全盘接收。</li>
+<li>改造基类成员：声明一个与基类成员同名的新成员，派生类中的新成员就屏蔽了基类同名的成员，也叫同名隐藏或同名覆盖。</li>
+<li>发展新成员：派生类新成员必须与基类成员不同名，它的加入保证派生类在功能上有所发展，独有的新成员才是继承与派生的核心特征。</li>
+<li>重写派生类的构造函数与析构函数。</li>
+</ol>
+<h2 id="同名隐藏"><a href="#同名隐藏" class="headerlink" title="同名隐藏"></a>同名隐藏</h2><p>在继承的过程中，还可能遇到同名隐藏（hidden）的问题。如果派生类中定义了一个与基类同名的成员，无论是变量还是函数，基类的这个成员都会在派生类中被隐藏，使得基类中的函数在派生类中无法被访问。当派生类中有一个成员函数和基类中的同名函数时，派生类中的函数会隐藏基类中的函数，除非使用了作用域运算符 <code>::</code> 或using声明，或者在派生类中使用virtual关键字使其成为虚函数。</p>
+<p>例如，我们可以定义这样一组类：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> var = <span class="number">10</span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;Base 的 show 函数，var = &quot;</span> &lt;&lt; var &lt;&lt; endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> var = <span class="number">20</span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;Derived 的 show 函数，var = &quot;</span> &lt;&lt; var &lt;&lt; endl; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在使用派生类对象时，默认会访问派生类的成员：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Derived d;</span><br><span class="line">    d.<span class="built_in">show</span>(); <span class="comment">// 调用 Derived 的 show</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Derived 的 var = &quot;</span> &lt;&lt; d.var &lt;&lt; endl; <span class="comment">// 访问 Derived 的 var</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 访问基类的成员</span></span><br><span class="line">    d.Base::<span class="built_in">show</span>();</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Base 的 var = &quot;</span> &lt;&lt; d.Base::var &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行这段代码，输出结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Derived 的 show 函数，var = 20</span><br><span class="line">Derived 的 var = 20</span><br><span class="line">Base 的 show 函数，var = 10</span><br><span class="line">Base 的 var = 10</span><br></pre></td></tr></table></figure>
+
+<p>通过这个例子可以看到，使用作用域解析符可以明确地访问基类被隐藏的成员。不过在实际开发中，我们应该尽量避免在派生类中定义与基类同名的成员，除非是有意进行覆盖，比如虚函数的重写，否则容易造成代码的混淆和可读性的下降。</p>
+<p>那什么是同名覆盖呢？覆盖（override）是指派生类中的函数重写了基类中的同名虚函数，使得在使用基类指针或引用调用该函数时，会根据运行时的实际对象来选择调用基类函数还是派生类函数。覆盖只能发生在虚函数之间，而且必须使用virtual关键字进行声明。如果在派生类中重新定义了虚函数而没有使用virtual关键字，则该函数不会被视为虚函数，也不会被认为是基类中同名函数的覆盖。</p>
+<h2 id="构造和析构函数调用顺序"><a href="#构造和析构函数调用顺序" class="headerlink" title="构造和析构函数调用顺序"></a>构造和析构函数调用顺序</h2><p>除了访问权限的控制，继承中另一个需要重点关注的问题是构造函数和析构函数的调用顺序。当创建一个派生类对象时，C++会先调用基类的构造函数来初始化基类部分，然后再调用派生类的构造函数来初始化派生类新增的部分。这种顺序是由C++的对象模型决定的，确保基类部分在派生类部分初始化之前就已经准备完毕。而在销毁对象时，顺序则完全相反，先调用派生类的析构函数清理派生类部分，再调用基类的析构函数清理基类部分，这样可以避免出现资源泄漏或访问无效内存的问题。</p>
+<p>我们可以通过一个简单的代码示例来验证这一顺序：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Base</span>() &#123; cout &lt;&lt; <span class="string">&quot;Base 构造函数&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    ~<span class="built_in">Base</span>() &#123; cout &lt;&lt; <span class="string">&quot;Base 析构函数&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Derived</span>() &#123; cout &lt;&lt; <span class="string">&quot;Derived 构造函数&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    ~<span class="built_in">Derived</span>() &#123; cout &lt;&lt; <span class="string">&quot;Derived 析构函数&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Derived d;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行这段代码，输出结果会清晰地展示构造和析构的顺序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Base 构造函数</span><br><span class="line">Derived 构造函数</span><br><span class="line">Derived 析构函数</span><br><span class="line">Base 析构函数</span><br></pre></td></tr></table></figure>
+
+<p>需要特别注意的是，如果基类的构造函数需要参数，派生类必须在其构造函数的初始化列表中显式调用基类的构造函数，否则编译器会尝试调用基类的默认构造函数。如果基类没有提供默认构造函数，就会导致编译错误。这一点在实际开发中很容易被忽略，因此在设计带有继承关系的类时，需要格外注意构造函数的设计。</p>
+<p>继承的主要目的是实现代码复用和层次结构的设计，但过度使用继承也可能导致代码的耦合度增加，使得类之间的关系变得复杂。因此，在设计类的层次结构时，我们应该遵循“组合优于继承”的原则，优先考虑使用组合来实现代码复用，只有在确实存在明确的“is-a”关系时才使用继承。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://shanchuann.cn">张念川</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://shanchuann.cn/2026/03/13/%E7%BB%A7%E6%89%BF/">https://shanchuann.cn/2026/03/13/%E7%BB%A7%E6%89%BF/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://shanchuann.cn" target="_blank">山川不念旧</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/">C++面向对象</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/03/13/function%E5%92%8Cbind%E7%BB%91%E5%AE%9A%E5%99%A8/" title="std::function与bind绑定器"><img class="cover" src="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">std::function与bind绑定器</div></div><div class="info-2"><div class="info-item-1">在 C++11 中，std::function 和 std::bind 让处理各种可调用对象变得简单多了。以前函数指针、仿函数、成员函数指针一大堆写法，光记语法就够头疼。现在有了这俩工具，写回调、保存函数、延迟执行都顺手不少。 可调用对象什么叫“可调用对象”？ C++ 里，能像函数那样用括号调用的东西都算：普通函数指针、仿函数（重载了 operator() 的类）、能转成函数指针的对象、成员函数指针、甚至成员变量指针。 123void func(int x) &#123;    cout &lt;&lt; &quot;func(int x): &quot; &lt;&lt; x &lt;&lt; endl;&#125;  这段代码定义了一个最基础的普通函数 func，它接受一个 int 类型的参数并打印输出，是可调用对象中最简单的形式，后续会通过函数指针的方式来调用它。 12345struct Foo&#123;    void operator()(int x)&#123;        cout &lt;&lt; &quot;Foo::operator(int x): &qu...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/10/21/operator/" title="operator"><img class="cover" src="https://s2.loli.net/2025/10/25/qrsz8JmlHfKQNxt.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-21</div><div class="info-item-2">operator</div></div><div class="info-2"><div class="info-item-1"> 代码仓库shanchuann&#x2F;CPP-Learninng  在C++中，operator关键字用于定义和重载运算符，使得自定义类的对象可以使用标准运算符进行操作，从而提高代码的可读性和可维护性。 运算符重载的基本概念 作用：operator主要有两个作用，一是操作符的重载，二是操作符的转换。操作符重载是对C++进行扩展，让自定义类的对象能够像内置类型一样使用运算符。 可重载与不可重载的操作符：可重载的操作符包括+、-、*、/、%、^、&amp;、|、~、!、=、&lt;、&gt;等；不可重载的操作符有.、.*、::、?:等。  运算符重载的语法运算符重载通过定义一个特殊的成员函数或友元函数来实现，其基本语法为：返回类型 operator 运算符 (参数列表)。例如，重载+运算符： 123456789class Complex &#123;public:    double real, imag;    Complex(double r, double i) : real(r), imag(i) &#123;&#125;    // 重载 + 运算符    Comple...</div></div></div></a><a class="pagination-related" href="/2025/11/11/%E5%8F%8B%E5%85%83/" title="友元"><img class="cover" src="https://s2.loli.net/2025/10/25/qrsz8JmlHfKQNxt.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-11</div><div class="info-item-2">友元</div></div><div class="info-2"><div class="info-item-1"> 代码仓库shanchuann&#x2F;CPP-Learninng  基本概念在C++面向对象编程中，封装是核心特性之一。类通过private和protected访问控制符，将内部数据和实现细节隐藏起来，仅暴露public接口与外部交互，以此保证数据安全和代码的可维护性。但在某些场景下，这种严格的封装可能带来不便——比如两个紧密协作的类需要互相访问对方的内部状态，或者某个外部函数需要直接操作类的私有成员以实现特定功能（如运算符重载）。此时，友元机制便提供了一种灵活的解决方案，它允许特定的外部实体临时获得访问类私有成员的权限，成为类的“特殊访客”。   友元可以是函数，也可以是类，甚至可以是另一个类的某个成员函数。它们的共同特点是，一旦被类声明为友元，就能够绕过访问控制符的限制，直接访问类中的private和protected成员。这种机制并非破坏封装的设计，而是在保证整体封装性的前提下，为特殊场景提供的灵活接口。   外部函数的特殊访问权普通函数可以被声明为友元函数。要将一个函数声明为类的友元，只需在类的内部（通常是public区域，也可在private或protected区域...</div></div></div></a><a class="pagination-related" href="/2025/10/17/%E5%B0%81%E8%A3%85/" title="封装"><img class="cover" src="https://s2.loli.net/2025/10/25/qrsz8JmlHfKQNxt.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-17</div><div class="info-item-2">封装</div></div><div class="info-2"><div class="info-item-1"> 代码仓库shanchuann&#x2F;CPP-Learninng  封装的核心概念封装是面向对象编程（OOP）的三大特性之一（另外两个是继承和多态），其核心思想是将数据（属性）和操作数据的方法（行为）绑定为一个独立的单元（类），并通过访问控制隐藏内部实现细节，仅对外提供可控的接口。这种设计模式确保了数据的安全性、代码的可维护性和可扩展性。 封装的两层含义：  数据与行为的结合将描述对象状态的成员变量（如圆的半径）和操作这些变量的成员函数（如计算面积）组合在同一个类中，形成逻辑上的整体。例如： 1234567class Circle &#123;private:    double radius; // 数据成员public:    void setRadius(double r) &#123; radius = r; &#125; // 行为成员    double getArea() &#123; return 3.14 * radius * radius; &#125;&#125;;  访问控制与信息隐藏通过访问修饰符（public、protected、private）控...</div></div></div></a><a class="pagination-related" href="/2025/10/29/%E6%8B%B7%E8%B4%9D%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/" title="拷贝构造函数"><img class="cover" src="https://s2.loli.net/2025/10/25/qrsz8JmlHfKQNxt.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-29</div><div class="info-item-2">拷贝构造函数</div></div><div class="info-2"><div class="info-item-1"> 代码仓库shanchuann&#x2F;CPP-Learninng  在C++面向对象编程中，拷贝构造函数是一种特殊的构造函数，用于用已存在的对象创建新对象。它是对象生命周期管理的核心机制之一，理解拷贝构造函数的原理和使用场景，对编写安全、高效的C++代码至关重要。 123456789101112131415class Int &#123;private:	int value;public:	Int() :value(0) &#123; std::cout &lt;&lt; &quot;Default create Int&quot; &lt;&lt; &quot;at&quot; &lt;&lt; this &lt;&lt; std::endl; &#125;	Int(int v) :value(v) &#123; std::cout &lt;&lt; &quot;Create Int with value &quot; &lt;&lt; value &lt;&lt; &quot; at &quot; &lt;&lt; this &lt;&lt; std::endl; &#1...</div></div></div></a><a class="pagination-related" href="/2025/10/20/%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84/" title="构造和析构"><img class="cover" src="https://s2.loli.net/2025/10/25/qrsz8JmlHfKQNxt.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-20</div><div class="info-item-2">构造和析构</div></div><div class="info-2"><div class="info-item-1"> 代码仓库shanchuann&#x2F;CPP-Learninng  在C++中，构造函数和析构函数是类的特殊成员函数，分别用于对象的初始化和资源清理，它们由编译器自动调用，是面向对象编程中管理对象生命周期的核心机制。 this指针编译器对类型编译的过程中分为三个部分  **类型解析：**编译器首先对代码中的类型声明进行解析，识别类型的定义、成员结构（如类的成员变量和成员函数）、继承关系等信息。 函数识别：在语义分析阶段，编译器基于类型解析的结果，对程序中的函数返回类型、函数名、参数类型进行识别。 **成员方法改写：**无论成员方法是公有私有，他会对非静态成员方法加入常性this指针。  12345678910111213141516171819202122232425262728293031class Pointer &#123;private:    int row, col;public:    void SetRow(int r) &#123;        row = r;    &#125;    /*	void SetRow(Pointer *const this...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">张念川</div><div class="author-info-description">玉袍长剑堪风流，山川不念旧</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">55</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/shanchuann"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">由于极为严重的失误，个人网站代码包括内容完全丢失，正在重建中。另外《C语言圣经》编写工作正在稳步进行。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%A7%E6%89%BF%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E5%AE%9A%E4%B9%89"><span class="toc-number">1.</span> <span class="toc-text">继承的概念与定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E5%90%8D%E9%9A%90%E8%97%8F"><span class="toc-number">2.</span> <span class="toc-text">同名隐藏</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E9%A1%BA%E5%BA%8F"><span class="toc-number">3.</span> <span class="toc-text">构造和析构函数调用顺序</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/03/13/%E7%BB%A7%E6%89%BF/" title="继承"><img src="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="继承"/></a><div class="content"><a class="title" href="/2026/03/13/%E7%BB%A7%E6%89%BF/" title="继承">继承</a><time datetime="2026-03-13T06:13:43.000Z" title="发表于 2026-03-13 14:13:43">2026-03-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/03/13/function%E5%92%8Cbind%E7%BB%91%E5%AE%9A%E5%99%A8/" title="std::function与bind绑定器"><img src="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="std::function与bind绑定器"/></a><div class="content"><a class="title" href="/2026/03/13/function%E5%92%8Cbind%E7%BB%91%E5%AE%9A%E5%99%A8/" title="std::function与bind绑定器">std::function与bind绑定器</a><time datetime="2026-03-13T06:13:30.000Z" title="发表于 2026-03-13 14:13:30">2026-03-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/03/04/EffectiveModernCPP1/" title="第一章 类型推导"><img src="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="第一章 类型推导"/></a><div class="content"><a class="title" href="/2026/03/04/EffectiveModernCPP1/" title="第一章 类型推导">第一章 类型推导</a><time datetime="2026-03-04T06:17:20.000Z" title="发表于 2026-03-04 14:17:20">2026-03-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/10/%E6%90%BA%E7%A8%8BNode.js%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="携程前端训练营Node.js入门与实践"><img src="https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="携程前端训练营Node.js入门与实践"/></a><div class="content"><a class="title" href="/2026/02/10/%E6%90%BA%E7%A8%8BNode.js%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="携程前端训练营Node.js入门与实践">携程前端训练营Node.js入门与实践</a><time datetime="2026-02-10T06:25:26.000Z" title="发表于 2026-02-10 14:25:26">2026-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/09/%E6%90%BA%E7%A8%8B%E8%B7%A8%E7%AB%AF%E5%BC%80%E5%8F%91/" title="携程前端训练营跨端开发"><img src="https://s2.loli.net/2026/01/30/lV2QUNMyAD87C5E.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="携程前端训练营跨端开发"/></a><div class="content"><a class="title" href="/2026/02/09/%E6%90%BA%E7%A8%8B%E8%B7%A8%E7%AB%AF%E5%BC%80%E5%8F%91/" title="携程前端训练营跨端开发">携程前端训练营跨端开发</a><time datetime="2026-02-09T09:34:29.000Z" title="发表于 2026-02-09 17:34:29">2026-02-09</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By 张念川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.0.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div><div class="footer_custom_text">满堂花醉三千客，一剑霜寒十四州</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="聊天" style="display:none"><i class="fas fa-message"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '1kGP51o4WjaiJX72Yfdy5T6k-gzGzoHsz',
+      appKey: 'OeiTKeZqnH8VrxSF1s69kyOf',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="255,0178,102" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script>(() => {
+  window.$crisp = ['safe', true]
+  window.CRISP_WEBSITE_ID = "2f8661da-b522-4dfb-a0f3-ce177151f169"
+
+  btf.getScript('https://client.crisp.chat/l.js').then(() => {
+    const isChatBtn = true
+    const isChatHideShow = false
+
+    if (isChatBtn) {
+      const open = () => {
+        $crisp.push(["do", "chat:show"])
+        $crisp.push(["do", "chat:open"])
+      }
+
+      const close = () => $crisp.push(["do", "chat:hide"])
+
+      close()
+
+      $crisp.push(["on", "chat:closed", close])
+
+      window.chatBtnFn = () => $crisp.is("chat:visible") ? close() : open()
+
+      document.getElementById('chat-btn').style.display = 'block'
+    } else if (isChatHideShow) {
+      window.chatBtn = {
+        hide: () => $crisp.push(["do", "chat:hide"]),
+        show: () => $crisp.push(["do", "chat:show"])
+      }
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div id="algolia-search-input"><div class="ais-SearchBox"><form class="ais-SearchBox-form" action="" role="search" novalidate=""><input class="ais-SearchBox-input" type="search" placeholder="搜索文章" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="512" aria-label="Search"/><button class="ais-SearchBox-submit" type="submit" title="Submit the search query" style="display:none;"><svg class="ais-SearchBox-submitIcon" width="10" height="10" viewBox="0 0 40 40" aria-hidden="true"><path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"></path></svg></button></form></div><hr/><div id="algolia-search-results"><div id="algolia-hits"><div id="algolia-hits-empty" style="display:none;"></div><div class="ais-Hits" style="display:none;"><ol class="ais-Hits-list"></ol></div></div><div class="ais-Pagination" id="algolia-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="algolia-info"><span class="ais-Stats-text"></span><a class="algolia-poweredBy" href="https://www.algolia.com/?utm_source=algoliasearch.js&amp;utm_medium=website&amp;utm_content=localhost&amp;utm_campaign=poweredby" target="_blank" aria-label="Search by Algolia" rel="noopener noreferrer"><svg class="ais-PoweredBy-logo" height="1.2em" viewBox="0 0 572 64" style="width: auto;"><path fill="#36395A" d="M16 48.3c-3.4 0-6.3-.6-8.7-1.7A12.4 12.4 0 0 1 1.9 42C.6 40 0 38 0 35.4h6.5a6.7 6.7 0 0 0 3.9 6c1.4.7 3.3 1.1 5.6 1.1 2.2 0 4-.3 5.4-1a7 7 0 0 0 3-2.4 6 6 0 0 0 1-3.4c0-1.5-.6-2.8-1.9-3.7-1.3-1-3.3-1.6-5.9-1.8l-4-.4c-3.7-.3-6.6-1.4-8.8-3.4a10 10 0 0 1-3.3-7.9c0-2.4.6-4.6 1.8-6.4a12 12 0 0 1 5-4.3c2.2-1 4.7-1.6 7.5-1.6s5.5.5 7.6 1.6a12 12 0 0 1 5 4.4c1.2 1.8 1.8 4 1.8 6.7h-6.5a6.4 6.4 0 0 0-3.5-5.9c-1-.6-2.6-1-4.4-1s-3.2.3-4.4 1c-1.1.6-2 1.4-2.6 2.4-.5 1-.8 2-.8 3.1a5 5 0 0 0 1.5 3.6c1 1 2.6 1.7 4.7 1.9l4 .3c2.8.2 5.2.8 7.2 1.8 2.1 1 3.7 2.2 4.9 3.8a9.7 9.7 0 0 1 1.7 5.8c0 2.5-.7 4.7-2 6.6a13 13 0 0 1-5.6 4.4c-2.4 1-5.2 1.6-8.4 1.6Zm35.6 0c-2.6 0-4.8-.4-6.7-1.3a13 13 0 0 1-4.7-3.5 17.1 17.1 0 0 1-3.6-10.4v-1c0-2 .3-3.8 1-5.6a13 13 0 0 1 7.3-8.3 15 15 0 0 1 6.3-1.4A13.2 13.2 0 0 1 64 24.3c1 2.2 1.6 4.6 1.6 7.2V34H39.4v-4.3h21.8l-1.8 2.2c0-2-.3-3.7-.9-5.1a7.3 7.3 0 0 0-2.7-3.4c-1.2-.7-2.7-1.1-4.6-1.1s-3.4.4-4.7 1.3a8 8 0 0 0-2.9 3.6c-.6 1.5-.9 3.3-.9 5.4 0 2 .3 3.7 1 5.3a7.9 7.9 0 0 0 2.8 3.7c1.3.8 3 1.3 5 1.3s3.8-.5 5.1-1.3c1.3-1 2.1-2 2.4-3.2h6a11.8 11.8 0 0 1-7 8.7 16 16 0 0 1-6.4 1.2ZM80 48c-2.2 0-4-.3-5.7-1a8.4 8.4 0 0 1-3.7-3.3 9.7 9.7 0 0 1-1.3-5.2c0-2 .5-3.8 1.5-5.2a9 9 0 0 1 4.3-3.1c1.8-.7 4-1 6.7-1H89v4.1h-7.5c-2 0-3.4.5-4.4 1.4-1 1-1.6 2.1-1.6 3.6s.5 2.7 1.6 3.6c1 1 2.5 1.4 4.4 1.4 1.1 0 2.2-.2 3.2-.7 1-.4 1.9-1 2.6-2 .6-1 1-2.4 1-4.2l1.7 2.1c-.2 2-.7 3.8-1.5 5.2a9 9 0 0 1-3.4 3.3 12 12 0 0 1-5.3 1Zm9.5-.7v-8.8h-1v-10c0-1.8-.5-3.2-1.4-4.1-1-1-2.4-1.4-4.2-1.4a142.9 142.9 0 0 0-10.2.4v-5.6a74.8 74.8 0 0 1 8.6-.4c3 0 5.5.4 7.5 1.2s3.4 2 4.4 3.6c1 1.7 1.4 4 1.4 6.7v18.4h-5Zm12.9 0V17.8h5v12.3h-.2c0-4.2 1-7.4 2.8-9.5a11 11 0 0 1 8.3-3.1h1v5.6h-2a9 9 0 0 0-6.3 2.2c-1.5 1.5-2.2 3.6-2.2 6.4v15.6h-6.4Zm34.4 1a15 15 0 0 1-6.6-1.3c-1.9-.9-3.4-2-4.7-3.5a15.5 15.5 0 0 1-2.7-5c-.6-1.7-1-3.6-1-5.4v-1c0-2 .4-3.8 1-5.6a15 15 0 0 1 2.8-4.9c1.3-1.5 2.8-2.6 4.6-3.5a16.4 16.4 0 0 1 13.3.2c2 1 3.5 2.3 4.8 4a12 12 0 0 1 2 6H144c-.2-1.6-1-3-2.2-4.1a7.5 7.5 0 0 0-5.2-1.7 8 8 0 0 0-4.7 1.3 8 8 0 0 0-2.8 3.6 13.8 13.8 0 0 0 0 10.3c.6 1.5 1.5 2.7 2.8 3.6s2.8 1.3 4.8 1.3c1.5 0 2.7-.2 3.8-.8a7 7 0 0 0 2.6-2c.7-1 1-2 1.2-3.2h6.2a11 11 0 0 1-2 6.2 15.1 15.1 0 0 1-11.8 5.5Zm19.7-1v-40h6.4V31h-1.3c0-3 .4-5.5 1.1-7.6a9.7 9.7 0 0 1 3.5-4.8A9.9 9.9 0 0 1 172 17h.3c3.5 0 6 1.1 7.9 3.5 1.7 2.3 2.6 5.7 2.6 10v16.8h-6.4V29.6c0-2.1-.6-3.8-1.8-5a6.4 6.4 0 0 0-4.8-1.8c-2 0-3.7.7-5 2a7.8 7.8 0 0 0-1.9 5.5v17h-6.4Zm63.8 1a12.2 12.2 0 0 1-10.9-6.2 19 19 0 0 1-1.8-7.3h1.4v12.5h-5.1v-40h6.4v19.8l-2 3.5c.2-3.1.8-5.7 1.9-7.7a11 11 0 0 1 4.4-4.5c1.8-1 3.9-1.5 6.1-1.5a13.4 13.4 0 0 1 12.8 9.1c.7 1.9 1 3.8 1 6v1c0 2.2-.3 4.1-1 6a13.6 13.6 0 0 1-13.2 9.4Zm-1.2-5.5a8.4 8.4 0 0 0 7.9-5c.7-1.5 1.1-3.3 1.1-5.3s-.4-3.8-1.1-5.3a8.7 8.7 0 0 0-3.2-3.6 9.6 9.6 0 0 0-9.2-.2 8.5 8.5 0 0 0-3.3 3.2c-.8 1.4-1.3 3-1.3 5v2.3a9 9 0 0 0 1.3 4.8 9 9 0 0 0 3.4 3c1.4.7 2.8 1 4.4 1Zm27.3 3.9-10-28.9h6.5l9.5 28.9h-6Zm-7.5 12.2v-5.7h4.9c1 0 2-.1 2.9-.4a4 4 0 0 0 2-1.4c.4-.7.9-1.6 1.2-2.7l8.6-30.9h6.2l-9.3 32.4a14 14 0 0 1-2.5 5 8.9 8.9 0 0 1-4 2.8c-1.5.6-3.4.9-5.6.9h-4.4Zm9-12.2v-5.2h6.4v5.2H248Z"></path><path fill="#003DFF" d="M534.4 9.1H528a.8.8 0 0 1-.7-.7V1.8c0-.4.2-.7.6-.8l6.5-1c.4 0 .8.2.9.6v7.8c0 .4-.4.7-.8.7zM428 35.2V.8c0-.5-.3-.8-.7-.8h-.2l-6.4 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.5 0 .8-.4.8-.8V43c0-.4-.3-.7-.6-.8-4.5-.5-4.5-6-4.5-7zm106.5-21.8H528c-.4 0-.7.4-.7.8v34c0 .4.3.8.7.8h6.5c.4 0 .8-.4.8-.8v-34c0-.5-.4-.8-.8-.8zm-17.7 21.8V.8c0-.5-.3-.8-.8-.8l-6.5 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.4 0 .8-.4.8-.8V43c0-.4-.3-.7-.7-.8-4.4-.5-4.4-6-4.4-7zm-22.2-20.6a16.5 16.5 0 0 1 8.6 9.3c.8 2.2 1.3 4.8 1.3 7.5a19.4 19.4 0 0 1-4.6 12.6 14.8 14.8 0 0 1-5.2 3.6c-2 .9-5.2 1.4-6.8 1.4a21 21 0 0 1-6.7-1.4 15.4 15.4 0 0 1-8.6-9.3 21.3 21.3 0 0 1 0-14.4 15.2 15.2 0 0 1 8.6-9.3c2-.8 4.3-1.2 6.7-1.2s4.6.4 6.7 1.2zm-6.7 27.6c2.7 0 4.7-1 6.2-3s2.2-4.3 2.2-7.8-.7-6.3-2.2-8.3-3.5-3-6.2-3-4.7 1-6.1 3c-1.5 2-2.2 4.8-2.2 8.3s.7 5.8 2.2 7.8 3.5 3 6.2 3zm-88.8-28.8c-6.2 0-11.7 3.3-14.8 8.2a18.6 18.6 0 0 0 4.8 25.2c1.8 1.2 4 1.8 6.2 1.7s.1 0 .1 0h.9c4.2-.7 8-4 9.1-8.1v7.4c0 .4.3.7.8.7h6.4a.7.7 0 0 0 .7-.7V14.2c0-.5-.3-.8-.7-.8h-13.5zm6.3 26.5a9.8 9.8 0 0 1-5.7 2h-.5a10 10 0 0 1-9.2-14c1.4-3.7 5-6.3 9-6.3h6.4v18.3zm152.3-26.5h13.5c.5 0 .8.3.8.7v33.7c0 .4-.3.7-.8.7h-6.4a.7.7 0 0 1-.8-.7v-7.4c-1.2 4-4.8 7.4-9 8h-.1a4.2 4.2 0 0 1-.5.1h-.9a10.3 10.3 0 0 1-7-2.6c-4-3.3-6.5-8.4-6.5-14.2 0-3.7 1-7.2 3-10 3-5 8.5-8.3 14.7-8.3zm.6 28.4c2.2-.1 4.2-.6 5.7-2V21.7h-6.3a9.8 9.8 0 0 0-9 6.4 10.2 10.2 0 0 0 9.1 13.9h.5zM452.8 13.4c-6.2 0-11.7 3.3-14.8 8.2a18.5 18.5 0 0 0 3.6 24.3 10.4 10.4 0 0 0 13 .6c2.2-1.5 3.8-3.7 4.5-6.1v7.8c0 2.8-.8 5-2.2 6.3-1.5 1.5-4 2.2-7.5 2.2l-6-.3c-.3 0-.7.2-.8.5l-1.6 5.5c-.1.4.1.8.5 1h.1c2.8.4 5.5.6 7 .6 6.3 0 11-1.4 14-4.1 2.7-2.5 4.2-6.3 4.5-11.4V14.2c0-.5-.4-.8-.8-.8h-13.5zm6.3 8.2v18.3a9.6 9.6 0 0 1-5.6 2h-1a10.3 10.3 0 0 1-8.8-14c1.4-3.7 5-6.3 9-6.3h6.4zM291 31.5A32 32 0 0 1 322.8 0h30.8c.6 0 1.2.5 1.2 1.2v61.5c0 1.1-1.3 1.7-2.2 1l-19.2-17a18 18 0 0 1-11 3.4 18.1 18.1 0 1 1 18.2-14.8c-.1.4-.5.7-.9.6-.1 0-.3 0-.4-.2l-3.8-3.4c-.4-.3-.6-.8-.7-1.4a12 12 0 1 0-2.4 8.3c.4-.4 1-.5 1.6-.2l14.7 13.1v-46H323a26 26 0 1 0 10 49.7c.8-.4 1.6-.2 2.3.3l3 2.7c.3.2.3.7 0 1l-.2.2a32 32 0 0 1-47.2-28.6z"></path></svg></a></div></div></div></div><div id="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/algoliasearch/dist/lite/builds/browser.umd.min.js"></script><script src="/js/search/algolia.js"></script></div></div></body></html>
