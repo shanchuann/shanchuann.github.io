@@ -302,6 +302,8 @@
 </head>
 <body class="antialiased selection:bg-mint-600 selection:text-white overflow-hidden">
 
+    <div id="main-content" style="opacity: 0; pointer-events: none; transition: opacity 1s ease;">
+
     <!-- Interactive Flowing Morandi Gradient Background -->
     <div id="ambient-fluid-bg">
         <!-- Add a subtle grid overlay for texture -->
@@ -454,7 +456,7 @@
     </script>
 
     <!-- Splash Screen WebGL Container -->
-    <div id="webgl-canvas-container" class="fixed inset-0 z-[100] pointer-events-none"></div>
+    <div id="webgl-canvas-container" class="fixed inset-0 z-[100] pointer-events-none" style="background-image: url('https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; transition: background-image 0.5s ease;"></div>
     <div id="emerging-text" class="fixed inset-0 flex items-center justify-center pointer-events-none z-[90]">
         <h1 class="text-white text-6xl md:text-8xl font-bold font-mono tracking-widest opacity-0">SYSTEM INITIALIZED</h1>
     </div>
@@ -1637,6 +1639,21 @@
 
                 const mesh = new THREE.Mesh(geometry, material);
                 scene.add(mesh);
+
+                // Ensure the canvas background turns transparent once the texture is rendered
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        container.style.backgroundImage = 'none';
+                        container.style.backgroundColor = 'transparent';
+                        
+                        // Reveal the main content now that the splash screen is fully covering the viewport
+                        const mainContent = document.getElementById("main-content");
+                        if (mainContent) {
+                            mainContent.style.opacity = '1';
+                            mainContent.style.pointerEvents = 'auto';
+                        }
+                    });
+                });
 
                 // 4. Fake Loader
                 let isLoaded = false;
