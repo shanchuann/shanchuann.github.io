@@ -401,8 +401,7 @@
         .dark .blob-3 { background: radial-gradient(circle, #e4ccc1, transparent 70%); opacity: 0.15; mix-blend-mode: normal; }
         .dark .blob-4 { background: radial-gradient(circle, #c3d2d3, transparent 70%); opacity: 0.15; }
         .dark .interactive-blob { 
-            background: radial-gradient(circle, rgba(0, 255, 204, 0.4) 0%, transparent 60%); 
-            mix-blend-mode: screen; 
+            display: none;
         }
 
         @keyframes float-blob {
@@ -1477,18 +1476,20 @@
                         let leftWidth = holeStart - MARGIN;
                         if (leftWidth > 30) {
                             const lineLeft = layoutNextLine(prepared, cursor, leftWidth);
-                            if (!lineLeft) break;
-                            ctx.fillText(lineLeft.text, MARGIN, y);
-                            cursor = lineLeft.end;
+                            if (lineLeft) {
+                                ctx.fillText(lineLeft.text, MARGIN, y);
+                                cursor = lineLeft.end;
+                            }
                         }
                         
                         // 计算右半边可用宽度
                         let rightWidth = width - holeEnd - MARGIN;
                         if (rightWidth > 30) {
                             const lineRight = layoutNextLine(prepared, cursor, rightWidth);
-                            if (!lineRight) break;
-                            ctx.fillText(lineRight.text, holeEnd, y);
-                            cursor = lineRight.end;
+                            if (lineRight) {
+                                ctx.fillText(lineRight.text, holeEnd, y);
+                                cursor = lineRight.end;
+                            }
                         }
 
                     } else {
