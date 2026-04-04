@@ -243,21 +243,17 @@
             width: 300px;
             height: 300px;
             border: 2px solid rgba(0, 255, 204, 0.4);
-            background: rgba(0, 255, 204, 0.05); /* So slight tint avoids rendering tearing */
+            background: radial-gradient(circle, rgba(0, 255, 204, 0) 30%, rgba(0, 255, 204, 0.05) 85%); /* Changed to radial gradient to avoid rendering tearing on iGPUs */
             border-radius: 50%;
             pointer-events: none;
             transform: translate(-50%, -50%);
             z-index: 9999;
-            /* Frosted glass lens effect using blur */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            /* Mask to keep center clear and edge blurred */
-            -webkit-mask-image: radial-gradient(circle, transparent 30%, black 85%);
-            mask-image: radial-gradient(circle, transparent 30%, black 85%);
+            /* Removed backdrop-filter to prevent severe rendering bugs (half text clipping) on laptop integrated GPUs */
             box-shadow: 
                 inset 0 0 20px rgba(0, 255, 204, 0.2), 
                 0 0 25px rgba(0, 255, 204, 0.2);
             transition: transform 0.05s ease-out, width 0.3s ease, height 0.3s ease;
+            will-change: transform;
         }
 
         .dark #cursor-glow {
@@ -542,7 +538,7 @@
                 Available for new projects
             </div>
 
-            <h1 class="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-8 font-heading text-slate-900 dark:text-white fade-up transition-colors duration-300">
+            <h1 class="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tight md:tracking-tighter mb-8 font-heading text-slate-900 dark:text-white fade-up transition-colors duration-300">
                 <span id="hero-title-1" class="border-r-4 border-mint-500 pr-2 animate-pulse">SYSTEM</span><br>
                 <span id="hero-title-2" class="text-transparent bg-clip-text bg-gradient-to-r from-mint-400 to-[#008060]" style="-webkit-text-stroke: 2px currentColor; line-height: 1.1;">ARCHITECT</span>
             </h1>
@@ -569,19 +565,20 @@
     .projects-sticky-wrap { height: 250vh; padding: 0; position: relative; }
 </style>
 <section id="projects" class="projects-sticky-wrap">
-    <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden pointer-events-none">
+    <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-start pt-[12vh] md:pt-[16vh] overflow-hidden pointer-events-none">
         
-        <div class="w-full max-w-7xl mx-auto px-4 z-50 absolute top-[12vh]" id="projects-title" style="transform: translateY(20px); opacity: 0;">
-            <h2 class="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white drop-shadow-md">Featured Projects</h2>
-            <div class="h-1 w-20 bg-mint-600 rounded-full shadow-md shadow-mint-600/30"></div>
+        <div class="w-full max-w-7xl mx-auto px-4 z-50 mb-8 md:mb-12" id="projects-title" style="transform: translateY(20px); opacity: 0;">
+            <h2 class="text-3xl md:text-5xl font-bold mb-2 md:mb-4 text-slate-900 dark:text-white drop-shadow-md">Featured Projects</h2>
+            <div class="h-1 w-16 md:w-20 bg-mint-600 rounded-full shadow-md shadow-mint-600/30"></div>
         </div>
 
-        <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[60vh] flex items-center justify-center perspective-[2000px] mt-[8vh] pointer-events-auto relative">
-            <div class="w-full h-full flex w-full" id="projects-grid" style="gap: 0px; transform: scale(1.15);">
+        <div class="w-full max-w-6xl mx-auto px-6 sm:px-12 lg:px-16 h-[55vh] md:h-[60vh] flex items-center justify-center perspective-[2000px] pointer-events-auto relative">
+            <div class="w-full h-full flex flex-row" id="projects-grid" style="gap: 0px; transform: scale(1.05);">
                 
                 <!-- Card 1 -->
                 <div class="project-panel relative h-full flex-1 preserve-3d cursor-pointer will-change-transform">
-                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face bg-cover bg-no-repeat" style="background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-position: left center; background-size: 300% 100%; border-radius: 0px;">
+                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face overflow-hidden" style="border-radius: 0px;">
+                        <div class="absolute top-0 bottom-0 h-full" style="width: 300%; left: 0%; background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-size: cover; background-position: center;"></div>
                     </div>
                     <div class="absolute inset-0 backface-hidden bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-xl overflow-hidden glass-panel border border-mint-600/20 z-10 back-face flex flex-col" style="transform: rotateY(180deg)">
                         <a href="https://github.com/shanchuann/Visualization-for-Hexo" target="_blank" class="block group h-full hover:bg-mint-600/5 transition-colors flex flex-col">
@@ -589,10 +586,10 @@
                                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
                                 <img src="https://files.seeusercontent.com/2026/03/15/iAs9/2026-03-14-235923.png" alt="Visualization for Hexo" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                             </div>
-                            <div class="p-6 relative z-20 flex-1 flex flex-col justify-center">
-                                <span class="inline-block w-fit px-3 py-1 bg-mint-600/10 dark:bg-mint-600/20 text-mint-600 dark:text-mint-300 text-xs font-bold rounded-full mb-3 shadow-sm">QML & Hexo</span>
-                                <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-mint-600 dark:group-hover:text-mint-400 transition-colors">Visualization for Hexo</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 hidden xl:block">
+                            <div class="p-3 md:p-6 relative z-20 flex-1 flex flex-col justify-center">
+                                <span class="inline-block w-fit px-2 py-0.5 md:px-3 md:py-1 bg-mint-600/10 dark:bg-mint-600/20 text-mint-600 dark:text-mint-300 text-[10px] md:text-xs font-bold rounded-full mb-1 md:mb-3 shadow-sm line-clamp-1">QML & Hexo</span>
+                                <h3 class="text-sm md:text-xl font-bold mb-1 md:mb-2 text-slate-900 dark:text-white group-hover:text-mint-600 dark:group-hover:text-mint-400 transition-colors line-clamp-2 md:line-clamp-none">Visualization for Hexo</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs md:text-sm leading-snug md:leading-relaxed mb-1 md:mb-4 line-clamp-2 xl:line-clamp-none">
                                     A visualization tool for Hexo static site generator, enhancing the development experience.
                                 </p>
                             </div>
@@ -602,7 +599,8 @@
 
                 <!-- Card 2 -->
                 <div class="project-panel relative h-full flex-1 preserve-3d cursor-pointer will-change-transform">
-                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face bg-cover bg-no-repeat" style="background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-position: center center; background-size: 300% 100%; border-radius: 0px;">
+                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face overflow-hidden" style="border-radius: 0px;">
+                        <div class="absolute top-0 bottom-0 h-full" style="width: 300%; left: -100%; background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-size: cover; background-position: center;"></div>
                     </div>
                     <div class="absolute inset-0 backface-hidden bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-xl overflow-hidden glass-panel border border-mint-600/20 z-10 back-face flex flex-col" style="transform: rotateY(180deg)">
                         <a href="https://github.com/shanchuann/ETOCK-Reservation-System.git" target="_blank" class="block group h-full hover:bg-mint-600/5 transition-colors flex flex-col">
@@ -610,10 +608,10 @@
                                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
                                 <img src="https://s2.loli.net/2025/11/11/DlFCuogPvrQmhdz.png" alt="ETOCK" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                             </div>
-                            <div class="p-6 relative z-20 flex-1 flex flex-col justify-center">
-                                <span class="inline-block w-fit px-3 py-1 bg-mint-500/10 dark:bg-mint-500/20 text-mint-600 dark:text-mint-300 text-xs font-bold rounded-full mb-3 shadow-sm">Distributed System</span>
-                                <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-mint-500 dark:group-hover:text-mint-400 transition-colors">ETOCK System</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 hidden xl:block">
+                            <div class="p-3 md:p-6 relative z-20 flex-1 flex flex-col justify-center">
+                                <span class="inline-block w-fit px-2 py-0.5 md:px-3 md:py-1 bg-mint-500/10 dark:bg-mint-500/20 text-mint-600 dark:text-mint-300 text-[10px] md:text-xs font-bold rounded-full mb-1 md:mb-3 shadow-sm line-clamp-1">Distributed System</span>
+                                <h3 class="text-sm md:text-xl font-bold mb-1 md:mb-2 text-slate-900 dark:text-white group-hover:text-mint-500 dark:group-hover:text-mint-400 transition-colors line-clamp-2 md:line-clamp-none">ETOCK System</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs md:text-sm leading-snug md:leading-relaxed mb-1 md:mb-4 line-clamp-2 xl:line-clamp-none">
                                     High-concurrency reservation system architected with C++11, Libevent, and MySQL.
                                 </p>
                             </div>
@@ -623,7 +621,8 @@
 
                 <!-- Card 3 -->
                 <div class="project-panel relative h-full flex-1 preserve-3d cursor-pointer will-change-transform">
-                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face bg-cover bg-no-repeat" style="background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-position: right center; background-size: 300% 100%; border-radius: 0px;">
+                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face overflow-hidden" style="border-radius: 0px;">
+                        <div class="absolute top-0 bottom-0 h-full" style="width: 300%; left: -200%; background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-size: cover; background-position: center;"></div>
                     </div>
                     <div class="absolute inset-0 backface-hidden bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-xl overflow-hidden glass-panel border border-mint-600/20 z-10 back-face flex flex-col" style="transform: rotateY(180deg)">
                         <a href="https://github.com/shanchuann/CStudy.git" target="_blank" class="block group h-full hover:bg-mint-600/5 transition-colors flex flex-col">
@@ -631,10 +630,10 @@
                                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
                                 <img src="https://s2.loli.net/2025/11/11/snp7iPLMWXlcrzD.png" alt="CStudy" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                             </div>
-                            <div class="p-6 relative z-20 flex-1 flex flex-col justify-center">
-                                <span class="inline-block w-fit px-3 py-1 bg-mint-500/10 dark:bg-mint-500/20 text-mint-600 dark:text-mint-300 text-xs font-bold rounded-full mb-3 shadow-sm">EdTech</span>
-                                <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white group-hover:text-mint-500 dark:group-hover:text-mint-400 transition-colors">CStudy Platform</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 hidden xl:block">
+                            <div class="p-3 md:p-6 relative z-20 flex-1 flex flex-col justify-center">
+                                <span class="inline-block w-fit px-2 py-0.5 md:px-3 md:py-1 bg-mint-500/10 dark:bg-mint-500/20 text-mint-600 dark:text-mint-300 text-[10px] md:text-xs font-bold rounded-full mb-1 md:mb-3 shadow-sm line-clamp-1">EdTech</span>
+                                <h3 class="text-sm md:text-xl font-bold mb-1 md:mb-2 text-slate-900 dark:text-white group-hover:text-mint-500 dark:group-hover:text-mint-400 transition-colors line-clamp-2 md:line-clamp-none">CStudy Platform</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs md:text-sm leading-snug md:leading-relaxed mb-1 md:mb-4 line-clamp-2 xl:line-clamp-none">
                                     Interactive C Language learning environment powered by local AI models.
                                 </p>
                             </div>
@@ -662,9 +661,9 @@
             const progress = Math.max(0, Math.min(1, rawProgress));
 
             // 1. Scale down (0.0 - 0.15)
-            let scaleAmount = 1.15;
+            let scaleAmount = 1.05;
             if (progress < 0.15) {
-                scaleAmount = 1.15 - (0.15 * (progress / 0.15));
+                scaleAmount = 1.05 - (0.05 * (progress / 0.15));
             } else {
                 scaleAmount = 1;
             }
@@ -776,7 +775,7 @@
                         </p>
                         
                         <!-- Rich Quote Block -->
-                        <div class="glass-panel p-8 rounded-xl border-l-4 border-mint-600 my-8 relative overflow-hidden fade-up shadow-sm" style="transition-delay: 400ms;">
+                        <div class="glass-panel p-6 md:p-8 rounded-xl border-l-4 border-mint-600 my-8 relative overflow-hidden fade-up shadow-sm" style="transition-delay: 400ms;">
                             <!-- Huge Watermark Quote -->
                             <i class="fa fa-quote-left absolute -top-4 -left-4 text-[8rem] text-mint-500/10 dark:text-mint-400/5 -z-10 -rotate-6 pointer-events-none"></i>
                             
@@ -814,11 +813,11 @@
                 <p class="text-slate-600 dark:text-slate-400">Tools tailored for performance.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
                 <!-- Left Column: Languages & Tools -->
-                <div class="space-y-10 fade-up">
+                <div class="flex flex-col gap-10 fade-up h-full">
                     <!-- Panel 1: Core Languages -->
-                    <div class="glass-panel p-10 rounded-3xl">
+                    <div class="glass-panel p-6 md:p-10 rounded-3xl">
                         <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
                             <i class="fa fa-terminal text-mint-600 mr-4"></i> Core Languages
                         </h3>
@@ -864,7 +863,7 @@
                     </div>
 
                     <!-- Panel 2: Technologies & Frameworks (Tag Cloud Style) -->
-                    <div class="glass-panel p-10 rounded-3xl">
+                    <div class="glass-panel p-6 md:p-10 rounded-3xl flex-1 flex flex-col justify-start">
                         <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
                             <i class="fa fa-code text-mint-500 mr-4"></i> Technologies & Tools
                         </h3>
@@ -883,7 +882,7 @@
                 </div>
 
                 <!-- Right Column: System Mastery (Vertical List) -->
-                <div class="glass-panel p-10 rounded-3xl fade-up" style="transition-delay: 100ms;">
+                <div class="glass-panel p-6 md:p-10 rounded-3xl fade-up h-full flex flex-col" style="transition-delay: 100ms;">
                     <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
                         <i class="fa fa-cogs text-mint-600 mr-4"></i> System Mastery
                     </h3>
@@ -981,7 +980,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
                 <!-- Left Column: Contact Info -->
                 <div class="fade-up h-full">
-                    <div class="glass-panel p-8 rounded-3xl h-full flex flex-col">
+                    <div class="glass-panel p-6 md:p-8 rounded-3xl h-full flex flex-col">
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Contact Information</h3>
                         <p class="text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
                             I am currently open for new opportunities. Whether you have a question about my stack, a project idea, or just want to say hi, feel free to drop a message.
@@ -1032,7 +1031,7 @@
 
                 <!-- Right Column: Form -->
                 <div class="fade-up h-full" style="transition-delay: 100ms;">
-                     <div class="glass-panel p-8 md:p-10 rounded-3xl h-full flex flex-col justify-center">
+                     <div class="glass-panel p-6 md:p-10 rounded-3xl h-full flex flex-col justify-center">
                         <form id="contact-form" action="https://formspree.io/f/xwpakqwk" method="POST" class="space-y-6 flex flex-col h-full">
                             <input type="hidden" name="_subject" value="New Connection Request">
                             <div>
