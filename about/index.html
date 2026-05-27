@@ -238,10 +238,15 @@
         }
 
         /* --- Unified Global Cursor --- */
+        :root {
+            /* Source of truth for cursor size — read by pretext canvas to size its repulsion field */
+            --cursor-radius: 150px;
+            --cursor-glow-spread: 25px;
+        }
                  #cursor-glow {
             position: fixed;
-            width: 300px;
-            height: 300px;
+            width: calc(var(--cursor-radius) * 2);
+            height: calc(var(--cursor-radius) * 2);
             border: 2px solid rgba(0, 255, 204, 0.4);
             background: radial-gradient(circle, rgba(0, 255, 204, 0) 30%, rgba(0, 255, 204, 0.05) 85%); /* Changed to radial gradient to avoid rendering tearing on iGPUs */
             border-radius: 50%;
@@ -249,9 +254,9 @@
             transform: translate(-50%, -50%);
             z-index: 9999;
             /* Removed backdrop-filter to prevent severe rendering bugs (half text clipping) on laptop integrated GPUs */
-            box-shadow: 
-                inset 0 0 20px rgba(0, 255, 204, 0.2), 
-                0 0 25px rgba(0, 255, 204, 0.2);
+            box-shadow:
+                inset 0 0 20px rgba(0, 255, 204, 0.2),
+                0 0 var(--cursor-glow-spread) rgba(0, 255, 204, 0.2);
             transition: transform 0.05s ease-out, width 0.3s ease, height 0.3s ease;
             will-change: transform;
         }
@@ -1425,7 +1430,12 @@
             let targetMouseX = width / 2;
             let mouseY = height / 2;
             let targetMouseY = height / 2;
-            const RADIUS = 160; // 力场的半径
+            // 力场半径 = 光标可见边界（CSS 变量）+ 外发光延展 + 安全边距
+            // 与 #cursor-glow 视觉范围对齐，确保文字被推到光晕之外，而不是穿过它
+            const rootStyle = getComputedStyle(document.documentElement);
+            const cursorRadiusPx = parseFloat(rootStyle.getPropertyValue('--cursor-radius')) || 150;
+            const cursorGlowSpreadPx = parseFloat(rootStyle.getPropertyValue('--cursor-glow-spread')) || 25;
+            const RADIUS = cursorRadiusPx + cursorGlowSpreadPx + 8; // ~183px：硬边框150 + 外发光25 + 8px缓冲
             const MARGIN = 80; // 两侧边框
             const LINE_HEIGHT = 26;
 
@@ -1459,6 +1469,14 @@
 
                 let cursor = { segmentIndex: 0, graphemeIndex: 0 };
                 let y = MARGIN;
+
+                // 圆形裁剪区：保证 RADIUS 内的字形像素在物理层面被擦除，
+                // 兜底 layoutNextLine 偶发的字符级溢出（实测约 50-70px 的尾字超界）。
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(0, 0, width, height);
+                ctx.arc(mouseX, mouseY, RADIUS, 0, Math.PI * 2);
+                ctx.clip('evenodd');
 
                 // [核心颠覆]：极速环绕计算 (Collision Wrap Engine)
                 // 每一帧都在计算并重排全屏所有的文字，躲避鼠标黑洞！
@@ -1502,6 +1520,8 @@
                     y += LINE_HEIGHT;
                     if (y > height - MARGIN) break; // 超出屏幕下方即停止渲染
                 }
+
+                ctx.restore();
 
                 requestAnimationFrame(render);
             }
