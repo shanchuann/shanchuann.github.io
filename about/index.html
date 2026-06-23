@@ -1,2062 +1,2024 @@
-<!DOCTYPE html>
-<html lang="zh-CN" class="scroll-smooth dark">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zhang Nianchuan | Developer Portfolio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
-    <!-- Tailwind Config -->
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        mint: {
-                            100: "#CCFFCC",
-                            200: "#99FFCC",
-                            300: "#66FFCC",
-                            400: "#33FFCC",
-                            500: "#00FFCC",
-                            600: "#00CC99",
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>张铂坤 · Zhang Bokun</title>
+<meta name="description" content="软件工程本科在读。高并发 C++ 服务端、AI 辅助的全栈工具。一次只做一件事，做到能讲清楚为止。">
+<link rel="canonical" href="https://shanchuann.cn/about/">
 
-    <!-- Google Fonts -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,700&family=Fragment+Mono&family=Lustria&family=Noto+Serif+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        :root {
-            --primary-gradient: linear-gradient(135deg, #66FFCC 0%, #00CC99 100%);
-            
-            /* Light Mode Vars */
-            --bg-base: #f8fafc;
-            --text-base: #0f172a;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --card-border: rgba(0, 0, 0, 0.05);
-            --nav-bg: rgba(255, 255, 255, 0.8);
-        }
+<style>
+/* =========================================================
+   TOKENS
+========================================================= */
+:root{
+  --paper:        oklch(0.74 0.045 78);   /* sandstone — page base */
+  --paper-soft:   oklch(0.78 0.035 80);
+  --paper-warm:   oklch(0.82 0.030 82);
+  --ink:          oklch(0.24 0.012 50);   /* deep coffee — text */
+  --ink-soft:     oklch(0.40 0.018 55);
+  --ink-faint:    oklch(0.55 0.020 60);
+  --rule:         oklch(0.55 0.020 60 / .35);
+  --deep:         oklch(0.18 0.012 280);  /* dusk purple — interstitial */
+  --deep-warm:    oklch(0.84 0.040 80);   /* type on dusk */
+  --accent:       oklch(0.52 0.135 38);   /* burnt sienna — rare */
 
-        .dark {
-            /* Dark Mode Vars */
-            --bg-base: #0f172a;
-            --text-base: #e2e8f0;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --nav-bg: rgba(15, 23, 42, 0.8);
-        }
+  --serif:    "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  --display:  "Bricolage Grotesque", "Noto Sans SC", system-ui, sans-serif;
+  --italic:   "Lustria", "Noto Serif SC", serif;
+  --mono:     "Fragment Mono", ui-monospace, "JetBrains Mono", monospace;
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-base);
-            overflow-x: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+  --gutter:   clamp(20px, 4vw, 56px);
+  --column:   minmax(0, 1fr);
 
-        h1, h2, h3, h4, .font-heading {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        /* Artistic Logo Font */
-        .font-art {
-            font-family: 'Syne', sans-serif;
-        }
-
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        html {
-            scrollbar-gutter: stable;
-        }
-
-        /* --- View Transition for Theme Toggle --- */
-        ::view-transition-old(root),
-        ::view-transition-new(root) {
-            animation: none;
-            mix-blend-mode: normal;
-        }
-        ::view-transition-old(root) {
-            z-index: 1;
-        }
-        ::view-transition-new(root) {
-            z-index: 9999;
-        }
-
-        /* --- Custom Scrollbar (Hidden) --- */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-        body {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-        }
-
-        /* --- Glassmorphism Utilities --- */
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px) saturate(2);
-            -webkit-backdrop-filter: blur(24px) saturate(2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-            transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        /* Add frosty shine to cards */
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            z-index: 10; pointer-events: none;
-            transition: 0.5s;
-        }
-        .glass-panel:hover::before {
-            left: 200%;
-            transition: 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .dark .glass-panel {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-glass {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(12px) saturate(1.5);
-            -webkit-backdrop-filter: blur(12px) saturate(1.5);
-            border-bottom: 1px solid rgba(0, 255, 204, 0.2); /* subtle lime border */
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-            transition: background 0.3s ease, border-color 0.3s ease;
-        }
-
-        .dark .nav-glass {
-            background: rgba(15, 23, 42, 0.3);
-            border-bottom: 1px solid rgba(0, 255, 204, 0.15);
-        }
-
-        .gradient-text {
-    background: linear-gradient(135deg, #00FFCC 0%, #008060 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
+  --ease-out: cubic-bezier(.22,.61,.36,1);
+  --ease-in-out: cubic-bezier(.65,.05,.36,1);
 }
 
-/* --- Animations --- */
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
+/* =========================================================
+   RESET
+========================================================= */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:auto; }
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:16px;
+  line-height:1.65;
+  font-feature-settings:"kern","liga","calt";
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  cursor:none;
+}
+img,svg{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ background:none; border:0; font:inherit; color:inherit; cursor:none; }
+::selection{ background:var(--ink); color:var(--paper); }
 
-        .fade-up {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+/* hide everything from scroll-bar */
+body::-webkit-scrollbar{ display:none; }
+body{ scrollbar-width:none; }
 
-        /* Typewriter Cursor */
-        .typing-cursor::after {
-            content: '|';
-            animation: blink 1s step-start infinite;
-            color: #00FFCC;
-        }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
+/* =========================================================
+   TYPE
+========================================================= */
+.caps{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-weight:400;
+}
+.caps-tight{ letter-spacing:.04em; }
+.caps-wide { letter-spacing:.18em; }
 
-        /* --- Interactive Card (Tilt) --- */
-        .tilt-card {
-            transform-style: preserve-3d;
-            transform: perspective(1000px);
-        }
-        .tilt-content {
-            transform: translateZ(20px);
-        }
+.label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.huge{
+  font-family:var(--display);
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  line-height:.92;
+  font-size:clamp(56px, 13vw, 196px);
+}
+.big{
+  font-family:var(--display);
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  line-height:1.0;
+  font-size:clamp(36px, 7vw, 96px);
+}
+.mid{
+  font-family:var(--display);
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  line-height:1.05;
+  font-size:clamp(22px, 3vw, 38px);
+}
+.body-cn{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(15px, 1.05vw, 17px);
+  line-height:1.85;
+  max-width:36em;
+  color:var(--ink);
+}
+.body-en{
+  font-family:var(--display);
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:clamp(13px, .95vw, 15px);
+  line-height:1.75;
+  color:var(--ink);
+}
+.italic{
+  font-family:var(--italic);
+  font-style:italic;
+  letter-spacing:.005em;
+}
 
-        /* --- Primary Button --- */
-        .btn-primary {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        /* Light Mode */
-        .btn-primary {
-            background-color: #00CC99;
-            color: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 204, 153, 0.3);
-        }
-        .btn-primary:hover {
-            background-color: #009966;
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 204, 153, 0.4);
-        }
+/* =========================================================
+   LAYOUT
+========================================================= */
+.section{
+  position:relative;
+  padding:clamp(80px, 12vw, 180px) var(--gutter);
+}
+.shell{ max-width:1640px; margin:0 auto; }
+.cols{ display:grid; grid-template-columns:repeat(12,var(--column)); column-gap:var(--gutter); }
+.hr{ height:1px; background:var(--rule); border:0; }
 
-        /* Dark Mode */
-        .dark .btn-primary {
-            background: var(--primary-gradient);
-            box-shadow: 0 0 20px rgba(0, 204, 153, 0.3);
-        }
-        .dark .btn-primary:hover {
-            box-shadow: 0 0 30px rgba(0, 204, 153, 0.5);
-        }
+/* =========================================================
+   CURSOR
+========================================================= */
+.cursor{
+  position:fixed; top:0; left:0;
+  width:10px; height:10px;
+  background:var(--ink);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:9999;
+  mix-blend-mode:multiply;
+  transition:transform .25s var(--ease-out), opacity .25s;
+  will-change:transform;
+}
+.cursor-label{
+  position:fixed; top:0; left:0;
+  font-family:var(--mono);
+  font-size:10px; letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--paper);
+  background:var(--ink);
+  padding:6px 10px;
+  border-radius:999px;
+  pointer-events:none;
+  z-index:9999;
+  opacity:0;
+  transform:translate(14px, 14px);
+  transition:opacity .25s var(--ease-out);
+  white-space:nowrap;
+}
+.cursor.is-hover{ transform:scale(2.4); background:transparent; outline:1px solid var(--ink); }
+.cursor.is-drag { transform:scale(3.6); background:transparent; outline:1px solid var(--ink); }
+.cursor-label.is-show{ opacity:1; }
+@media (hover:none){ body{ cursor:auto; } .cursor,.cursor-label{ display:none; } button,a{ cursor:pointer; } }
 
-        /* --- Skill Bar --- */
-        .skill-progress {
-            width: 0;
-            transition: width 1.5s cubic-bezier(0.2, 1, 0.3, 1);
-            background: linear-gradient(135deg, #66FFCC 0%, #00CC99 100%);
-        }
+/* =========================================================
+   NAV
+========================================================= */
+.nav{
+  position:fixed; top:0; left:0; right:0;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  padding:22px var(--gutter);
+  z-index:1000;
+  mix-blend-mode:multiply;
+  pointer-events:none;
+}
+.nav > *{ pointer-events:auto; }
+.nav-left, .nav-right{
+  display:flex; align-items:center; gap:28px;
+}
+.nav-right{ justify-content:flex-end; }
+.nav-link{
+  font-family:var(--mono);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  color:var(--ink);
+  position:relative;
+}
+.nav-link::after{
+  content:""; position:absolute; left:0; right:0; bottom:-3px;
+  height:1px; background:var(--ink); transform:scaleX(0); transform-origin:right;
+  transition:transform .5s var(--ease-out);
+}
+.nav-link:hover::after{ transform:scaleX(1); transform-origin:left; }
+.brand{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:14px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.brand sup{ font-size:8px; letter-spacing:.2em; }
 
-        /* --- Unified Global Cursor --- */
-        :root {
-            /* Source of truth for cursor size — read by pretext canvas to size its repulsion field */
-            --cursor-radius: 150px;
-            --cursor-glow-spread: 25px;
-        }
-                 #cursor-glow {
-            position: fixed;
-            width: calc(var(--cursor-radius) * 2);
-            height: calc(var(--cursor-radius) * 2);
-            border: 2px solid rgba(0, 255, 204, 0.4);
-            background: radial-gradient(circle, rgba(0, 255, 204, 0) 30%, rgba(0, 255, 204, 0.05) 85%); /* Changed to radial gradient to avoid rendering tearing on iGPUs */
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            /* Removed backdrop-filter to prevent severe rendering bugs (half text clipping) on laptop integrated GPUs */
-            box-shadow:
-                inset 0 0 20px rgba(0, 255, 204, 0.2),
-                0 0 var(--cursor-glow-spread) rgba(0, 255, 204, 0.2);
-            transition: transform 0.05s ease-out, width 0.3s ease, height 0.3s ease;
-            will-change: transform;
-        }
+.cta-pill{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:12px 20px;
+  border:1px solid var(--ink);
+  border-radius:999px;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--ink);
+  overflow:hidden;
+  position:relative;
+  transition:color .4s var(--ease-out);
+}
+.cta-pill::before{
+  content:""; position:absolute; inset:0;
+  background:var(--ink);
+  transform:translateY(101%);
+  transition:transform .5s var(--ease-out);
+  z-index:-1;
+}
+.cta-pill:hover{ color:var(--paper); }
+.cta-pill:hover::before{ transform:translateY(0); }
+.cta-pill .dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+  display:inline-block;
+}
 
-        .dark #cursor-glow {
-            /* Dark mode keeps the same lens */
-        }
+/* =========================================================
+   HERO
+========================================================= */
+.hero{
+  min-height:100vh;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  padding:120px var(--gutter) 40px;
+}
+.hero-top{
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.hero-stack{
+  align-self:end;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.hero-stack .l1, .hero-stack .l2, .hero-stack .l3{
+  font-family:var(--display);
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  line-height:.88;
+  font-size:clamp(48px, 10vw, 156px);
+  overflow:hidden;
+}
+.hero-stack .l2{ color:var(--ink-soft); padding-left:clamp(20px, 5vw, 100px); }
+.hero-stack .l3{ padding-left:clamp(40px, 10vw, 200px); }
+.hero-stack span.line{
+  display:block;
+  transform:translateY(105%);
+  will-change:transform;
+}
+.hero-bottom{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:end;
+  gap:var(--gutter);
+  margin-top:60px;
+}
+.hero-meta{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  line-height:1.7;
+}
+.hero-meta span{ display:block; }
+.hero-cta{
+  display:inline-flex; align-items:center; gap:14px;
+  padding:18px 28px;
+  border:1px solid var(--ink);
+  border-radius:999px;
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+}
+.hero-cta::before{
+  content:""; position:absolute; inset:0; background:var(--ink);
+  transform:translateY(101%); transition:transform .55s var(--ease-out);
+  z-index:-1;
+}
+.hero-cta:hover{ color:var(--paper); }
+.hero-cta:hover::before{ transform:translateY(0); }
+.hero-mark{
+  justify-self:end;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  text-align:right;
+}
 
-        html:not(.dark) #cursor-glow {
-            /* Light mode keeps the same lens */
-        }
+/* scroll hint */
+.scroll-hint{
+  position:absolute;
+  left:50%;
+  bottom:30px;
+  transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.scroll-hint .line-y{
+  width:1px; height:42px; background:var(--ink-soft);
+  transform-origin:top;
+  animation:scrollPulse 2.4s var(--ease-in-out) infinite;
+}
+@keyframes scrollPulse{
+  0%,100%{ transform:scaleY(.2); }
+  50%{ transform:scaleY(1); }
+}
 
-        /* --- Profile Image Interaction Styles --- */
-        #profile-container {
-            transform-style: preserve-3d;
-            perspective: 1000px;
-            cursor: pointer;
-        }
-        #profile-image {
-            transition: transform 0.1s ease-out;
-            will-change: transform;
-        }
-        #profile-shine {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2), transparent 60%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            z-index: 10;
-            border-radius: 0.75rem; /* Match rounded-xl */
-        }
-    </style>
-    <!-- Handle scroll restoration and initial hiding to prevent shifts -->
-    <script>
-        if (history.scrollRestoration) {
-            history.scrollRestoration = 'manual';
-        }
-        window.scrollTo(0, 0);
-    </script>
-</head>
-<body class="antialiased selection:bg-mint-600 selection:text-white overflow-hidden">
+/* =========================================================
+   PROLOGUE
+========================================================= */
+.prologue{
+  text-align:center;
+  padding-top:clamp(120px, 18vw, 220px);
+  padding-bottom:clamp(120px, 18vw, 220px);
+}
+.prologue .label{ margin-bottom:46px; }
+.prologue blockquote{
+  font-family:var(--italic);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(24px, 3.2vw, 44px);
+  line-height:1.35;
+  max-width:24ch;
+  margin:0 auto;
+  color:var(--ink);
+  letter-spacing:-.01em;
+}
+.prologue blockquote::before{ content:"“"; padding-right:.05em; color:var(--ink-faint); }
+.prologue blockquote::after { content:"”"; padding-left:.05em; color:var(--ink-faint); }
+.prologue .attr{
+  margin-top:46px;
+  font-family:var(--mono);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  color:var(--ink-soft);
+}
 
-    <div id="main-content" style="opacity: 0; pointer-events: none; transition: opacity 1s ease;">
+/* =========================================================
+   ABOUT — text-led with floating quote photo
+========================================================= */
+.about{ padding-top:clamp(60px, 8vw, 120px); }
+.about .lead{
+  font-family:var(--display);
+  font-weight:400;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-size:clamp(44px, 8vw, 132px);
+  line-height:.94;
+  margin-bottom:80px;
+}
+.about .lead .sub{
+  display:block;
+  font-family:var(--italic);
+  font-style:italic;
+  text-transform:none;
+  letter-spacing:-.005em;
+  color:var(--ink-soft);
+  font-size:.36em;
+  line-height:1.3;
+  padding-left:.4em;
+  padding-top:.5em;
+}
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:var(--gutter);
+  align-items:start;
+}
+.about-grid .ms{ padding-top:.4em; }
+.about-grid .label{ margin-bottom:24px; }
+.about p + p{ margin-top:1.4em; }
 
-    <!-- Interactive Flowing Morandi Gradient Background -->
-    <div id="ambient-fluid-bg">
-        <!-- Add a subtle grid overlay for texture -->
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik02MCAwaC0xdjYwaDFWMHptLTIgMHY2MGgtMVYwaDF6bS0yIDBoLTF2NjBoMVYwem0tMjkgMHY2MGgtMVYwaDF6TTMwIDBIMXY2MGgyOVYwem0tMiAwaC0xdjYwaDFWMHptLTIgMGgtMXY2MGgxVjB6TTIgMHY2MGgxVjBIMXptLTIgMHY2MGgxVjBIMHoiIGZpbGw9IiM2NjY2NjYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvZz48L3N2Zz4=')] opacity-50 z-0"></div>
-        <div class="fluid-blob blob-1"></div>
-        <div class="fluid-blob blob-2"></div>
-        <div class="fluid-blob blob-3"></div>
-        <div class="fluid-blob blob-4"></div>
-        <!-- 专为鼠标交互添加的跟随色块 -->
-        <div class="interactive-blob"></div>
-    </div>
-    
-    <style>
-        #ambient-fluid-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            z-index: -1;
-            background: var(--bg-base); /* Fallback */
-            transition: background-color 0.5s ease;
-        }
+/* =========================================================
+   WAY — 3 principles, big numerals
+========================================================= */
+.way{ background:var(--paper-soft); }
+.way .head{
+  display:flex; justify-content:space-between; align-items:end;
+  gap:var(--gutter);
+  margin-bottom:80px;
+}
+.way h2 .sub{
+  display:block;
+  font-family:var(--italic);
+  font-style:italic;
+  text-transform:none;
+  letter-spacing:0;
+  font-size:.30em;
+  color:var(--ink-soft);
+  padding-top:.5em;
+}
+.way-list{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:0;
+}
+.way-row{
+  display:grid;
+  grid-template-columns:60px 110px 1fr;
+  align-items:start;
+  gap:var(--gutter);
+  padding:48px 0;
+  border-top:1px solid var(--rule);
+}
+.way-row:last-child{ border-bottom:1px solid var(--rule); }
+.way-row .num{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.18em;
+  padding-top:.4em;
+  color:var(--ink-soft);
+}
+.way-row .en{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-weight:500;
+  font-size:clamp(15px, 1.1vw, 18px);
+  padding-top:.4em;
+}
+.way-row .cn{
+  font-family:var(--serif);
+  font-size:clamp(20px, 2vw, 30px);
+  line-height:1.5;
+  letter-spacing:.02em;
+  color:var(--ink);
+}
 
-        .fluid-blob {
-            position: absolute;
-            border-radius: 50%;
-            /* 取消高斯模糊效果，避免毛玻璃感 */
-            opacity: 0.95;
-            animation: float-blob infinite alternate ease-in-out;
-            will-change: transform, margin;
-            transition: margin 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
+/* =========================================================
+   MAP — radial knowledge graph
+========================================================= */
+.map{
+  padding-top:clamp(120px, 16vw, 200px);
+  padding-bottom:clamp(120px, 16vw, 200px);
+}
+.map h2{ text-align:center; margin-bottom:24px; }
+.map .head-line{
+  text-align:center;
+  font-family:var(--italic);
+  font-style:italic;
+  font-size:clamp(20px, 2.4vw, 32px);
+  color:var(--ink-soft);
+  max-width:32ch;
+  margin:0 auto 60px;
+  line-height:1.45;
+}
+.map-canvas{
+  position:relative;
+  aspect-ratio: 16 / 11;
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+}
+.map-canvas svg{
+  position:absolute; inset:0; width:100%; height:100%;
+  overflow:visible;
+}
+.map-canvas .node{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.map-canvas .node .title{
+  display:block;
+  font-family:var(--display);
+  font-weight:500;
+  font-size:clamp(13px, 1vw, 16px);
+  letter-spacing:.10em;
+  margin-bottom:6px;
+}
+.map-canvas .node .dist{ color:var(--ink-soft); }
+.map-canvas .node.center{
+  font-family:var(--display);
+  font-weight:500;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:clamp(14px, 1.1vw, 18px);
+  white-space:nowrap;
+}
+.map-canvas .node.center::before{
+  content:""; display:block;
+  width:11px; height:11px; border-radius:50%;
+  background:var(--accent);
+  margin:0 auto 12px;
+}
+.map .foot-line{
+  margin-top:80px;
+  text-align:center;
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:clamp(13px, .95vw, 15px);
+  color:var(--ink);
+  line-height:1.8;
+}
 
-        /* Ambient Morandi Colors per Blob - Light Mode */
-        .blob-1 {
-            width: 80vw;
-            height: 80vh;
-            background: radial-gradient(circle, #eedbc5, transparent 70%);
-            top: -10vh;
-            left: -10vw;
-            animation-duration: 15s;
-        }
+/* =========================================================
+   HOLD — horizontal scrub between two epochs
+========================================================= */
+.hold{
+  background:var(--paper-soft);
+  padding-top:clamp(100px, 14vw, 160px);
+  padding-bottom:clamp(100px, 14vw, 160px);
+  overflow:hidden;
+}
+.hold .head{
+  display:flex; justify-content:space-between; align-items:end;
+  margin-bottom:60px; gap:var(--gutter);
+}
+.hold .toggle{
+  display:flex; gap:24px;
+}
+.hold .toggle button{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:clamp(14px, 1.1vw, 16px);
+  color:var(--ink-faint);
+  position:relative;
+  padding-bottom:6px;
+}
+.hold .toggle button::after{
+  content:""; position:absolute; left:0; right:0; bottom:0;
+  height:1px; background:var(--ink);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .5s var(--ease-out);
+}
+.hold .toggle button.is-active{ color:var(--ink); }
+.hold .toggle button.is-active::after{ transform:scaleX(1); }
 
-        .blob-2 {
-            width: 70vw;
-            height: 70vh;
-            background: radial-gradient(circle, #b9d8d6, transparent 70%);
-            bottom: -15vh;
-            right: -10vw;
-            animation-duration: 18s;
-            animation-delay: -5s;
-        }
+.hold-stage{
+  position:relative;
+  height:clamp(420px, 60vh, 560px);
+  cursor:none;
+  user-select:none;
+}
+.hold-track{
+  position:absolute; inset:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:var(--gutter);
+  width:200%;
+  will-change:transform;
+}
+.hold-panel{
+  position:relative;
+  height:100%;
+  background:var(--paper-warm);
+  border:1px solid var(--rule);
+  padding:48px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.hold-panel .epoch{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.hold-panel .quote{
+  font-family:var(--italic);
+  font-style:italic;
+  font-size:clamp(20px, 2.4vw, 32px);
+  line-height:1.45;
+  max-width:24ch;
+}
+.hold-panel ul{
+  list-style:none;
+  display:grid;
+  gap:10px;
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:13px;
+}
+.hold-panel ul li{
+  display:flex; justify-content:space-between;
+  border-top:1px solid var(--rule);
+  padding-top:10px;
+}
+.hold-panel ul li span:last-child{ color:var(--ink-soft); font-family:var(--mono); }
 
-        .blob-3 {
-            width: 70vw;
-            height: 75vh;
-            background: radial-gradient(circle, #e4ccc1, transparent 70%);
-            top: 20vh;
-            left: 50vw;
-            animation-duration: 22s;
-            animation-delay: -10s;
-        }
+/* =========================================================
+   WORK — 4 typographic project cards
+========================================================= */
+.work{ padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
+.work .head{
+  display:flex; justify-content:space-between; align-items:end; gap:var(--gutter);
+  margin-bottom:80px;
+}
+.work-list{ border-top:1px solid var(--rule); }
+.work-row{
+  display:grid;
+  grid-template-columns:80px 1.3fr 1fr 80px;
+  gap:var(--gutter);
+  align-items:start;
+  padding:48px 0;
+  border-bottom:1px solid var(--rule);
+  position:relative;
+  transition:padding-left .6s var(--ease-out);
+}
+.work-row:hover{ padding-left:24px; }
+.work-row .idx{
+  font-family:var(--mono);
+  font-size:13px;
+  letter-spacing:.18em;
+  color:var(--ink-soft);
+  padding-top:.45em;
+}
+.work-row .name{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-weight:400;
+  font-size:clamp(28px, 4vw, 56px);
+  line-height:1.0;
+  margin-bottom:14px;
+}
+.work-row .role{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.work-row .role .acc{ color:var(--accent); }
+.work-row .desc{ padding-top:.4em; }
+.work-row .desc p{
+  font-family:var(--serif);
+  font-size:clamp(14px, 1vw, 16px);
+  line-height:1.75;
+  margin-bottom:16px;
+}
+.work-row .stack{
+  display:flex; flex-wrap:wrap; gap:6px 18px;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.work-row .stack span{ position:relative; }
+.work-row .stack span + span::before{
+  content:"·"; position:absolute; left:-12px; color:var(--ink-faint);
+}
+.work-row .open{
+  justify-self:end;
+  width:44px; height:44px;
+  border:1px solid var(--ink);
+  border-radius:50%;
+  display:grid; place-items:center;
+  font-family:var(--mono);
+  font-size:14px;
+  transition:transform .5s var(--ease-out), background .4s var(--ease-out), color .4s var(--ease-out);
+}
+.work-row:hover .open{
+  background:var(--ink); color:var(--paper); transform:rotate(45deg);
+}
 
-        .blob-4 {
-            width: 75vw;
-            height: 75vh;
-            background: radial-gradient(circle, #c3d2d3, transparent 70%);
-            top: 40vh;
-            left: -5vw;
-            animation-duration: 20s;
-            animation-delay: -2s;
-        }
-        
-        /* Interactive Mouse Blob */
-        .interactive-blob {
-            position: absolute;
-            width: 80vmin;
-            height: 80vmin;
-            background: radial-gradient(circle, rgba(163, 196, 188, 1) 0%, transparent 60%);
-            border-radius: 50%;
-            opacity: 1;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 1; 
-            mix-blend-mode: color-burn; /* 更有侵略性的颜色混合 */
-        }
+/* =========================================================
+   ARSENAL — horizontal tabs of stacks
+========================================================= */
+.arsenal{
+  background:var(--paper-soft);
+  padding-top:clamp(120px, 16vw, 200px);
+  padding-bottom:clamp(120px, 16vw, 200px);
+}
+.arsenal h2{ margin-bottom:60px; }
+.arsenal-tabs{
+  display:flex; flex-wrap:wrap;
+  gap:32px;
+  margin-bottom:60px;
+  border-bottom:1px solid var(--rule);
+  padding-bottom:24px;
+}
+.arsenal-tabs button{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:clamp(18px, 1.8vw, 26px);
+  color:var(--ink-faint);
+  position:relative;
+}
+.arsenal-tabs button.is-active{ color:var(--ink); }
+.arsenal-tabs button.is-active::after{
+  content:""; position:absolute; left:0; right:0; bottom:-25px;
+  height:1px; background:var(--ink);
+}
+.arsenal-pane{
+  display:grid;
+  grid-template-columns:.8fr 1fr 1fr;
+  gap:var(--gutter);
+}
+.arsenal-pane .since{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:clamp(28px, 3.6vw, 56px);
+  line-height:.95;
+  color:var(--ink);
+}
+.arsenal-pane .since small{
+  display:block;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  color:var(--ink-soft);
+  margin-top:14px;
+}
+.arsenal-pane .desc{
+  font-family:var(--serif);
+  font-size:clamp(15px, 1.05vw, 17px);
+  line-height:1.8;
+}
+.arsenal-pane .keys{
+  display:flex; flex-direction:column; gap:14px;
+}
+.arsenal-pane .keys span{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:clamp(13px, .95vw, 15px);
+  padding-bottom:14px;
+  border-bottom:1px solid var(--rule);
+}
 
-        /* Ambient Morandi Colors per Blob - Dark Mode Adaptation (类似日间模式配色) */
-        .dark .blob-1 { background: radial-gradient(circle, #eedbc5, transparent 70%); opacity: 0.15; }
-        .dark .blob-2 { background: radial-gradient(circle, #b9d8d6, transparent 70%); opacity: 0.15; mix-blend-mode: normal; }
-        .dark .blob-3 { background: radial-gradient(circle, #e4ccc1, transparent 70%); opacity: 0.15; mix-blend-mode: normal; }
-        .dark .blob-4 { background: radial-gradient(circle, #c3d2d3, transparent 70%); opacity: 0.15; }
-        .dark .interactive-blob { 
-            display: none;
-        }
+/* =========================================================
+   TIMELINE
+========================================================= */
+.timeline{ padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
+.timeline h2{ margin-bottom:80px; }
+.timeline-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:var(--gutter);
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  padding:48px 0;
+}
+.timeline-col{ padding-right:var(--gutter); }
+.timeline-col + .timeline-col{ border-left:1px solid var(--rule); padding-left:var(--gutter); }
+.timeline-col .when{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:24px;
+}
+.timeline-col .title{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:clamp(22px, 2.4vw, 36px);
+  line-height:1.1;
+  margin-bottom:20px;
+}
+.timeline-col .note{
+  font-family:var(--serif);
+  font-size:15px;
+  line-height:1.75;
+  color:var(--ink-soft);
+}
 
-        @keyframes float-blob {
-            0% { transform: scale(1) translateY(0) rotate(0deg); }
-            33% { transform: scale(1.1) translateY(-5vh) rotate(5deg); }
-            66% { transform: scale(0.9) translateY(5vh) rotate(-5deg); }
-            100% { transform: scale(1.05) translateY(-2vh) rotate(2deg); }
-        }
-    </style>
+/* =========================================================
+   METRICS — marquee + 4 cells
+========================================================= */
+.metrics{
+  background:var(--deep);
+  color:var(--deep-warm);
+  padding:0;
+  overflow:hidden;
+  position:relative;
+}
+.metrics .marquee{
+  display:flex;
+  white-space:nowrap;
+  border-top:1px solid color-mix(in oklch, var(--deep-warm) 24%, transparent);
+  border-bottom:1px solid color-mix(in oklch, var(--deep-warm) 24%, transparent);
+  padding:30px 0;
+}
+.metrics .marquee-inner{
+  display:flex; gap:48px;
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:clamp(30px, 4vw, 60px);
+  animation:marq 36s linear infinite;
+}
+.metrics .marquee-inner span{ display:inline-block; }
+.metrics .marquee-inner .dot{
+  display:inline-block;
+  width:14px; height:14px; border-radius:50%;
+  background:var(--accent);
+  align-self:center;
+  margin:auto 0;
+}
+@keyframes marq{
+  from{ transform:translateX(0); }
+  to  { transform:translateX(-50%); }
+}
+.metrics-body{
+  padding:clamp(120px, 16vw, 180px) var(--gutter);
+}
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:var(--gutter);
+}
+.metric-cell .label{ color:color-mix(in oklch, var(--deep-warm) 70%, transparent); }
+.metric-cell .num{
+  font-family:var(--display);
+  font-weight:400;
+  font-size:clamp(64px, 9vw, 132px);
+  line-height:.9;
+  letter-spacing:-.02em;
+  margin:20px 0 16px;
+  color:var(--deep-warm);
+}
+.metric-cell .num small{
+  font-size:.32em; vertical-align:top; letter-spacing:.02em;
+  font-family:var(--mono);
+  color:color-mix(in oklch, var(--deep-warm) 70%, transparent);
+}
+.metric-cell .cap{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:13px;
+  line-height:1.5;
+  color:color-mix(in oklch, var(--deep-warm) 86%, transparent);
+}
 
-    <script>
-        // Interactive Flowing Background Logic with enhanced mouse tracking
-        document.addEventListener('DOMContentLoaded', () => {
-            const blobs = document.querySelectorAll('.fluid-blob');
-            const iblob = document.querySelector('.interactive-blob');
-            let mouseX = window.innerWidth / 2;
-            let mouseY = window.innerHeight / 2;
-            
-            // Used for lerp smooth tracking
-            let curX = mouseX;
-            let curY = mouseY;
+/* =========================================================
+   SCHOOL — Developer equivalent
+========================================================= */
+.school{ padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
+.school-head{
+  display:grid; grid-template-columns:1fr 1fr; gap:var(--gutter);
+  margin-bottom:80px;
+}
+.school-head .label{ margin-bottom:24px; }
+.school-head h2{ margin-bottom:30px; }
+.school-head .quote{
+  font-family:var(--italic);
+  font-style:italic;
+  font-size:clamp(22px, 2.6vw, 36px);
+  line-height:1.4;
+  max-width:18ch;
+}
+.school-stats{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:var(--gutter);
+  border-top:1px solid var(--rule);
+  padding-top:48px;
+}
+.school-stats .num{
+  font-family:var(--display);
+  font-weight:400;
+  font-size:clamp(56px, 7vw, 100px);
+  line-height:.9;
+  margin-bottom:14px;
+  letter-spacing:-.01em;
+}
+.school-stats .cap{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:12px;
+  line-height:1.6;
+  color:var(--ink-soft);
+}
 
-            window.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                
-                // Shift background blobs with strong parallax reaction
-                const offsetX = (mouseX / window.innerWidth - 0.5) * 150; 
-                const offsetY = (mouseY / window.innerHeight - 0.5) * 150;
+/* =========================================================
+   BLOG
+========================================================= */
+.blog{ background:var(--paper-soft); padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
+.blog .head{
+  display:flex; justify-content:space-between; align-items:end; gap:var(--gutter);
+  margin-bottom:60px;
+}
+.blog-list{ border-top:1px solid var(--rule); min-height:240px; }
+.blog-row{
+  display:grid;
+  grid-template-columns:120px 1fr auto;
+  align-items:center;
+  gap:var(--gutter);
+  padding:32px 0;
+  border-bottom:1px solid var(--rule);
+  transition:padding-left .5s var(--ease-out);
+}
+.blog-row:hover{ padding-left:18px; }
+.blog-row .date{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.blog-row .title{
+  font-family:var(--display);
+  font-size:clamp(20px, 1.8vw, 28px);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  line-height:1.2;
+}
+.blog-row .arrow{
+  font-family:var(--mono);
+  font-size:18px;
+  transition:transform .4s var(--ease-out);
+}
+.blog-row:hover .arrow{ transform:translateX(10px); }
+.blog-empty{
+  padding:60px 0; text-align:center;
+  font-family:var(--mono); font-size:12px;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ink-soft);
+}
 
-                blobs.forEach((blob, index) => {
-                    const factor = (index + 1) * -0.7; // negative for opposite movement
-                    // Use margin for translation so we don't overwrite the CSS transform animation
-                    blob.style.marginLeft = `${offsetX * factor}px`;
-                    blob.style.marginTop = `${offsetY * factor}px`;
-                });
-            });
-            
-            // Animation loop for the mouse-following blob
-            function animateBlob() {
-                curX += (mouseX - curX) * 0.05; // 0.05 is the smoothing factor
-                curY += (mouseY - curY) * 0.05;
-                if (iblob) {
-                    iblob.style.left = `${curX}px`;
-                    iblob.style.top = `${curY}px`;
-                }
-                requestAnimationFrame(animateBlob);
-            }
-            animateBlob();
-        });
-    </script>
+/* =========================================================
+   CONTACT — finale w/ photo
+========================================================= */
+.contact{
+  position:relative;
+  min-height:100vh;
+  padding:clamp(80px, 12vw, 140px) var(--gutter);
+  overflow:hidden;
+  background:var(--deep);
+  color:var(--deep-warm);
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.contact-bg{
+  position:absolute; inset:0; z-index:0;
+  background-image:url('/images/IMG_20251026_131027.jpg');
+  background-size:cover; background-position:center;
+  filter:saturate(.85) brightness(.85);
+}
+.contact-bg::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg,
+    color-mix(in oklch, var(--deep) 65%, transparent) 0%,
+    color-mix(in oklch, var(--deep) 35%, transparent) 40%,
+    color-mix(in oklch, var(--deep) 75%, transparent) 100%);
+}
+.contact > *{ position:relative; z-index:1; }
+.contact-top{
+  display:flex; justify-content:space-between; align-items:start;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+}
+.contact-center{
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  flex:1;
+  padding:80px 0;
+  text-align:center;
+}
+.contact-center .pre{
+  font-family:var(--italic);
+  font-style:italic;
+  font-size:clamp(16px, 1.4vw, 22px);
+  max-width:38ch;
+  margin:0 auto 40px;
+  color:color-mix(in oklch, var(--deep-warm) 88%, transparent);
+  line-height:1.5;
+}
+.contact-center h2{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-size:clamp(56px, 11vw, 168px);
+  line-height:.92;
+  color:var(--deep-warm);
+}
+.contact-center h2 .ital{
+  font-family:var(--italic);
+  font-style:italic;
+  text-transform:none;
+  letter-spacing:-.01em;
+}
+.contact-bottom{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:var(--gutter);
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.contact-bottom h4{
+  font-family:var(--mono);
+  font-weight:400;
+  color:color-mix(in oklch, var(--deep-warm) 65%, transparent);
+  margin-bottom:14px;
+  font-size:11px;
+}
+.contact-bottom a{
+  display:block;
+  font-size:14px;
+  letter-spacing:.10em;
+  color:var(--deep-warm);
+  position:relative; padding-bottom:3px;
+}
+.contact-bottom a::after{
+  content:""; position:absolute; left:0; right:0; bottom:0;
+  height:1px; background:var(--deep-warm);
+  transform:scaleX(0); transform-origin:right;
+  transition:transform .5s var(--ease-out);
+}
+.contact-bottom a:hover::after{ transform:scaleX(1); transform-origin:left; }
+.contact-bottom .row + .row{ margin-top:10px; }
 
-    <!-- Splash Screen WebGL Container -->
-    <div id="webgl-canvas-container" class="fixed inset-0 z-[100] pointer-events-none" style="background-image: url('https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; transition: background-image 0.5s ease;"></div>
-    <div id="emerging-text" class="fixed inset-0 flex items-center justify-center pointer-events-none z-[90]">
-        <h1 class="text-white text-6xl md:text-8xl font-bold font-mono tracking-widest opacity-0">SYSTEM INITIALIZED</h1>
-    </div>
+/* =========================================================
+   FAQ
+========================================================= */
+.faq{ padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
+.faq h2{ margin-bottom:60px; }
+.faq-item{
+  border-top:1px solid var(--rule);
+}
+.faq-item:last-child{ border-bottom:1px solid var(--rule); }
+.faq-q{
+  display:grid;
+  grid-template-columns:60px 1fr 60px;
+  gap:var(--gutter);
+  align-items:center;
+  padding:28px 0;
+  width:100%;
+  text-align:left;
+}
+.faq-q .num{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.18em;
+  color:var(--ink-soft);
+}
+.faq-q .q{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-size:clamp(18px, 1.8vw, 26px);
+  line-height:1.3;
+}
+.faq-q .plus{
+  justify-self:end;
+  width:36px; height:36px; border:1px solid var(--ink); border-radius:50%;
+  display:grid; place-items:center;
+  font-family:var(--mono); font-size:16px;
+  transition:transform .5s var(--ease-out), background .4s var(--ease-out), color .4s var(--ease-out);
+}
+.faq-item.is-open .faq-q .plus{ background:var(--ink); color:var(--paper); transform:rotate(45deg); }
+.faq-a{
+  display:grid;
+  grid-template-rows:0fr;
+  transition:grid-template-rows .55s var(--ease-out);
+}
+.faq-a-inner{ overflow:hidden; }
+.faq-item.is-open .faq-a{ grid-template-rows:1fr; }
+.faq-a-body{
+  display:grid;
+  grid-template-columns:60px 1fr 60px;
+  gap:var(--gutter);
+  padding:0 0 36px;
+}
+.faq-a-body p{
+  grid-column:2;
+  font-family:var(--serif);
+  font-size:clamp(15px, 1.05vw, 17px);
+  line-height:1.85;
+  max-width:38em;
+  color:var(--ink-soft);
+}
 
-    <!-- Splash Top UI -->
-    <div id="splash-ui" class="fixed inset-0 z-[101] flex flex-col justify-end p-8 pointer-events-none">
-        <div class="relative z-10 flex flex-col items-start">
-            <div id="splash-timer" class="font-bold text-[6rem] md:text-[8rem] leading-none font-mono" style="-webkit-text-stroke: 2px white; -webkit-text-fill-color: transparent;">000</div>
-            <div id="splash-prompt" class="mt-2 text-white/80 text-lg md:text-xl tracking-[0.2em] uppercase opacity-0 transition-opacity duration-1000 font-art flex items-center gap-3">
-                Scroll Down <i class="fa fa-angle-down animate-bounce"></i>
-            </div>
-        </div>
-    </div>
+/* =========================================================
+   FOOTER
+========================================================= */
+.foot{
+  padding:60px var(--gutter);
+  border-top:1px solid var(--rule);
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:var(--gutter);
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.foot a:hover{ color:var(--ink); }
+.foot .center{ text-align:center; }
+.foot .right{ text-align:right; }
 
-    <!-- Interactive Background Glow -->
-    <div id="cursor-glow"></div>
+/* =========================================================
+   REVEAL
+========================================================= */
+.reveal{ opacity:0; transform:translateY(28px); transition:opacity 1.2s var(--ease-out), transform 1.2s var(--ease-out); }
+.reveal.is-in{ opacity:1; transform:translateY(0); }
 
-    <!-- Navigation -->
-    <nav class="fixed w-full top-0 z-50 nav-glass transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="#" class="text-2xl md:text-3xl font-extrabold tracking-tight font-art text-slate-900 dark:text-white hover:text-mint-500 dark:hover:text-mint-400 transition-colors flex items-center h-full">
-                    ZhangNianchuan
-                </a>
-                
-                <div class="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide text-slate-600 dark:text-slate-300 h-full">
-                    <a href="#projects" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors relative group h-full flex items-center">
-                        Projects
-                        <span class="absolute bottom-6 left-0 w-0 h-0.5 bg-mint-500 transition-all group-hover:w-full"></span>
-                    </a>
-                    <a href="#about" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors relative group h-full flex items-center">
-                        About
-                        <span class="absolute bottom-6 left-0 w-0 h-0.5 bg-mint-500 transition-all group-hover:w-full"></span>
-                    </a>
-                    <a href="#skills" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors relative group h-full flex items-center">
-                        Skills
-                        <span class="absolute bottom-6 left-0 w-0 h-0.5 bg-mint-500 transition-all group-hover:w-full"></span>
-                    </a>
-                    
-                    <button id="theme-toggle" class="p-2 rounded-full bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 hover:text-mint-600 dark:hover:text-mint-400 focus:outline-none transition-colors border border-transparent hover:border-mint-500/30">
-                        <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <svg id="icon-moon" class="w-5 h-5 block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                    </button>
+.char{ display:inline-block; transform:translateY(105%); will-change:transform; }
+.word{ display:inline-block; overflow:hidden; vertical-align:top; }
 
-                    <div class="flex items-center pl-2">
-                        <a href="#contact" class="magnetic-btn px-6 py-2.5 rounded-full bg-gradient-to-r from-mint-400 to-[#008060] hover:from-mint-100 hover:to-mint-600 text-slate-900 border-0 font-bold transition-all duration-300 flex items-center shadow-lg shadow-mint-500/30">
-                            Contact
-                        </a>
-                    </div>
-                </div>
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width:900px){
+  .nav{ grid-template-columns:1fr auto 1fr; padding:18px var(--gutter); }
+  .nav-left .nav-link:not(:first-child), .nav-right .nav-link:not(:last-child){ display:none; }
+  .hero-bottom{ grid-template-columns:1fr; gap:36px; }
+  .hero-mark{ justify-self:start; text-align:left; }
+  .about-grid{ grid-template-columns:1fr; gap:48px; }
+  .way-row{ grid-template-columns:40px 1fr; }
+  .way-row .en{ grid-column:2; padding-top:0; }
+  .way-row .cn{ grid-column:2; }
+  .map-canvas{ aspect-ratio:1 / 1.2; }
+  .work-row{ grid-template-columns:50px 1fr 50px; }
+  .work-row .desc{ grid-column:1 / -1; padding-top:24px; }
+  .arsenal-pane{ grid-template-columns:1fr; gap:40px; }
+  .timeline-grid{ grid-template-columns:1fr; }
+  .timeline-col + .timeline-col{ border-left:0; border-top:1px solid var(--rule); padding-left:0; padding-top:48px; margin-top:48px; }
+  .metrics-grid{ grid-template-columns:1fr 1fr; row-gap:60px; }
+  .school-head{ grid-template-columns:1fr; gap:40px; }
+  .school-stats{ grid-template-columns:1fr 1fr; row-gap:40px; }
+  .blog-row{ grid-template-columns:1fr auto; gap:14px; padding:24px 0; }
+  .blog-row .date{ grid-column:1 / -1; }
+  .contact-bottom{ grid-template-columns:1fr; gap:30px; }
+  .faq-q{ grid-template-columns:40px 1fr 36px; gap:14px; }
+  .faq-a-body{ grid-template-columns:40px 1fr 36px; gap:14px; padding-bottom:30px; }
+  .foot{ grid-template-columns:1fr; gap:18px; }
+  .foot .center,.foot .right{ text-align:left; }
+}
 
-                <button id="menu-btn" class="md:hidden text-slate-900 dark:text-white focus:outline-none p-2">
-                    <i class="fa fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-        
-        <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-slate-800 shadow-2xl">
-            <div class="flex flex-col px-4 py-6 space-y-4 text-base font-medium text-slate-600 dark:text-slate-300">
-                <a href="#projects" class="mobile-link block hover:text-mint-500">Projects</a>
-                <a href="#about" class="mobile-link block hover:text-mint-500">About</a>
-                <a href="#skills" class="mobile-link block hover:text-mint-500">Skills</a>
-                <a href="#contact" class="mobile-link block hover:text-mint-500">Contact</a>
-                <button id="mobile-theme-toggle" class="text-left flex items-center gap-2 hover:text-mint-500">
-                    <span>Toggle Theme</span>
-                    <i class="fa fa-adjust"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section (Subversive Interactive Typography) -->
-    <section id="hero" class="h-screen w-full relative overflow-hidden flex flex-col justify-center items-center bg-transparent transition-colors duration-300">
-            <!-- Bottom fade for smooth transition to Projects section -->
-        <div class="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-transparent to-transparent z-10 pointer-events-none transition-colors duration-300"></div>
-
-        <!-- The pure typography layer running on Canvas + Pretext -->
-        <canvas id="pretext-canvas" class="absolute inset-0 w-full h-full opacity-90 z-0"></canvas>
-        
-        
-
-        <div class="relative z-20 text-center pointer-events-none w-full max-w-5xl mx-auto px-4">
-            <div class="inline-block mb-4 px-5 py-2 rounded-full border border-mint-500/30 bg-mint-500/10 text-mint-600 dark:text-mint-300 text-sm font-medium fade-up tracking-wide pointer-events-auto backdrop-blur-md">
-                Available for new projects
-            </div>
-
-            <h1 class="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tight md:tracking-tighter mb-8 font-heading text-slate-900 dark:text-white fade-up transition-colors duration-300">
-                <span id="hero-title-1" class="border-r-4 border-mint-500 pr-2 animate-pulse">SYSTEM</span><br>
-                <span id="hero-title-2" class="text-transparent bg-clip-text bg-gradient-to-r from-mint-400 to-[#008060]" style="-webkit-text-stroke: 2px currentColor; line-height: 1.1;">ARCHITECT</span>
-            </h1>
-            
-            <div class="flex flex-col sm:flex-row gap-5 justify-center fade-up pointer-events-auto" style="transition-delay: 300ms;">
-                <a href="#projects" class="magnetic-btn px-10 py-4 rounded-full text-lg font-bold tracking-wide shadow-lg bg-gradient-to-r from-mint-400 to-[#008060] hover:from-mint-100 hover:to-mint-600 text-slate-900 border-0 transition-all">
-                    View Work
-                </a>
-                <a href="#contact" class="magnetic-btn px-10 py-4 rounded-full bg-white/60 dark:bg-black/40 backdrop-blur-md text-slate-900 dark:text-white font-medium border border-mint-500/30 hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center group shadow-sm">
-                    Contact Me
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" class="ml-2 group-hover:translate-x-1 transition-transform" style="vertical-align:middle">
-                        <line x1="2" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <polyline points="11,5 16,9 11,13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-<style>
-    .preserve-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .projects-sticky-wrap { height: 250vh; padding: 0; position: relative; }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; animation-iteration-count:1 !important; }
+  .char{ transform:none; }
+  .reveal{ opacity:1; transform:none; }
+}
 </style>
-<section id="projects" class="projects-sticky-wrap">
-    <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-start pt-[12vh] md:pt-[16vh] overflow-hidden pointer-events-none">
-        
-        <div class="w-full max-w-7xl mx-auto px-4 z-50 mb-8 md:mb-12" id="projects-title" style="transform: translateY(20px); opacity: 0;">
-            <h2 class="text-3xl md:text-5xl font-bold mb-2 md:mb-4 text-slate-900 dark:text-white drop-shadow-md">Featured Projects</h2>
-            <div class="h-1 w-16 md:w-20 bg-mint-600 rounded-full shadow-md shadow-mint-600/30"></div>
-        </div>
+</head>
+<body>
 
-        <div class="w-full max-w-6xl mx-auto px-6 sm:px-12 lg:px-16 h-[55vh] md:h-[60vh] flex items-center justify-center perspective-[2000px] pointer-events-auto relative">
-            <div class="w-full h-full flex flex-row" id="projects-grid" style="gap: 0px; transform: scale(1.05);">
-                
-                <!-- Card 1 -->
-                <div class="project-panel relative h-full flex-1 preserve-3d cursor-pointer will-change-transform">
-                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face overflow-hidden" style="border-radius: 0px;">
-                        <div class="absolute top-0 bottom-0 h-full" style="width: 300%; left: 0%; background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-size: cover; background-position: center;"></div>
-                    </div>
-                    <div class="absolute inset-0 backface-hidden bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-xl overflow-hidden glass-panel border border-mint-600/20 z-10 back-face flex flex-col" style="transform: rotateY(180deg)">
-                        <a href="https://github.com/shanchuann/Visualization-for-Hexo" target="_blank" class="block group h-full hover:bg-mint-600/5 transition-colors flex flex-col">
-                            <div class="h-[45%] overflow-hidden relative border-b border-mint-600/10">
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
-                                <img src="https://files.seeusercontent.com/2026/03/15/iAs9/2026-03-14-235923.png" alt="Visualization for Hexo" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                            </div>
-                            <div class="p-3 md:p-6 relative z-20 flex-1 flex flex-col justify-center">
-                                <span class="inline-block w-fit px-2 py-0.5 md:px-3 md:py-1 bg-mint-600/10 dark:bg-mint-600/20 text-mint-600 dark:text-mint-300 text-[10px] md:text-xs font-bold rounded-full mb-1 md:mb-3 shadow-sm line-clamp-1">QML & Hexo</span>
-                                <h3 class="text-sm md:text-xl font-bold mb-1 md:mb-2 text-slate-900 dark:text-white group-hover:text-mint-600 dark:group-hover:text-mint-400 transition-colors line-clamp-2 md:line-clamp-none">Visualization for Hexo</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs md:text-sm leading-snug md:leading-relaxed mb-1 md:mb-4 line-clamp-2 xl:line-clamp-none">
-                                    A visualization tool for Hexo static site generator, enhancing the development experience.
-                                </p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+<!-- ────────────────────────────────────────────────────────
+     CURSOR
+──────────────────────────────────────────────────────── -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-label" id="cursorLabel"></div>
 
-                <!-- Card 2 -->
-                <div class="project-panel relative h-full flex-1 preserve-3d cursor-pointer will-change-transform">
-                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face overflow-hidden" style="border-radius: 0px;">
-                        <div class="absolute top-0 bottom-0 h-full" style="width: 300%; left: -100%; background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-size: cover; background-position: center;"></div>
-                    </div>
-                    <div class="absolute inset-0 backface-hidden bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-xl overflow-hidden glass-panel border border-mint-600/20 z-10 back-face flex flex-col" style="transform: rotateY(180deg)">
-                        <a href="https://github.com/shanchuann/ETOCK-Reservation-System.git" target="_blank" class="block group h-full hover:bg-mint-600/5 transition-colors flex flex-col">
-                            <div class="h-[45%] overflow-hidden relative border-b border-mint-600/10">
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
-                                <img src="https://s2.loli.net/2025/11/11/DlFCuogPvrQmhdz.png" alt="ETOCK" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                            </div>
-                            <div class="p-3 md:p-6 relative z-20 flex-1 flex flex-col justify-center">
-                                <span class="inline-block w-fit px-2 py-0.5 md:px-3 md:py-1 bg-mint-500/10 dark:bg-mint-500/20 text-mint-600 dark:text-mint-300 text-[10px] md:text-xs font-bold rounded-full mb-1 md:mb-3 shadow-sm line-clamp-1">Distributed System</span>
-                                <h3 class="text-sm md:text-xl font-bold mb-1 md:mb-2 text-slate-900 dark:text-white group-hover:text-mint-500 dark:group-hover:text-mint-400 transition-colors line-clamp-2 md:line-clamp-none">ETOCK System</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs md:text-sm leading-snug md:leading-relaxed mb-1 md:mb-4 line-clamp-2 xl:line-clamp-none">
-                                    High-concurrency reservation system architected with C++11, Libevent, and MySQL.
-                                </p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+<!-- ────────────────────────────────────────────────────────
+     NAV
+──────────────────────────────────────────────────────── -->
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-link" href="https://shanchuann.cn">← Blog</a>
+    <a class="nav-link" href="https://github.com/shanchuann" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <a class="brand" href="#hero">张铂坤 <sup>· EST 2023</sup></a>
+  <div class="nav-right">
+    <a class="nav-link" href="#" data-lang>EN</a>
+    <a class="cta-pill" href="#contact"><span class="dot"></span>Contact</a>
+  </div>
+</header>
 
-                <!-- Card 3 -->
-                <div class="project-panel relative h-full flex-1 preserve-3d cursor-pointer will-change-transform">
-                    <div class="absolute top-0 bottom-0 left-0 right-0 backface-hidden shadow-2xl z-20 front-face overflow-hidden" style="border-radius: 0px;">
-                        <div class="absolute top-0 bottom-0 h-full" style="width: 300%; left: -200%; background-image: url('https://s2.loli.net/2025/11/11/alGCRfNKuTmqOvb.jpg'); background-size: cover; background-position: center;"></div>
-                    </div>
-                    <div class="absolute inset-0 backface-hidden bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-xl overflow-hidden glass-panel border border-mint-600/20 z-10 back-face flex flex-col" style="transform: rotateY(180deg)">
-                        <a href="https://github.com/shanchuann/CStudy.git" target="_blank" class="block group h-full hover:bg-mint-600/5 transition-colors flex flex-col">
-                            <div class="h-[45%] overflow-hidden relative border-b border-mint-600/10">
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 opacity-60"></div>
-                                <img src="https://s2.loli.net/2025/11/11/snp7iPLMWXlcrzD.png" alt="CStudy" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                            </div>
-                            <div class="p-3 md:p-6 relative z-20 flex-1 flex flex-col justify-center">
-                                <span class="inline-block w-fit px-2 py-0.5 md:px-3 md:py-1 bg-mint-500/10 dark:bg-mint-500/20 text-mint-600 dark:text-mint-300 text-[10px] md:text-xs font-bold rounded-full mb-1 md:mb-3 shadow-sm line-clamp-1">EdTech</span>
-                                <h3 class="text-sm md:text-xl font-bold mb-1 md:mb-2 text-slate-900 dark:text-white group-hover:text-mint-500 dark:group-hover:text-mint-400 transition-colors line-clamp-2 md:line-clamp-none">CStudy Platform</h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs md:text-sm leading-snug md:leading-relaxed mb-1 md:mb-4 line-clamp-2 xl:line-clamp-none">
-                                    Interactive C Language learning environment powered by local AI models.
-                                </p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+<!-- ────────────────────────────────────────────────────────
+     1. HERO
+──────────────────────────────────────────────────────── -->
+<section class="hero section" id="hero" style="padding-top:120px;">
+  <div class="hero-top">
+    <span class="label">Shanchuann.cn / 2023 — 2027</span>
+    <span class="label">N 34.347° &nbsp; E 108.939° &nbsp; XI'AN</span>
+  </div>
 
-            </div>
-        </div>
+  <h1 class="hero-stack" aria-label="Open-source work, systems and AI, by Zhang Bokun">
+    <span class="l1"><span class="line">OPEN-SOURCE</span></span>
+    <span class="l2"><span class="line">WORK</span></span>
+    <span class="l3"><span class="line">BY ZHANG BOKUN</span></span>
+  </h1>
+
+  <div class="hero-bottom">
+    <div class="hero-meta">
+      <span>SOFTWARE ENGINEERING</span>
+      <span>XI'AN UNIVERSITY OF</span>
+      <span>FINANCE AND ECONOMICS</span>
     </div>
+    <a class="hero-cta" href="#prologue">Enter <span aria-hidden="true">→</span></a>
+    <div class="hero-mark">
+      <span>SYSTEMS · BACKEND · AI</span><br>
+      <span>SINCE Q3 2023</span>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <span class="line-y"></span>
+  </div>
 </section>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const projectSec = document.getElementById("projects");
-        const projectTitle = document.getElementById("projects-title");
-        const projectGrid = document.getElementById("projects-grid");
-        const panels = document.querySelectorAll(".project-panel");
-
-        function updateScroll() {
-            const rect = projectSec.getBoundingClientRect();
-            // Total track is reduced. Fast-paced configuration.
-            const totalScroll = rect.height - window.innerHeight;
-            const rawProgress = -rect.top / totalScroll;
-            const progress = Math.max(0, Math.min(1, rawProgress));
-
-            // 1. Scale down (0.0 - 0.15)
-            let scaleAmount = 1.05;
-            if (progress < 0.15) {
-                scaleAmount = 1.05 - (0.05 * (progress / 0.15));
-            } else {
-                scaleAmount = 1;
-            }
-            projectGrid.style.transform = "scale(" + scaleAmount + ")";
-
-            // 2. Title Fade (0.15 - 0.3)
-            let opacityAmt = 0;
-            if (progress > 0.15) {
-                opacityAmt = Math.min((progress - 0.15) / 0.15, 1);
-            }
-            projectTitle.style.opacity = opacityAmt;
-            projectTitle.style.transform = "translateY(" + (20 - 20 * opacityAmt) + "px)";
-
-            // 3. Gap & Corners (0.3 - 0.45)
-            let gapProgress = 0;
-            if(progress > 0.3) {
-                gapProgress = Math.min((progress - 0.3) / 0.15, 1);
-            }
-            projectGrid.style.gap = (gapProgress * 32) + "px";
-            const currentRadius = gapProgress * 16; 
-
-            // Deal with Gap subpixel overlap by injecting a calculated negative bleed when gap = 0
-            panels.forEach((panel, i) => {
-                const front = panel.querySelector(".front-face");
-                if (front) {
-                    front.style.borderRadius = currentRadius + "px";
-                    
-                    // The core fix: while gap is 0, stretch the boundaries by 1px
-                    if (gapProgress === 0) {
-                        if (i === 0) { front.style.right = "-1px"; front.style.left = "0px"; }
-                        else if (i === 1) { front.style.left = "-1px"; front.style.right = "-1px"; }
-                        else if (i === 2) { front.style.left = "-1px"; front.style.right = "0px"; }
-                    } else {
-                        front.style.right = "0px";
-                        front.style.left = "0px";
-                    }
-                }
-
-                // 4. Panel Flips (0.45 - 0.95)
-                const startFlip = 0.45; // 所有卡片同时开始翻转
-                const endFlip = 0.85;   // 延迟翻转完成时间，使得速率更慢
-                
-                let flipProgress = 0;
-                if(progress > startFlip) {
-                    flipProgress = Math.min((progress - startFlip) / (endFlip - startFlip), 1);
-                }
-                
-                let rotateY = flipProgress * 180;
-                panel.style.transform = "rotateY(" + rotateY + "deg)";
-
-                if(rotateY > 90) {
-                    front.style.visibility = "hidden";
-                    front.style.pointerEvents = "none";
-                } else {
-                    front.style.visibility = "visible";
-                    front.style.pointerEvents = "auto";
-                }
-            });
-            
-            requestAnimationFrame(updateScroll);
-        }
-
-        requestAnimationFrame(updateScroll);
-    });
-</script>
-
-<!-- About Section -->
-
-<style>
-    @keyframes soft-float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-15px); }
-    }
-    .animate-soft-float {
-        animation: soft-float 6s ease-in-out infinite;
-    }
-</style>
-
-    <section id="about" class="py-48 lg:py-64 scroll-mt-32 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col lg:flex-row items-center gap-16">
-                <!-- Profile Image with Soft Floating and Ambient Glow -->
-                <div class="w-full max-w-md lg:w-1/2 fade-up animate-soft-float">
-                    <div id="profile-container" class="relative group z-10">
-                        <!-- Offset Ambient Glow -->
-                        <div class="absolute -inset-4 bg-gradient-to-tr from-mint-400/40 to-transparent rounded-[2rem] blur-2xl -z-10 opacity-70 group-hover:opacity-100 transition-opacity duration-500 will-change-transform dark:from-mint-500/20"></div>
-                        
-                        <div class="relative glass-panel p-2 rounded-2xl aspect-square overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-mint-600/30 bg-white/40 dark:bg-slate-800/40">
-                            <div id="profile-shine"></div>
-                            <img id="profile-image" src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" alt="Zhang Nianchuan" class="w-full h-full object-cover rounded-xl grayscale group-hover:grayscale-0 transition-all duration-700">
-                            <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-white/90 dark:from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                <p class="text-slate-900 dark:text-white font-mono text-sm">> System Architect</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Text Content with Staggered Entrance -->
-                <div class="w-full lg:w-1/2">
-                    <h2 class="text-4xl font-bold mb-6 text-slate-900 dark:text-white fade-up" style="transition-delay: 100ms;">
-                        Architecting the <br><span class="gradient-text dark:text-mint-400">Invisible Foundation</span>.
-                    </h2>
-                    <div class="space-y-6 text-lg text-slate-600 dark:text-slate-400 font-light leading-relaxed">
-                        <p class="fade-up" style="transition-delay: 200ms;">
-                            Graduate of <strong class="text-slate-900 dark:text-white font-medium">Xi'an University of Finance and Economics</strong>. While others focus on the surface, I dive deep into the kernel.
-                        </p>
-                        <p class="fade-up" style="transition-delay: 300ms;">
-                            My expertise lies in the raw power of <strong class="text-slate-900 dark:text-white font-medium">C/C++</strong>, crafting robust network protocols, and optimizing system performance down to the last byte. I build the engines that drive modern applications.
-                        </p>
-                        
-                        <!-- Rich Quote Block -->
-                        <div class="glass-panel p-6 md:p-8 rounded-xl border-l-4 border-mint-600 my-8 relative overflow-hidden fade-up shadow-sm" style="transition-delay: 400ms;">
-                            <!-- Huge Watermark Quote -->
-                            <i class="fa fa-quote-left absolute -top-4 -left-4 text-[8rem] text-mint-500/10 dark:text-mint-400/5 -z-10 -rotate-6 pointer-events-none"></i>
-                            
-                            <p class="italic text-slate-800 dark:text-slate-200 font-medium tracking-wide text-base relative z-10 leading-loose">
-                                "我生怕自己本非美玉，故而不敢加以刻苦琢磨; 却又半信自己是块美玉，故又不肯庸庸碌碌，与瓦砾为伍。"
-                            </p>
-                            <p class="text-sm mt-4 text-mint-600 dark:text-mint-400 font-medium relative z-10 flex items-center gap-2">
-                                <span class="w-4 h-[1px] bg-mint-500 block"></span> 山月记 (The Tiger Poet)
-                            </p>
-                        </div>
-                        
-                        <!-- Interactive Social Buttons -->
-                        <div class="flex gap-4 pt-4 fade-up" style="transition-delay: 500ms;">
-                            <a href="https://github.com/shanchuann" target="_blank" class="w-14 h-14 flex items-center justify-center rounded-full bg-white dark:bg-slate-800/50 shadow-md text-slate-500 dark:text-slate-400 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-mint-500/20 hover:bg-mint-500 hover:text-white dark:hover:bg-mint-500/80 dark:hover:text-white transition-all duration-300 group ring-1 ring-slate-100 dark:ring-slate-700/50">
-                                <i class="fa fa-github text-2xl group-hover:scale-110 transition-transform"></i>
-                            </a>
-                            <a href="https://shanchuann.cn" target="_blank" class="w-14 h-14 flex items-center justify-center rounded-full bg-white dark:bg-slate-800/50 shadow-md text-slate-500 dark:text-slate-400 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-mint-500/20 hover:bg-mint-500 hover:text-white dark:hover:bg-mint-500/80 dark:hover:text-white transition-all duration-300 group ring-1 ring-slate-100 dark:ring-slate-700/50">
-                                <i class="fa fa-globe text-2xl group-hover:scale-110 transition-transform"></i>
-                            </a>
-                            <a href="mailto:1537521192@qq.com" class="w-14 h-14 flex items-center justify-center rounded-full bg-white dark:bg-slate-800/50 shadow-md text-slate-500 dark:text-slate-400 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-mint-500/20 hover:bg-mint-500 hover:text-white dark:hover:bg-mint-500/80 dark:hover:text-white transition-all duration-300 group ring-1 ring-slate-100 dark:ring-slate-700/50">
-                                <i class="fa fa-envelope text-2xl group-hover:scale-110 transition-transform"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Skills Section (Enriched) -->
-    <section id="skills" class="py-48 lg:py-64 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-20 fade-up">
-                <h2 class="text-4xl font-bold mb-4 text-slate-900 dark:text-white">Tech Arsenal</h2>
-                <p class="text-slate-600 dark:text-slate-400">Tools tailored for performance.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
-                <!-- Left Column: Languages & Tools -->
-                <div class="flex flex-col gap-10 fade-up h-full">
-                    <!-- Panel 1: Core Languages -->
-                    <div class="glass-panel p-6 md:p-10 rounded-3xl">
-                        <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
-                            <i class="fa fa-terminal text-mint-600 mr-4"></i> Core Languages
-                        </h3>
-                        <div class="space-y-8">
-                            <div class="group">
-                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
-                                    <span>C/C++</span>
-                                    <span class="gradient-text dark:text-mint-400">95%</span>
-                                </div>
-                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                                    <div class="skill-progress h-2  rounded-full relative" data-width="95%"></div>
-                                </div>
-                            </div>
-                            <div class="group">
-                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
-                                    <span>Python</span>
-                                    <span class="gradient-text dark:text-mint-400">80%</span>
-                                </div>
-                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                                    <div class="skill-progress h-2  rounded-full" data-width="80%"></div>
-                                </div>
-                            </div>
-                            <div class="group">
-                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
-                                    <span>Database Architecture</span>
-                                    <span class="gradient-text dark:text-mint-400">75%</span>
-                                </div>
-                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                                    <div class="skill-progress h-2  rounded-full" data-width="75%"></div>
-                                </div>
-                            </div>
-                            <!-- Added AI Concepts -->
-                            <div class="group">
-                                <div class="flex justify-between text-sm font-medium mb-2 text-slate-600 dark:text-slate-300">
-                                    <span>AI Concepts</span>
-                                    <span class="gradient-text dark:text-mint-400">60%</span>
-                                </div>
-                                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                                    <div class="skill-progress h-2  rounded-full" data-width="60%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Panel 2: Technologies & Frameworks (Tag Cloud Style) -->
-                    <div class="glass-panel p-6 md:p-10 rounded-3xl flex-1 flex flex-col justify-start">
-                        <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
-                            <i class="fa fa-code text-mint-500 mr-4"></i> Technologies & Tools
-                        </h3>
-                        <div class="flex flex-wrap gap-3">
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">STL Containers</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">C++11/14/17</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">MySQL</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">LangChain</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">Docker</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">Redis</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">Git</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">CMake</span>
-                            <span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium">GDB</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column: System Mastery (Vertical List) -->
-                <div class="glass-panel p-6 md:p-10 rounded-3xl fade-up h-full flex flex-col" style="transition-delay: 100ms;">
-                    <h3 class="text-2xl font-semibold mb-8 text-slate-900 dark:text-white flex items-center">
-                        <i class="fa fa-cogs text-mint-600 mr-4"></i> System Mastery
-                    </h3>
-                    <div class="space-y-4">
-                        
-                        <!-- New Card: Data Structures -->
-                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
-                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl">
-                                <i class="fa fa-sitemap"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">Algorithms & Data Structures</h4>
-                                    <span class="text-xs font-mono bg-mint-500/10 px-2 gradient-text py-0.5 rounded">Foundational</span>
-                                </div>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Solid foundation in computer science fundamentals.</p>
-                                <div class="flex gap-2 flex-wrap">
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Red-Black Trees</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Hash Tables</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Dynamic Programming</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Skill Card 1: Linux (Enriched) -->
-                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
-                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xl">
-                                <i class="fa fa-linux"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">Linux System Programming</h4>
-                                    <span class="text-xs font-mono bg-mint-600/10 px-2 gradient-text py-0.5 rounded">Advanced</span>
-                                </div>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Kernel APIs, memory management, and scheduling.</p>
-                                <div class="flex gap-2 flex-wrap">
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">IPC</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Process Mgmt</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Signals</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Skill Card 2: Network (Enriched) -->
-                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
-                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xl">
-                                <i class="fa fa-server"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">High-Performance Net</h4>
-                                    <span class="text-xs font-mono bg-mint-500/10 px-2 gradient-text py-0.5 rounded">Expert</span>
-                                </div>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Non-blocking I/O & TCP/IP optimization.</p>
-                                <div class="flex gap-2 flex-wrap">
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Epoll/Reactor</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">TCP/IP Stack</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">HTTP/HTTPS</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Skill Card 3: Concurrency (Enriched) -->
-                        <div class="p-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-start space-x-4 hover:bg-white dark:hover:bg-slate-700 transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
-                            <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xl">
-                                <i class="fa fa-cubes"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <h4 class="text-base font-bold text-slate-900 dark:text-white">Concurrency & Sync</h4>
-                                    <span class="text-xs font-mono bg-mint-500/10 px-2 gradient-text py-0.5 rounded">Proficient</span>
-                                </div>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Multithreading patterns and resource locking.</p>
-                                <div class="flex gap-2 flex-wrap">
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Thread Pool</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Mutex/CondVar</span>
-                                    <span class="text-xs text-slate-500 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-md">Deadlock Avoidance</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-48 lg:py-64 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-20 fade-up">
-                <h2 class="text-4xl font-bold mb-4 text-slate-900 dark:text-white">Initialize Handshake</h2>
-                <p class="text-slate-600 dark:text-slate-400">Establish connection and start collaboration.</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
-                <!-- Left Column: Contact Info -->
-                <div class="fade-up h-full">
-                    <div class="glass-panel p-6 md:p-8 rounded-3xl h-full flex flex-col">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Contact Information</h3>
-                        <p class="text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
-                            I am currently open for new opportunities. Whether you have a question about my stack, a project idea, or just want to say hi, feel free to drop a message.
-                        </p>
-
-                        <div class="space-y-8 flex-grow">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-mint-600/10 dark:bg-mint-600/20 flex items-center justify-center text-mint-600 dark:text-mint-400">
-                                    <i class="fa fa-envelope text-xl"></i>
-                                </div>
-                                <div class="ml-6">
-                                    <h4 class="text-slate-900 dark:text-white font-medium">Email Address</h4>
-                                    <a href="mailto:1537521192@qq.com" class="text-slate-600 dark:text-slate-400 hover:text-mint-600 dark:hover:text-mint-400 transition-colors mt-1 block">1537521192@qq.com</a>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-mint-500/10 dark:bg-mint-500/20 flex items-center justify-center text-mint-600 dark:text-mint-400">
-                                    <i class="fa fa-globe text-xl"></i>
-                                </div>
-                                <div class="ml-6">
-                                    <h4 class="text-slate-900 dark:text-white font-medium">Personal Blog</h4>
-                                    <a href="https://shanchuann.cn" target="_blank" class="text-slate-600 dark:text-slate-400 hover:text-mint-600 dark:hover:text-mint-400 transition-colors mt-1 block">shanchuann.cn</a>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 h-12 w-12 rounded-xl bg-mint-500/10 dark:bg-mint-500/20 flex items-center justify-center text-mint-600 dark:text-mint-400">
-                                    <i class="fa fa-map-marker text-xl"></i>
-                                </div>
-                                <div class="ml-6">
-                                    <h4 class="text-slate-900 dark:text-white font-medium">Location</h4>
-                                    <p class="text-slate-600 dark:text-slate-400 mt-1">Xi'an, China</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700 flex gap-6">
-                            <a href="https://github.com/shanchuann" target="_blank" class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
-                                <i class="fa fa-github text-lg"></i>
-                            </a>
-                            <a href="https://shanchuann.cn" target="_blank" class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-mint-600 hover:text-white dark:hover:bg-mint-600 dark:hover:text-white transition-all">
-                                <i class="fa fa-rss text-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column: Form -->
-                <div class="fade-up h-full" style="transition-delay: 100ms;">
-                     <div class="glass-panel p-6 md:p-10 rounded-3xl h-full flex flex-col justify-center">
-                        <form id="contact-form" action="https://formspree.io/f/xwpakqwk" method="POST" class="space-y-6 flex flex-col h-full">
-                            <input type="hidden" name="_subject" value="New Connection Request">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Your Name</label>
-                                <input type="text" id="name" name="name" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-mint-600 focus:ring-1 focus:ring-mint-600 transition-all" placeholder="Enter your name" required>
-                            </div>
-                            
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Email Address</label>
-                                <input type="email" id="email" name="email" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-mint-600 focus:ring-1 focus:ring-mint-600 transition-all" placeholder="Enter your email" required>
-                            </div>
-
-                            <div class="flex-grow flex flex-col">
-                                <label for="message" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Message</label>
-                                <textarea id="message" name="message" rows="5" class="flex-grow w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-mint-600 focus:ring-1 focus:ring-mint-600 transition-all" placeholder="What's on your mind?" required></textarea>
-                            </div>
-
-                            <!-- Enhanced Button -->
-                            <button type="submit" class="magnetic-btn mt-auto w-full btn-primary py-4 rounded-xl font-bold text-white tracking-wide uppercase text-sm flex justify-center items-center gap-2">
-                                                                Send Transmission
-                                                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" class="ml-2" style="vertical-align:middle">
-                                                                    <line x1="2" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                                                    <polyline points="11,5 16,9 11,13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                                </svg>
-                            </button>
-                        </form>
-                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer (Immersive) -->
-    <footer class="py-16 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
-                <!-- Brand Col -->
-                <div class="col-span-1 md:col-span-2 lg:col-span-2">
-                    <a href="#" class="text-2xl font-extrabold tracking-tight font-art text-slate-900 dark:text-white block mb-6">
-                        ZhangNianchuan
-                    </a>
-                    <p class="text-slate-500 dark:text-slate-500 text-sm leading-relaxed mb-6">
-                        Architecting robust systems and digital experiences. Focused on high-performance C++ backends and clean, modern frontends.
-                    </p>
-                    <div class="flex gap-4">
-                        <a href="https://github.com/shanchuann" target="_blank" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa fa-github"></i></a>
-                        <a href="https://shanchuann.cn" target="_blank" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa fa-globe"></i></a>
-                        <a href="mailto:1537521192@qq.com" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"><i class="fa fa-envelope"></i></a>
-                    </div>
-                </div>
-
-                <!-- Links Col 1 -->
-                <div>
-                    <h4 class="text-slate-900 dark:text-white font-bold mb-6">Navigation</h4>
-                    <ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
-                        <li><a href="#" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">Home</a></li>
-                        <li><a href="#projects" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">Projects</a></li>
-                        <li><a href="#about" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">About Me</a></li>
-                        <li><a href="#skills" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">Skills & Tech</a></li>
-                    </ul>
-                </div>
-
-                <!-- Links Col 2 -->
-                <div>
-                    <h4 class="text-slate-900 dark:text-white font-bold mb-6">Resources</h4>
-                    <ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
-                        <li><a href="https://shanchuann.cn" target="_blank" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">Tech Blog</a></li>
-                        <li><a href="https://github.com/shanchuann" target="_blank" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">GitHub Repo</a></li>
-                        <li><a href="#" class="hover:text-mint-600 dark:hover:text-mint-400 transition-colors">Resume</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact Col -->
-                <div>
-                    <h4 class="text-slate-900 dark:text-white font-bold mb-6">Status</h4>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="relative flex h-3 w-3">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-mint-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-mint-500"></span>
-                        </span>
-                        <span class="text-slate-500 dark:text-slate-400 text-sm">Open to Work</span>
-                    </div>
-                    <p class="text-slate-500 dark:text-slate-500 text-sm">
-                        Currently exploring Artificial Intelligence and developing applications with LangChain.
-                    </p>
-                </div>
-            </div>
-
-            <div class="border-t border-slate-200 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight font-heading">山川不念旧</p>
-                <p class="text-xs text-slate-500 dark:text-slate-600">
-                    &copy; 2025 Zhang Nianchuan. All Rights Reserved.
-                </p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // --- Theme Toggle Logic ---
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const mobileThemeToggleBtn = document.getElementById('mobile-theme-toggle');
-        const iconSun = document.getElementById('icon-sun');
-        const iconMoon = document.getElementById('icon-moon');
-
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            updateIcon(true);
-        } else {
-            document.documentElement.classList.remove('dark');
-            updateIcon(false);
-        }
-
-        function toggleTheme(event) {
-            const isDark = document.documentElement.classList.contains('dark');
-            const toggleAction = () => {
-                if (isDark) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.theme = 'light';
-                    updateIcon(false);
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.theme = 'dark';
-                    updateIcon(true);
-                }
-            };
-
-            if (!document.startViewTransition) {
-                toggleAction();
-                return;
-            }
-
-            const x = event?.clientX ?? innerWidth / 2;
-            const y = event?.clientY ?? innerHeight / 2;
-            const endRadius = Math.hypot(
-                Math.max(x, innerWidth - x),
-                Math.max(y, innerHeight - y)
-            );
-
-            const transition = document.startViewTransition(() => {
-                toggleAction();
-            });
-
-            transition.ready.then(() => {
-                const clipPath = [
-                    `circle(0px at ${x}px ${y}px)`,
-                    `circle(${endRadius}px at ${x}px ${y}px)`
-                ];
-                
-                document.documentElement.animate(
-                    { clipPath: clipPath },
-                    {
-                        duration: 500,
-                        easing: 'ease-in-out',
-                        pseudoElement: '::view-transition-new(root)'
-                    }
-                );
-            });
-        }
-
-        function updateIcon(isDark) {
-            if (isDark) {
-                iconSun.classList.remove('hidden');
-                iconMoon.classList.add('hidden');
-            } else {
-                iconSun.classList.add('hidden');
-                iconMoon.classList.remove('hidden');
-            }
-        }
-
-        themeToggleBtn.addEventListener('click', toggleTheme);
-        mobileThemeToggleBtn.addEventListener('click', toggleTheme);
-
-        // --- Typewriter Effect ---
-        const texts = ["C++ Developer", "System Architect", "Network Engineer"];
-        let count = 0;
-        let index = 0;
-        let currentText = "";
-        let letter = "";
-        
-        const typewriterEl = document.getElementById("typewriter");
-        if (typewriterEl) {
-            (function type() {
-                if (count === texts.length) {
-                    count = 0;
-                }
-                currentText = texts[count];
-                letter = currentText.slice(0, ++index);
-                
-                typewriterEl.textContent = letter;
-                
-                if (letter.length === currentText.length) {
-                    setTimeout(() => {
-                        count++;
-                        index = 0;
-                        type();
-                    }, 2000);
-                } else {
-                    setTimeout(type, 150); 
-                }
-            })();
-        }
-
-        // --- Intersection Observer ---
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: "0px 0px -50px 0px"
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    if(entry.target.querySelector('.skill-progress')) {
-                        const bars = entry.target.querySelectorAll('.skill-progress');
-                        bars.forEach(bar => {
-                            bar.style.width = bar.getAttribute('data-width');
-                        });
-                    }
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-up').forEach(el => {
-            observer.observe(el);
-        });
-
-        // --- Tilt Effect ---
-        document.querySelectorAll('.tilt-card').forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -5;
-                const rotateY = ((x - centerX) / centerX) * 5;
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-            });
-        });
-
-        // --- Mouse Follower ---
-        const cursorGlow = document.getElementById('cursor-glow');
-        let mouseX = 0, mouseY = 0;
-        let cursorX = 0, cursorY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        function animateCursor() {
-            const dx = mouseX - cursorX;
-            const dy = mouseY - cursorY;
-            cursorX += dx * 0.15;
-            cursorY += dy * 0.15;
-            cursorGlow.style.left = cursorX + 'px';
-            cursorGlow.style.top = cursorY + 'px';
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // --- Mobile Menu ---
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            const icon = menuBtn.querySelector('i');
-            if(mobileMenu.classList.contains('hidden')){
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            } else {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            }
-        });
-
-        document.querySelectorAll('.mobile-link').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-                menuBtn.querySelector('i').classList.remove('fa-times');
-                menuBtn.querySelector('i').classList.add('fa-bars');
-            });
-        });
-        
-        // --- Form Handling ---
-        const contactForm = document.getElementById('contact-form');
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = contactForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'TRANSMITTING... <i class="fa fa-spinner fa-spin ml-2"></i>';
-            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
-
-            try {
-                const response = await fetch(contactForm.action, {
-                    method: contactForm.method,
-                    body: new FormData(contactForm),
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (response.ok) {
-                    alert('Message Transmitted Successfully.');
-                    contactForm.reset();
-                } else {
-                    alert("Transmission Failed.");
-                }
-            } catch (error) {
-                alert("Network Error.");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-            }
-        });
-
-        // --- Profile Image Interactive Effect ---
-        const profileContainer = document.getElementById('profile-container');
-        const profileImage = document.getElementById('profile-image');
-        const profileShine = document.getElementById('profile-shine');
-
-        if (profileContainer && profileImage && profileShine) {
-            profileContainer.addEventListener('mousemove', (e) => {
-                const rect = profileContainer.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-
-                // Calculate rotation (limited to 15 degrees)
-                const rotateX = ((y - centerY) / centerY) * -15;
-                const rotateY = ((x - centerX) / centerX) * 15;
-
-                // Apply transformation
-                profileImage.style.transform = `
-                    perspective(1000px) 
-                    rotateX(${rotateX}deg) 
-                    rotateY(${rotateY}deg) 
-                    scale3d(1.05, 1.05, 1.05)
-                `;
-
-                // Move shine effect
-                profileShine.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.2), transparent 60%)`;
-                profileShine.style.opacity = '1';
-            });
-
-            profileContainer.addEventListener('mouseleave', () => {
-                profileImage.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-                profileShine.style.opacity = '0';
-            });
-        }
-    </script>
-    <script type="module">
-        import { prepareWithSegments, layoutNextLine } from 'https://esm.sh/@chenglou/pretext';
-
-        const canvas = document.getElementById('pretext-canvas');
-        
-        
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            let width, height;
-
-            function resize() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                const dpr = window.devicePixelRatio || 1;
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                ctx.scale(dpr, dpr);
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            // 超长文本，用于填满整个巨大的 Canvas
-            const baseText = "Zhang Nianchuan. System Architect. C/C++ Engine. While others focus on the surface, I dive deep into the kernel. High-concurrency scaling, GPU Acceleration, TCP/IP, Libevent, MySQL, LangChain, Next.js, Redis, Docker, Distributed Systems. Software engineering is not just about writing code, it's about building resilient architectures that withstand the test of time and scale. Memory management, pointer arithmetic, multi-threading paradigms, lock-free data structures, and asynchronous I/O architectures are the building blocks of true performance. From low-level socket programming to high-level system design, every layer of the stack matters. Optimizing CPU cache lines, reducing page faults, and minimizing context switches distinguish a good application from an extraordinary one. The pursuit of zero-cost abstractions, RAII, and deterministic memory allocation in modern C++ empowers developers to construct high-throughput engines without sacrificing safety. Microservices orchestration, containerization with Kubernetes, real-time message brokers like Kafka, and protocol buffers ensure seamless communication across clusters. Whether it is a real-time reservation system or a machine learning inference pipeline, the principles of solid concurrency control, database indexing schemas, and load balancing remain the same. The digital future requires scalable foundations, robust error handling, and a meticulous approach to latency reduction. We architect the invisible infrastructure that powers the visible world. Mastery over the POSIX API, epoll, kqueue, and standard template library semantics provides the raw power necessary to handle millions of concurrent connections. Embracing modern DevSecOps, CI/CD pipelines, and rigorous unit testing frameworks guarantees that deployment is as reliable as the code itself. As the boundaries of cloud computing and edge processing blur, true architects must navigate the complexities of CAP theorem, consensus algorithms like Raft and Paxos, and eventual consistency models in scalable NoSQL datastores. Building reliable systems means preparing for network partitions, node failures, and Byzantine faults with resilient retry mechanisms and exponential backoff strategies. The art of software architecture is a continuous journey of balancing trade-offs between memory, CPU, bandwidth, and development velocity. Hello World. ";
-            // 使用零宽空格 (\u200B) 分割每一个字符，从而强制 Pretext 以字母为单位进行排队打断
-            const text = baseText.repeat(10).split('').join('\u200B'); 
-
-            // 粗犷/强结构感的等宽字体
-            const fontConfig = '16px "JetBrains Mono", monospace';
-            
-            // Pretext 核心：预处理执行一次，极速建立 AST 及字距缓存
-            const prepared = prepareWithSegments(text, fontConfig);
-
-            let mouseX = width / 2;
-            let targetMouseX = width / 2;
-            let mouseY = height / 2;
-            let targetMouseY = height / 2;
-            // 力场半径 = 光标可见边界（CSS 变量）+ 外发光延展 + 安全边距
-            // 与 #cursor-glow 视觉范围对齐，确保文字被推到光晕之外，而不是穿过它
-            const rootStyle = getComputedStyle(document.documentElement);
-            const cursorRadiusPx = parseFloat(rootStyle.getPropertyValue('--cursor-radius')) || 150;
-            const cursorGlowSpreadPx = parseFloat(rootStyle.getPropertyValue('--cursor-glow-spread')) || 25;
-            const RADIUS = cursorRadiusPx + cursorGlowSpreadPx + 8; // ~183px：硬边框150 + 外发光25 + 8px缓冲
-            const MARGIN = 80; // 两侧边框
-            const LINE_HEIGHT = 26;
-
-            let viewportMouseX = width / 2;
-            let viewportMouseY = height / 2;
-
-            window.addEventListener('mousemove', (e) => {
-                viewportMouseX = e.clientX;
-                viewportMouseY = e.clientY;
-            });
-
-            function render() {
-                // Ensure canvas rect triggers absolute positioning mapping correctly on scroll
-                const rect = canvas.getBoundingClientRect();
-                targetMouseX = viewportMouseX - rect.left;
-                targetMouseY = viewportMouseY - rect.top;
-
-                ctx.clearRect(0, 0, width, height);
-
-                // Lerp 平滑计算鼠标和光标镜头
-                mouseX += (targetMouseX - mouseX) * 0.15;
-                mouseY += (targetMouseY - mouseY) * 0.15;
-                
-                
-
-                ctx.font = fontConfig;
-                // 检测当前是否是 Dark 模式，并动态平滑切换文字颜色
-                const isDark = document.documentElement.classList.contains('dark');
-                ctx.fillStyle = isDark ? '#334155' : '#cbd5e1'; // 根据深浅模式设置不同的系统色系
-                ctx.textBaseline = 'top';
-
-                let cursor = { segmentIndex: 0, graphemeIndex: 0 };
-                let y = MARGIN;
-
-                // 圆形裁剪区：保证 RADIUS 内的字形像素在物理层面被擦除，
-                // 兜底 layoutNextLine 偶发的字符级溢出（实测约 50-70px 的尾字超界）。
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(0, 0, width, height);
-                ctx.arc(mouseX, mouseY, RADIUS, 0, Math.PI * 2);
-                ctx.clip('evenodd');
-
-                // [核心颠覆]：极速环绕计算 (Collision Wrap Engine)
-                // 每一帧都在计算并重排全屏所有的文字，躲避鼠标黑洞！
-                while (true) {
-                    // 判断当前行 y 是否在光标黑洞范围内
-                    let dy = Math.abs(mouseY - (y + LINE_HEIGHT/2));
-                    if (dy < RADIUS) {
-                        // 使用勾股定理计算出当前行被黑洞遮挡的横向空洞大小
-                        let dx = Math.sqrt(RADIUS * RADIUS - dy * dy);
-                        let holeStart = mouseX - dx;
-                        let holeEnd = mouseX + dx;
-
-                        // 计算左半边可用宽度
-                        let leftWidth = holeStart - MARGIN;
-                        if (leftWidth > 30) {
-                            const lineLeft = layoutNextLine(prepared, cursor, leftWidth);
-                            if (lineLeft) {
-                                ctx.fillText(lineLeft.text, MARGIN, y);
-                                cursor = lineLeft.end;
-                            }
-                        }
-                        
-                        // 计算右半边可用宽度
-                        let rightWidth = width - holeEnd - MARGIN;
-                        if (rightWidth > 30) {
-                            const lineRight = layoutNextLine(prepared, cursor, rightWidth);
-                            if (lineRight) {
-                                ctx.fillText(lineRight.text, holeEnd, y);
-                                cursor = lineRight.end;
-                            }
-                        }
-
-                    } else {
-                        // 如果没有触碰到力场，正常横行铺满排版
-                        const line = layoutNextLine(prepared, cursor, width - MARGIN * 2);
-                        if (!line) break;
-                        ctx.fillText(line.text, MARGIN, y);
-                        cursor = line.end;
-                    }
-                    
-                    y += LINE_HEIGHT;
-                    if (y > height - MARGIN) break; // 超出屏幕下方即停止渲染
-                }
-
-                ctx.restore();
-
-                requestAnimationFrame(render);
-            }
-
-            render();
-
-            // --- Advanced Typewriter Effect for Hero ---
-            const heroPhrases = [
-                { top: 'SYSTEM', bottom: 'ARCHITECT' },
-                { top: 'C/C++', bottom: 'ENGINEER' },
-                { top: 'CORE', bottom: 'KERNEL' },
-                { top: 'BACKEND', bottom: 'DEVELOPER' }
-            ];
-            let phraseIdx = 0;
-            const title1 = document.getElementById('hero-title-1');
-            const title2 = document.getElementById('hero-title-2');
-            
-            if (title1 && title2) {
-                let isDeleting = true;
-                let fullText = 'SYSTEM';
-                let charIdx = fullText.length;
-                
-                function typeHero() {
-                    const currentPhrase = heroPhrases[phraseIdx];
-                    fullText = currentPhrase.top;
-
-                    if (isDeleting) {
-                        charIdx--;
-                        title1.textContent = fullText.substring(0, charIdx);
-                    } else {
-                        charIdx++;
-                        title1.textContent = fullText.substring(0, charIdx);
-                    }
-
-                    title2.textContent = currentPhrase.bottom;
-
-                    let typeSpeed = isDeleting ? 40 : 120;
-
-                    if (!isDeleting && charIdx === fullText.length) {
-                        typeSpeed = 3000;
-                        isDeleting = true;
-                    } else if (isDeleting && charIdx === 0) {
-                        isDeleting = false;
-                        phraseIdx = (phraseIdx + 1) % heroPhrases.length;
-                        typeSpeed = 400;
-                    }
-                    setTimeout(typeHero, typeSpeed);
-                }
-                
-                setTimeout(typeHero, 2000);
-            }
-        }
-    </script>
-
-    <!-- Splash Screen Logic -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            let renderActive = true;
-            let rafId;
-
-            function raf(time) {
-                if (renderActive && container && typeof renderer !== 'undefined') {
-                    renderer.render(scene, camera);
-                    rafId = requestAnimationFrame(raf);
-                }
-            }
-            rafId = requestAnimationFrame(raf);
-
-            // 2. Three.js Setup
-            const container = document.getElementById('webgl-canvas-container');
-            const scene = new THREE.Scene();
-            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
-            camera.position.z = 1;
-
-            const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(1);
-            renderer.setClearColor(0x000000, 0);
-            container.appendChild(renderer.domElement);
-
-            // 3. Shader Material
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load('https://s2.loli.net/2025/09/25/bMEfVYwjH18cB5Q.png', (texture) => {
-                const geometry = new THREE.PlaneGeometry(2, 2);
-
-                const material = new THREE.ShaderMaterial({
-                    uniforms: {
-                        uTexture: { value: texture },
-                        uProgress: { value: 0.0 }
-                    },
-                    vertexShader: `
-                        varying vec2 vUv;
-                        void main() {
-                            vUv = uv;
-                            gl_Position = vec4(position, 1.0);
-                        }
-                    `,
-                    fragmentShader: `
-                        uniform sampler2D uTexture;
-                        uniform float uProgress;
-                        varying vec2 vUv;
-
-                        float random (vec2 st) {
-                            return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-                        }
-
-                        float noise (vec2 st) {
-                            vec2 i = floor(st);
-                            vec2 f = fract(st);
-
-                            float a = random(i);
-                            float b = random(i + vec2(1.0, 0.0));
-                            float c = random(i + vec2(0.0, 1.0));
-                            float d = random(i + vec2(1.0, 1.0));
-
-                            vec2 u = f*f*(3.0-2.0*f);
-
-                            return mix(a, b, u.x) +
-                                    (c - a)* u.y * (1.0 - u.x) +
-                                    (d - b) * u.x * u.y;
-                        }
-
-                        void main() {
-                            vec4 color = texture2D(uTexture, vUv);
-                            float dist = length(vUv - vec2(0.5));
-                            float n = noise(vUv * 40.0);
-                            float mask = dist + n * 0.8;
-                            
-                            if (mask < uProgress) discard;
-                            gl_FragColor = color;
-                        }
-                    `,
-                    transparent: true
-                });
-
-                const mesh = new THREE.Mesh(geometry, material);
-                scene.add(mesh);
-
-                // Ensure the canvas background turns transparent once the texture is rendered
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        container.style.backgroundImage = 'none';
-                        container.style.backgroundColor = 'transparent';
-                        
-                        // Reveal the main content now that the splash screen is fully covering the viewport
-                        const mainContent = document.getElementById("main-content");
-                        if (mainContent) {
-                            mainContent.style.opacity = '1';
-                            mainContent.style.pointerEvents = 'auto';
-                        }
-                    });
-                });
-
-                // 4. Fake Loader
-                let isLoaded = false;
-                let loadingProgress = 0;
-                let loadingInterval = setInterval(() => {
-                    loadingProgress += Math.floor(Math.random() * 5) + 1; // Increment by 1-5
-                    if (loadingProgress >= 100) {
-                        loadingProgress = 100;
-                        isLoaded = true;
-                        clearInterval(loadingInterval);
-                        
-                        // Show prompt
-                        const promptEl = document.getElementById('splash-prompt');
-                        if (promptEl) promptEl.style.opacity = '1';
-                    }
-                    
-                    // Update timer text
-                    const timerEl = document.getElementById('splash-timer');
-                    if (timerEl) {
-                        timerEl.textContent = loadingProgress.toString().padStart(3, '0');
-                    }
-                }, 30);
-
-                // 5. Virtual Scroll for Splash
-                let virtualScroll = 0;
-                let scrollMax = window.innerHeight * 1.5;
-                let isComplete = false;
-                
-                let lastTouchY = 0;
-
-                function handleScroll(e) {
-                    if (!isLoaded || isComplete) return;
-                    
-                    let deltaY = 0;
-                    if (e.type === 'wheel') {
-                        deltaY = e.deltaY;
-                    } else if (e.type === 'touchmove') {
-                        let currentTouchY = e.touches[0].clientY;
-                        if (lastTouchY !== 0) {
-                            deltaY = lastTouchY - currentTouchY;
-                        }
-                        lastTouchY = currentTouchY;
-                    }
-                    
-                    virtualScroll += deltaY;
-                    if (virtualScroll < 0) virtualScroll = 0;
-                    if (virtualScroll > scrollMax) virtualScroll = scrollMax;
-
-                    let p = virtualScroll / scrollMax;
-
-                    gsap.to(material.uniforms.uProgress, { value: p * 1.5, duration: 0.5, ease: "power2.out", overwrite: "auto" });
-                    gsap.to("#emerging-text h1", { opacity: (p < 0.5 ? p * 2 : 1 - (p - 0.5) * 2), duration: 0.5, overwrite: "auto" });
-                    gsap.to("#splash-ui", { opacity: 1 - p * 2, duration: 0.5, overwrite: "auto" });
-
-                    if (p >= 1) {
-                        isComplete = true;
-                        
-                        // Disable events completely
-                        window.removeEventListener('wheel', handleScroll);
-                        window.removeEventListener('touchmove', handleScroll);
-                        window.removeEventListener('touchstart', handleTouchStart);
-                        
-                        // Cleanup
-                        gsap.delayedCall(0.5, () => {
-                            renderActive = false;
-                            cancelAnimationFrame(rafId);
-                            if (renderer) renderer.dispose();
-                            if (geometry) geometry.dispose();
-                            if (material) material.dispose();
-                            if (texture) texture.dispose();
-                            if (scene) scene.clear();
-                            container.remove();
-
-                            const text = document.getElementById("emerging-text");
-                            if (text) text.remove();
-                            
-                            const splashUi = document.getElementById("splash-ui");
-                            if (splashUi) splashUi.remove();
-
-                            // Restore scrolling
-                            document.body.classList.remove('overflow-hidden');
-                        });
-                    }
-                }
-                
-                function handleTouchStart(e) {
-                    lastTouchY = e.touches[0].clientY;
-                }
-
-                window.addEventListener('wheel', handleScroll, { passive: false });
-                window.addEventListener('touchstart', handleTouchStart, { passive: false });
-                window.addEventListener('touchmove', handleScroll, { passive: false });
-            });
-
-            window.addEventListener('resize', () => {
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(1);
-            });
-        });
-
-        // --- Page Transition Animation ---
-        document.addEventListener("DOMContentLoaded", () => {
-            // Blinds container (flex row for vertical strip blinds spanning horizontally)
-            const blindsContainer = document.createElement('div');
-            blindsContainer.className = 'fixed inset-0 z-[9998] pointer-events-none flex flex-row';
-            document.body.appendChild(blindsContainer);
-
-            // Create 16 vertical blind elements for higher density
-            const blindCount = 16;
-            const blinds = [];
-            for (let i = 0; i < blindCount; i++) {
-                const blind = document.createElement('div');
-                // Theme adaptation: light mode and dark mode, added relative positioning and strong shadow
-                blind.className = 'flex-1 h-full bg-slate-50 dark:bg-[#0f172a] shadow-[10px_0_20px_-5px_rgba(0,0,0,0.3)] dark:shadow-[10px_0_20px_-5px_rgba(0,0,0,0.8)] relative';
-                blind.style.zIndex = blindCount - i; // Ensued left blinds cast shadows over right ones
-                blind.style.transform = 'scaleX(0)'; 
-                blind.style.transformOrigin = 'left';
-                blindsContainer.appendChild(blind);
-                blinds.push(blind);
-            }
-
-            // Text container for transition title overlay 
-            const textContainer = document.createElement('div');
-            textContainer.className = 'fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center';
-            document.body.appendChild(textContainer);
-            
-            const overlayText = document.createElement('div');
-            // Responsive text color and perspective container for 3D letter animation
-            overlayText.className = 'text-slate-900 dark:text-white text-4xl md:text-6xl font-art font-extrabold tracking-widest flex items-center justify-center';
-            overlayText.style.perspective = '1000px'; // Enable 3D space for children
-            textContainer.appendChild(overlayText);
-
-            // Select nav links that point to specific sections
-            const navLinks = document.querySelectorAll('a[href^="#"]');
-            
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const targetId = this.getAttribute('href');
-                    if (!['#projects', '#about', '#skills', '#contact'].includes(targetId)) return;
-                    
-                    const targetEl = document.querySelector(targetId);
-                    if (!targetEl) return;
-
-                    e.preventDefault();
-                    
-                    let linkText = this.textContent.trim().toUpperCase();
-                    if (!linkText) linkText = targetId.substring(1).toUpperCase();
-                    
-                    // Split text into spans for per-letter 3D animation
-                    overlayText.innerHTML = linkText.split('').map(char => {
-                        const isSpace = char === ' ';
-                        return `<span class="inline-block" style="min-width: ${isSpace ? '1.5rem' : 'auto'}">${char}</span>`;
-                    }).join('');
-                    
-                    const chars = overlayText.querySelectorAll('span');
-                    
-                    // Reset states: blinds start from left, text is hidden and flipped backward
-                    gsap.set(blinds, { scaleX: 0, transformOrigin: 'left' });
-                    gsap.set(chars, { y: 40, opacity: 0, rotationX: -90, transformOrigin: '50% 50% -20px' });
-
-                    const tl = gsap.timeline();
-                    
-                    // Blinds closing
-                    tl.to(blinds, {
-                        scaleX: 1,
-                        duration: 0.35,
-                        stagger: 0.025,
-                        ease: 'power3.inOut'
-                    })
-                    // Characters animating in with a 3D flip and spring effect
-                    .to(chars, {
-                        y: 0,
-                        opacity: 1,
-                        rotationX: 0,
-                        duration: 0.4,
-                        stagger: 0.02,
-                        ease: 'back.out(1.7)'
-                    }, "-=0.2")
-                    .call(() => {
-                        // Switch section & clear smooth scrolling temporarily
-                        document.documentElement.classList.remove('scroll-smooth');
-                        window.scrollTo(0, targetEl.offsetTop);
-                        
-                        // Close mobile menu if open
-                        const mobileMenu = document.getElementById('mobile-menu');
-                        const mobileMenuBtn = document.getElementById('menu-btn');
-                        if (mobileMenu && !mobileMenu.classList.contains('hidden') && mobileMenuBtn) {
-                            mobileMenu.classList.add('hidden');
-                            const icon = mobileMenuBtn.querySelector('i');
-                            if (icon) {
-                                icon.classList.remove('fa-times');
-                                icon.classList.add('fa-bars');
-                            }
-                        }
-                    })
-                    // Characters animating out
-                    .to(chars, {
-                        y: -30,
-                        opacity: 0,
-                        rotationX: 90,
-                        duration: 0.25,
-                        stagger: 0.015,
-                        ease: 'power2.in',
-                        delay: 0.1 
-                    })
-                    .call(() => {
-                        // Change origin point to right for the blinds
-                        gsap.set(blinds, { transformOrigin: 'right', scaleX: 1 });
-                        document.documentElement.classList.add('scroll-smooth');
-                        history.pushState(null, null, targetId);
-                    })
-                    // Blinds opening
-                    .to(blinds, {
-                        scaleX: 0,
-                        duration: 0.35,
-                        stagger: 0.025,
-                        ease: 'power3.inOut'
-                    });
-                });
-            });
-        });
-
-    </script>
-
-    <!-- Custom Right-Side Progress Tracker -->
-    <div id="custom-scroll-tracker" class="fixed right-6 lg:right-12 top-24 bottom-12 w-20 z-[100] pointer-events-none hidden md:flex flex-col items-center justify-center font-mono opacity-0 transition-opacity duration-700">
-        <!-- Vertical Track Line -->
-        <div class="absolute right-6 top-0 bottom-0 w-[2px] bg-slate-200/50 dark:bg-slate-700/50 shadow-[0_0_10px_rgba(0,255,204,0.1)] rounded-full"></div>
-        
-        <!-- Active Percentage Indicator (Middle) -->
-        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-mint-500/50 rounded-full flex items-center justify-center text-sm font-black text-mint-600 dark:text-mint-400 shadow-[0_0_15px_rgba(0,255,204,0.3)] z-30 transition-transform duration-300">
-            <span id="tracker-percent">0%</span>
-        </div>
-
-        <!-- Labels Container -->
-        <div id="tracker-labels" class="absolute right-16 top-0 bottom-0 w-32 z-20 overflow-visible">
-            <!-- JS generates items here -->
-        </div>
+<!-- ────────────────────────────────────────────────────────
+     2. PROLOGUE
+──────────────────────────────────────────────────────── -->
+<section class="prologue section" id="prologue">
+  <div class="shell">
+    <p class="label">Prologue / 序</p>
+    <blockquote class="reveal">
+      把代码当成可以反复打磨的器物 —— 在底层系统的呼吸里，慢慢寻找一种自己的诚实。
+    </blockquote>
+    <p class="attr">Zhang Bokun · MMXXVI</p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     3. ABOUT
+──────────────────────────────────────────────────────── -->
+<section class="about section" id="about">
+  <div class="shell">
+    <h2 class="lead reveal">
+      Zhang Bokun
+      <span class="sub">— a second-year software engineering student, building one commit at a time.</span>
+    </h2>
+
+    <div class="about-grid">
+      <div>
+        <p class="label">About / 关于</p>
+        <p class="body-en reveal">
+          I'M A SECOND-YEAR<br>
+          SOFTWARE ENGINEERING<br>
+          STUDENT, BUILDING<br>
+          HIGH-CONCURRENCY<br>
+          C++ BACKENDS AND<br>
+          AI-ASSISTED FULL-STACK<br>
+          TOOLS — STITCHING THE<br>
+          TWO TOGETHER.
+        </p>
+      </div>
+      <div class="ms">
+        <p class="label">在做的事 / In progress</p>
+        <p class="body-cn reveal">
+          我是西安财经大学软件工程本科二年级在读，正在做的事是高并发 C++ 服务端、AI 辅助的全栈工具，
+          以及把这两件事缝合在一起。
+        </p>
+        <p class="body-cn reveal">
+          比起"颠覆"和"重塑"，我更愿意把代码当成可以反复打磨的器物 ——
+          先把问题写清楚，再写代码；信任工具，但不让工具替我思考。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     4. WAY
+──────────────────────────────────────────────────────── -->
+<section class="way section">
+  <div class="shell">
+    <div class="head">
+      <h2 class="big reveal">
+        How I Work
+        <span class="sub">— three rules I keep coming back to.</span>
+      </h2>
+      <span class="label">§ 02</span>
     </div>
 
-    <script>
-        // --- Magnetic Buttons ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const magneticBtns = document.querySelectorAll('.magnetic-btn');
+    <div class="way-list">
+      <div class="way-row reveal">
+        <span class="num">01</span>
+        <span class="en">Write the problem first</span>
+        <span class="cn">先把问题写清楚，再写代码。能写清楚的，往往已经做完一半。</span>
+      </div>
+      <div class="way-row reveal">
+        <span class="num">02</span>
+        <span class="en">Trust the tool, keep the judgment</span>
+        <span class="cn">信任工具，但不让工具替你思考 —— AI 给我节奏，我给它判断。</span>
+      </div>
+      <div class="way-row reveal">
+        <span class="num">03</span>
+        <span class="en">One thing at a time</span>
+        <span class="cn">一次只做一件事，做到能讲清楚为止。讲不清楚的，就还没做完。</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-            magneticBtns.forEach(btn => {
-                btn.addEventListener('mousemove', (e) => {
-                    const rect = btn.getBoundingClientRect();
-                    const x = e.clientX - rect.left - rect.width / 2;
-                    const y = e.clientY - rect.top - rect.height / 2;
-                    
-                    gsap.to(btn, {
-                        x: x * 0.3,
-                        y: y * 0.3,
-                        duration: 0.3,
-                        ease: 'power2.out'
-                    });
-                });
+<!-- ────────────────────────────────────────────────────────
+     5. MAP — radial knowledge graph
+──────────────────────────────────────────────────────── -->
+<section class="map section" id="map">
+  <div class="shell">
+    <p class="label" style="text-align:center;">Where the work takes me</p>
+    <h2 class="huge reveal" style="text-align:center; margin:24px 0 16px;">
+      a m a p &nbsp; o f &nbsp; <em class="italic">paths.</em>
+    </h2>
+    <p class="head-line">从西安财经大学出发，这四条路把我带到了不同的工地。</p>
 
-                btn.addEventListener('mouseleave', () => {
-                    gsap.to(btn, {
-                        x: 0,
-                        y: 0,
-                        duration: 0.7,
-                        ease: 'elastic.out(1, 0.3)'
-                    });
-                });
-            });
+    <div class="map-canvas" id="mapCanvas">
+      <svg viewBox="0 0 1280 880" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="1" fill="oklch(0.55 0.020 60 / .25)"/>
+          </pattern>
+        </defs>
+        <rect width="1280" height="880" fill="url(#dots)"/>
+        <g stroke="oklch(0.24 0.012 50)" stroke-width="1" fill="none">
+          <path d="M640 440 L 200 200" stroke-dasharray="2 6"/>
+          <path d="M640 440 L 1080 220" stroke-dasharray="2 6"/>
+          <path d="M640 440 L 180 720" stroke-dasharray="2 6"/>
+          <path d="M640 440 L 1100 700" stroke-dasharray="2 6"/>
+        </g>
+        <g fill="oklch(0.52 0.135 38)">
+          <circle cx="200"  cy="200" r="4"/>
+          <circle cx="1080" cy="220" r="4"/>
+          <circle cx="180"  cy="720" r="4"/>
+          <circle cx="1100" cy="700" r="4"/>
+        </g>
+      </svg>
+
+      <div class="node center" style="left:50%; top:50%;">
+        Xi'an Univ. of Finance &amp; Economics
+      </div>
+
+      <div class="node" style="left:15.6%; top:22.7%;">
+        <span class="title">Systems · C/C++</span>
+        <span class="dist">— 720 D</span>
+      </div>
+      <div class="node" style="left:84.4%; top:25%;">
+        <span class="title">High-concurrency Backend</span>
+        <span class="dist">— 450 D</span>
+      </div>
+      <div class="node" style="left:14%; top:81.8%;">
+        <span class="title">Database &amp; Storage</span>
+        <span class="dist">— 540 D</span>
+      </div>
+      <div class="node" style="left:85.9%; top:79.5%;">
+        <span class="title">AI Engineering</span>
+        <span class="dist">— 380 D</span>
+      </div>
+    </div>
+
+    <p class="foot-line reveal">
+      &nbsp;&nbsp;&nbsp; 1000 公里以外的清华操作系统训练营 ／ 字节青训营，<br>
+      也算同一张地图上的两座坐标。 &nbsp;&nbsp;&nbsp;
+    </p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     6. HOLD — scrub between two epochs
+──────────────────────────────────────────────────────── -->
+<section class="hold section">
+  <div class="shell">
+    <div class="head">
+      <h2 class="big reveal">Hold &amp; Move</h2>
+      <div class="toggle">
+        <button class="is-active" data-epoch="0">Then · 2023</button>
+        <button data-epoch="1">Now · 2026</button>
+      </div>
+    </div>
+
+    <div class="hold-stage" id="holdStage" data-cursor="hold">
+      <div class="hold-track" id="holdTrack">
+        <div class="hold-panel">
+          <span class="epoch">FRESHMAN YEAR · Q3 2023</span>
+          <p class="quote">那时候我刚学完 C 语言，对着 "Hello, World" 想象一座可以跑起来的城市。</p>
+          <ul>
+            <li><span>Languages</span><span>C · Python (basic)</span></li>
+            <li><span>Reading</span><span>CSAPP · K&amp;R</span></li>
+            <li><span>Built</span><span>Course assignments</span></li>
+            <li><span>Tools</span><span>VS Code · Git (just learning)</span></li>
+          </ul>
+        </div>
+        <div class="hold-panel">
+          <span class="epoch">JUNIOR YEAR · Q2 2026</span>
+          <p class="quote">现在我在写自己的网络库，让 epoll 在事务里跑得安全；让 AI 帮我读日志，但不让它替我下结论。</p>
+          <ul>
+            <li><span>Languages</span><span>C++17/20 · Java · TS</span></li>
+            <li><span>Working on</span><span>HyperTicket · ChronoLite</span></li>
+            <li><span>Shipped</span><span>UQBank · Hexo Viz</span></li>
+            <li><span>Tools</span><span>Claude Code · GDB · CMake</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="label" style="text-align:center; margin-top:30px;">— hold &amp; drag —</p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     7. WORK — 4 typographic project cards
+──────────────────────────────────────────────────────── -->
+<section class="work section" id="work">
+  <div class="shell">
+    <div class="head">
+      <h2 class="huge reveal">Work.</h2>
+      <span class="label">04 / Selected projects</span>
+    </div>
+
+    <div class="work-list">
+
+      <a class="work-row" href="https://github.com/shanchuann/HyperTicket" target="_blank" rel="noopener">
+        <span class="idx">01</span>
+        <div>
+          <h3 class="name">HyperTicket</h3>
+          <p class="role">高性能票务预约系统 · <span class="acc">core developer</span> · 2025.12 — 2026.06</p>
+        </div>
+        <div class="desc">
+          <p>在单机上把"几万个连接"压成"一个事件循环" —— 主从 Reactor + one loop per thread + 业务线程池；下单与取消放进事务里，靠 <code>SELECT … FOR UPDATE</code> 行锁根治超卖。已在 Linux 完成完整部署与压测。</p>
+          <div class="stack"><span>C++17</span><span>epoll Reactor</span><span>MySQL</span><span>jsoncpp</span><span>ChronoLite</span><span>React · TS</span></div>
+        </div>
+        <span class="open">↗</span>
+      </a>
+
+      <a class="work-row" href="https://github.com/shanchuann/Visualization-for-Hexo" target="_blank" rel="noopener">
+        <span class="idx">02</span>
+        <div>
+          <h3 class="name">Visualization for Hexo</h3>
+          <p class="role">博客可视化管理工具 · full-stack · 2026.01 — 2026.05</p>
+        </div>
+        <div class="desc">
+          <p>给 Hexo 装一张可视化的脸 —— Markdown 编辑与实时预览、Front Matter 表单化、Git 集成、Hexo 命令一键执行。内置多模型 AI 助手（DeepSeek / GLM / OpenAI）做摘要、对话编辑与逐行 Diff 审查。Material 3 无边框桌面端，GitHub Actions 打包发布。</p>
+          <div class="stack"><span>C++17</span><span>Qt 6 / QML</span><span>Material Design 3</span><span>SQLite</span><span>Multi-LLM</span></div>
+        </div>
+        <span class="open">↗</span>
+      </a>
+
+      <a class="work-row" href="https://github.com/shanchuann/ChronoLite" target="_blank" rel="noopener">
+        <span class="idx">03</span>
+        <div>
+          <h3 class="name">ChronoLite</h3>
+          <p class="role">轻量级异步日志库 · solo · 2026.02 — 2026.04</p>
+        </div>
+        <div class="desc">
+          <p>为高并发服务端和资源受限环境写的日志库 —— 双缓冲交换 + 后台写线程，业务线程不等磁盘 IO；纳秒时间戳、文件大小与时间双重轮转、过期自动清理。printf 与流式两种 API；CMake 静态/动态库；已嵌进 HyperTicket 等项目当基础组件。</p>
+          <div class="stack"><span>C++11 / 17</span><span>CMake</span><span>Linux / Windows</span><span>Double-buffer</span></div>
+        </div>
+        <span class="open">↗</span>
+      </a>
+
+      <a class="work-row" href="https://github.com/shanchuann/Universal-Question-Bank-Paper-System" target="_blank" rel="noopener">
+        <span class="idx">04</span>
+        <div>
+          <h3 class="name">UQBank</h3>
+          <p class="role">通用题库组卷考试系统 · full-stack · 2025.11 — 2026.01 · <span class="acc">live</span></p>
+        </div>
+        <div class="desc">
+          <p>开源考试平台 —— 题库、智能组卷、在线考试、RBAC、数据分析、自动化工作流；JWT 鉴权，Docker Compose 部署，预留 Ollama 接口为后续主观题批阅与难度分级铺路。线上版本：uqbank.shanchuann.cn。</p>
+          <div class="stack"><span>Java 17</span><span>Spring Boot</span><span>Vue 3 · TS</span><span>PostgreSQL</span><span>Docker</span><span>Ollama</span></div>
+        </div>
+        <span class="open">↗</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     8. ARSENAL — horizontal tabs
+──────────────────────────────────────────────────────── -->
+<section class="arsenal section">
+  <div class="shell">
+    <p class="label">Arsenal / 工具箱</p>
+    <h2 class="huge reveal">What I reach for.</h2>
+
+    <div class="arsenal-tabs" role="tablist">
+      <button class="is-active" data-tab="system">Systems</button>
+      <button data-tab="backend">Backend</button>
+      <button data-tab="ai">AI</button>
+      <button data-tab="tooling">Tooling</button>
+    </div>
+
+    <div class="arsenal-pane" data-pane="system">
+      <div class="since">From 2023<small>— First language. Still the one I trust most.</small></div>
+      <p class="desc">从 C 开始，然后 C++11/17/20。STL 容器、智能指针、移动语义、模板、lambda 这些我用着不慌。Linux 系统编程是顺着 C++ 这条线自然走过来的 —— 内核一直在问我答不上的问题，我得回去补课。</p>
+      <div class="keys">
+        <span>C++11 / 17 / 20</span>
+        <span>STL · RAII · Move semantics</span>
+        <span>Templates · Lambda</span>
+        <span>Linux · IPC · Signals · GDB</span>
+      </div>
+    </div>
+
+    <div class="arsenal-pane" data-pane="backend" hidden>
+      <div class="since">Since 2024<small>— Where my projects actually live.</small></div>
+      <p class="desc">Linux 下的进程/线程模型、IO 多路复用、事件驱动框架。TCP/IP 四层和 HTTP/HTTPS 都吃过亏才搞明白 —— 粘包、心跳、自定义协议这些是 HyperTicket 教我的。MySQL 的事务隔离与 InnoDB 锁也是这一路顺出来的。</p>
+      <div class="keys">
+        <span>Epoll · Reactor · Thread pool</span>
+        <span>TCP/IP · HTTP/HTTPS</span>
+        <span>MySQL · ACID · InnoDB locks</span>
+        <span>Redis · Cache patterns</span>
+      </div>
+    </div>
+
+    <div class="arsenal-pane" data-pane="ai" hidden>
+      <div class="since">Since 2025<small>— Working with it daily, carefully.</small></div>
+      <p class="desc">Claude Code 是日常同事。LangChain 用来串调用与外部工具，Ollama 在本地跑小模型，Prompt 是当作"接口契约"在维护。我会让 AI 帮我读日志、复盘 bug、生成脚手架 —— 但所有架构决策和最终判断留给人。</p>
+      <div class="keys">
+        <span>Claude Code · Copilot</span>
+        <span>LangChain</span>
+        <span>Ollama · Local LLMs</span>
+        <span>Prompt engineering</span>
+      </div>
+    </div>
+
+    <div class="arsenal-pane" data-pane="tooling" hidden>
+      <div class="since">Always<small>— The boring stuff that decides whether a project lives.</small></div>
+      <p class="desc">Git 用得多就总会练顺。CMake、Gradle 跨平台搭项目；GitHub Actions 把构建、测试、发布串起来；Docker / Docker Compose 是给同事跑起来最稳的方式；GDB 是真正出问题时的伙伴。</p>
+      <div class="keys">
+        <span>Git · GitHub Actions</span>
+        <span>CMake · Gradle</span>
+        <span>Docker · Docker Compose</span>
+        <span>GDB</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     9. TIMELINE
+──────────────────────────────────────────────────────── -->
+<section class="timeline section">
+  <div class="shell">
+    <p class="label">Construction / 时间表</p>
+    <h2 class="huge reveal">The build, in three phases.</h2>
+
+    <div class="timeline-grid">
+      <div class="timeline-col reveal">
+        <div class="when">Phase I · Q3 2023</div>
+        <div class="title">Enrolled.</div>
+        <p class="note">软件工程本科入学。系统读 CSAPP、操作系统、计算机网络、数据库原理这一线。打基础的两年。</p>
+      </div>
+      <div class="timeline-col reveal">
+        <div class="when">Phase II · Q4 2025 →</div>
+        <div class="title">First Open-Source Drops.</div>
+        <p class="note">11 月开始 UQBank，12 月开始 HyperTicket；穿插 ChronoLite 和 Hexo Viz。数模竞赛拿到陕西赛区一等奖。</p>
+      </div>
+      <div class="timeline-col reveal">
+        <div class="when">Phase III · Q2 2027</div>
+        <div class="title">Graduation.</div>
+        <p class="note">毕业。在那之前要把 HyperTicket 跑完压测、把 ChronoLite 拆成独立 release、把本地小模型嵌进运维链路里。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     10. METRICS
+──────────────────────────────────────────────────────── -->
+<section class="metrics" id="metrics">
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-inner">
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+      <span>Numbers, plainly stated</span><span class="dot"></span>
+    </div>
+  </div>
+
+  <div class="metrics-body">
+    <div class="metrics-grid">
+      <div class="metric-cell reveal">
+        <p class="label">Open-source projects</p>
+        <p class="num" data-count="4">0</p>
+        <p class="cap">on github, public &amp; maintained</p>
+      </div>
+      <div class="metric-cell reveal">
+        <p class="label">Shaanxi Math Modeling</p>
+        <p class="num"><small>1<sup>ST</sup></small> Prize</p>
+        <p class="cap">2025 national contest, regional finals — team lead</p>
+      </div>
+      <div class="metric-cell reveal">
+        <p class="label">Training programs</p>
+        <p class="num" data-count="2">0</p>
+        <p class="cap">tsinghua rcore os camp &nbsp;·&nbsp; bytedance youth camp</p>
+      </div>
+      <div class="metric-cell reveal">
+        <p class="label">Live products</p>
+        <p class="num" data-count="1">0</p>
+        <p class="cap">uqbank.shanchuann.cn — in real use</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-inner" style="animation-direction:reverse;">
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+      <span>shanchuann · since 2023</span><span class="dot"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     11. SCHOOL
+──────────────────────────────────────────────────────── -->
+<section class="school section">
+  <div class="shell">
+    <div class="school-head">
+      <div>
+        <p class="label">School / 学校</p>
+        <h2 class="big reveal">Xi'an University of Finance and Economics</h2>
+        <p class="body-cn">软件工程本科 · 2023.09 — 2027.06 · 本科在读。</p>
+      </div>
+      <p class="quote reveal">
+        基础课程是地基 —— 我在这里把操作系统、计算机网络、数据库原理一寸寸读厚。
+      </p>
+    </div>
+
+    <div class="school-stats">
+      <div class="reveal"><div class="num">04</div><div class="cap">Core courses<br>aced</div></div>
+      <div class="reveal"><div class="num">02</div><div class="cap">External camps<br>(Tsinghua / ByteDance)</div></div>
+      <div class="reveal"><div class="num">01</div><div class="cap">Regional 1<sup>st</sup><br>prize · math modeling</div></div>
+      <div class="reveal"><div class="num">∞</div><div class="cap">Late nights<br>at the keyboard</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     12. BLOG
+──────────────────────────────────────────────────────── -->
+<section class="blog section" id="blog">
+  <div class="shell">
+    <div class="head">
+      <div>
+        <p class="label">Field notes</p>
+        <h2 class="big reveal">From the blog.</h2>
+      </div>
+      <a class="cta-pill" href="https://shanchuann.cn" target="_blank" rel="noopener">All posts ↗</a>
+    </div>
+    <div class="blog-list" id="blogList">
+      <div class="blog-empty">— loading recent posts —</div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     13. CONTACT
+──────────────────────────────────────────────────────── -->
+<section class="contact section" id="contact">
+  <div class="contact-bg"></div>
+  <div class="contact-top">
+    <span>Get in touch / 联系</span>
+    <span>§ 13</span>
+  </div>
+
+  <div class="contact-center">
+    <p class="pre reveal">如果你看到了这里 —— 写邮件、提 issue、甚至打电话都行。回得不快，但一定回。</p>
+    <h2 class="reveal">
+      Let's<br><span class="ital">build something.</span>
+    </h2>
+  </div>
+
+  <div class="contact-bottom">
+    <div>
+      <h4>Email</h4>
+      <div class="row"><a href="mailto:1537521192@qq.com">1537521192@qq.com</a></div>
+    </div>
+    <div>
+      <h4>Phone &amp; Channels</h4>
+      <div class="row"><a href="tel:+8613008569663">+86 130 0856 9663</a></div>
+      <div class="row"><a href="https://github.com/shanchuann" target="_blank" rel="noopener">github.com/shanchuann</a></div>
+      <div class="row"><a href="https://shanchuann.cn" target="_blank" rel="noopener">shanchuann.cn</a></div>
+    </div>
+    <div>
+      <h4>Location</h4>
+      <div class="row">Xi'an, Shaanxi · CN</div>
+      <div class="row" style="opacity:.7;">Local time: <span id="localTime">— : —</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     14. FAQ
+──────────────────────────────────────────────────────── -->
+<section class="faq section" id="faq">
+  <div class="shell">
+    <p class="label">Frequently asked</p>
+    <h2 class="huge reveal">FAQ.</h2>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">01</span>
+        <span class="q">为什么本科就深耕 C++ 而不是更"卷"的方向？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        因为我先碰到了让我兴奋的问题。第一次看到 epoll 把"几万个连接"压成"一个事件循环"那一刻，我知道接下来几年得跟着这条路走下去。卷不卷是别人的事；我只想把眼前这个值得做的问题做完。
+      </p></div></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">02</span>
+        <span class="q">AI 辅助开发会让你失去思考能力吗？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        会，如果你把它当成"答案生成器"。我把 Claude Code 当一个比我快、比我没耐心、也比我没立场的同事 —— 它给我节奏，我给它判断。HyperTicket 的事务隔离、ChronoLite 的双缓冲设计，是我和它来回吵出来的，不是它单方面递给我的。
+      </p></div></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">03</span>
+        <span class="q">为什么坚持开源？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        因为我大二就用上了别人写的 jsoncpp、libevent、Hexo —— 我至少得还回去一点点。也因为开源是我目前唯一能拿出来给陌生人审查的"工作记录"。代码摆在那儿，谁都能验真，比履历上的形容词扎实得多。
+      </p></div></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">04</span>
+        <span class="q">下一步想做什么？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        短期：把 HyperTicket 跑完一轮认真的压测、把 ChronoLite 拆成独立 release。中期：把本地小模型嵌进运维链路里 —— 让 AI 帮我读日志、帮我做事后复盘，但所有决策权留给人。长期还没想明白，先把上面两件做扎实再说。
+      </p></div></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">05</span>
+        <span class="q">怎么联系你最快？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        邮件 <a href="mailto:1537521192@qq.com" style="text-decoration:underline;">1537521192@qq.com</a> 是我最常看的。技术问题直接在 GitHub issue 提，公开讨论对大家都好。电话 +86 130 0856 9663 留给真的紧急的事。我回复不快但一定回。
+      </p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     FOOTER
+──────────────────────────────────────────────────────── -->
+<footer class="foot">
+  <div>
+    <div>© 2026 Zhang Bokun</div>
+    <div style="margin-top:6px;">All rights reserved</div>
+  </div>
+  <div class="center">
+    <div>Site by hand, with Claude Code</div>
+    <div style="margin-top:6px;">Last update <span id="lastUpdate">—</span></div>
+  </div>
+  <div class="right">
+    <a href="https://github.com/shanchuann" target="_blank" rel="noopener">GitHub</a> &nbsp;·&nbsp;
+    <a href="https://shanchuann.cn" target="_blank" rel="noopener">Blog</a> &nbsp;·&nbsp;
+    <a href="#hero">Top ↑</a>
+  </div>
+</footer>
+
+<!-- ────────────────────────────────────────────────────────
+     SCRIPTS
+──────────────────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<script>
+(() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  gsap.registerPlugin(ScrollTrigger, Draggable);
+
+  /* ── Lenis smooth scroll ── */
+  let lenis;
+  if (!reduced) {
+    lenis = new Lenis({ duration: 1.15, easing: t => Math.min(1, 1.001 - Math.pow(2, -10*t)) });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  /* ── Cursor ── */
+  const cursor = document.getElementById('cursor');
+  const cursorLabel = document.getElementById('cursorLabel');
+  let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
+  addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+  function loop(){
+    cx += (tx - cx) * 0.22;
+    cy += (ty - cy) * 0.22;
+    cursor.style.transform = `translate(${cx-5}px, ${cy-5}px)`;
+    cursorLabel.style.transform = `translate(${tx+14}px, ${ty+14}px)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+  document.querySelectorAll('a, button, [data-cursor]').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.classList.add('is-hover');
+      const lbl = el.dataset.cursor;
+      if (lbl) {
+        cursorLabel.textContent = lbl === 'hold' ? 'Hold & drag' : lbl;
+        cursorLabel.classList.add('is-show');
+      }
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.classList.remove('is-hover');
+      cursorLabel.classList.remove('is-show');
+    });
+  });
+
+  /* ── Hero stack reveal ── */
+  if (!reduced) {
+    gsap.to('.hero-stack .line', {
+      yPercent: 0, duration: 1.4, stagger: 0.12,
+      ease: 'expo.out', delay: 0.2
+    });
+    gsap.from('.hero-meta span, .hero-mark span, .hero-cta', {
+      y: 18, opacity: 0, duration: 1, stagger: 0.06,
+      ease: 'expo.out', delay: 0.9
+    });
+  } else {
+    gsap.set('.hero-stack .line', { yPercent: 0 });
+  }
+
+  /* ── Reveal on scroll ── */
+  document.querySelectorAll('.reveal').forEach(el => {
+    ScrollTrigger.create({
+      trigger: el, start: 'top 88%',
+      onEnter: () => el.classList.add('is-in')
+    });
+  });
+
+  /* ── HOLD draggable ── */
+  const stage = document.getElementById('holdStage');
+  const track = document.getElementById('holdTrack');
+  const toggles = document.querySelectorAll('.hold .toggle button');
+  if (stage && track) {
+    let bounds = { minX: -stage.offsetWidth, maxX: 0 };
+    const setBounds = () => { bounds = { minX: -stage.offsetWidth, maxX: 0 }; };
+    setBounds();
+    addEventListener('resize', setBounds);
+
+    const drag = Draggable.create(track, {
+      type: 'x',
+      bounds: () => bounds,
+      inertia: false,
+      edgeResistance: 0.7,
+      onDragStart(){ cursor.classList.add('is-drag'); document.body.classList.add('is-dragging'); },
+      onDragEnd(){
+        cursor.classList.remove('is-drag'); document.body.classList.remove('is-dragging');
+        const half = stage.offsetWidth * -0.5;
+        const target = this.x < half ? bounds.minX : 0;
+        gsap.to(track, { x: target, duration: 0.7, ease: 'expo.out' });
+        toggles.forEach((b,i) => b.classList.toggle('is-active', (target === 0 ? i===0 : i===1)));
+      }
+    })[0];
+
+    toggles.forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        const target = i === 0 ? 0 : bounds.minX;
+        gsap.to(track, { x: target, duration: 0.9, ease: 'expo.inOut' });
+        toggles.forEach((b,j) => b.classList.toggle('is-active', i===j));
+      });
+    });
+  }
+
+  /* ── Arsenal tabs ── */
+  document.querySelectorAll('.arsenal-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.arsenal-tabs button').forEach(b => b.classList.toggle('is-active', b===btn));
+      document.querySelectorAll('.arsenal-pane').forEach(p => {
+        const match = p.dataset.pane === tab;
+        p.hidden = !match;
+        if (match) gsap.fromTo(p, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: .6, ease: 'expo.out' });
+      });
+    });
+  });
+
+  /* ── FAQ accordion ── */
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const btn = item.querySelector('.faq-q');
+    btn.addEventListener('click', () => {
+      const open = item.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  });
+
+  /* ── Metric counters ── */
+  document.querySelectorAll('.metric-cell .num[data-count]').forEach(el => {
+    const end = +el.dataset.count;
+    ScrollTrigger.create({
+      trigger: el, start: 'top 85%',
+      onEnter: () => {
+        const o = { v: 0 };
+        gsap.to(o, {
+          v: end, duration: 1.6, ease: 'expo.out',
+          onUpdate(){ el.textContent = String(Math.round(o.v)).padStart(2, '0'); }
         });
+      }
+    });
+  });
 
-        // --- Logic for Right-Side Progress Tracker ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const sectionsList = [
-                { id: 'hero', name: 'HERO' },
-                { id: 'projects', name: 'WORK' },
-                { id: 'about', name: 'ABOUT' },
-                { id: 'skills', name: 'SKILLS' },
-                { id: 'contact', name: 'CONTACT' }
-            ];
+  /* ── Atom feed ── */
+  (async () => {
+    const list = document.getElementById('blogList');
+    try {
+      const res = await fetch('https://shanchuann.cn/atom.xml', { credentials: 'omit' });
+      if (!res.ok) throw new Error('feed status ' + res.status);
+      const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+      const entries = [...xml.querySelectorAll('entry')].slice(0, 2);
+      if (!entries.length) throw new Error('no entries');
+      list.innerHTML = '';
+      entries.forEach(e => {
+        const title = e.querySelector('title')?.textContent?.trim() || 'Untitled';
+        const link = e.querySelector('link')?.getAttribute('href') || 'https://shanchuann.cn';
+        const updated = e.querySelector('updated')?.textContent || e.querySelector('published')?.textContent || '';
+        const d = updated ? new Date(updated) : null;
+        const dateStr = d ? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` : '';
+        const row = document.createElement('a');
+        row.className = 'blog-row';
+        row.href = link; row.target = '_blank'; row.rel = 'noopener';
+        row.innerHTML = `<span class="date">${dateStr}</span><span class="title">${title}</span><span class="arrow">↗</span>`;
+        list.appendChild(row);
+      });
+    } catch (err) {
+      list.innerHTML = `
+        <a class="blog-row" href="https://shanchuann.cn" target="_blank" rel="noopener">
+          <span class="date">visit blog</span>
+          <span class="title">shanchuann.cn — field notes, in chinese.</span>
+          <span class="arrow">↗</span>
+        </a>`;
+    }
+  })();
 
-            const trackerContainer = document.getElementById('custom-scroll-tracker');
-            const trackerLabels = document.getElementById('tracker-labels');
-            const percentText = document.getElementById('tracker-percent');
+  /* ── Local time ── */
+  const tEl = document.getElementById('localTime');
+  if (tEl) {
+    const fmt = () => {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      tEl.textContent = `${h} : ${m}`;
+    };
+    fmt(); setInterval(fmt, 30_000);
+  }
 
-            if (!trackerContainer) return;
+  /* ── Last update ── */
+  const lu = document.getElementById('lastUpdate');
+  if (lu) {
+    const d = new Date(document.lastModified);
+    lu.textContent = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }
 
-            // Generate label elements
-            const labelEls = sectionsList.map((sec) => {
-                const el = document.createElement('div');
-                el.className = 'absolute right-0 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-300 ease-out origin-right whitespace-nowrap drop-shadow-md';
-                el.innerText = sec.name;
-                el.style.transform = `translateY(100vh) scale(0.8)`;
-                el.style.opacity = '0';
-                trackerLabels.appendChild(el);
-                return el;
-            });
+  /* ── Anchor scrolling via Lenis ── */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (!id || id === '#') return;
+      const el = document.querySelector(id);
+      if (!el) return;
+      e.preventDefault();
+      if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.4 });
+      else el.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
 
-            function updateScrollTracker() {
-                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                if (maxScroll <= 0) return;
+})();
+</script>
 
-                const scrollY = window.scrollY;
-                if (scrollY > 10) {
-                    trackerContainer.classList.remove('opacity-0');
-                    trackerContainer.classList.add('opacity-100');
-                } else {
-                    trackerContainer.classList.add('opacity-0');
-                    trackerContainer.classList.remove('opacity-100');
-                }
-
-                const globalProgress = Math.max(0, Math.min(1, scrollY / maxScroll));
-                percentText.innerText = Math.round(globalProgress * 100) + '%';
-
-                const trackHeight = trackerLabels.clientHeight;
-                const gap = 44; // Increased spacing for stacked labels to fit larger text
-                const total = sectionsList.length;
-
-                sectionsList.forEach((sec, i) => {
-                    const secEl = document.getElementById(sec.id);
-                    if (!secEl) return;
-
-                    const activeZone = 0.15; // Within 15% of viewport matching
-                    const rect = secEl.getBoundingClientRect();
-                    
-                    // Ratio of how far this section's top is scrolled globally
-                    const absoluteTop = rect.top + scrollY;
-                    let targetProgress = absoluteTop / Math.max(1, maxScroll);
-                    targetProgress = Math.max(0, Math.min(1, targetProgress));
-
-                    const diff = targetProgress - globalProgress; 
-                    const el = labelEls[i];
-                    
-                    let yPos, scale, opacity;
-                    const topLimit = i * gap;
-                    const bottomLimit = trackHeight - (total - i) * gap;
-
-                    // If we reached the end of the page, force all to top stack
-                    if (globalProgress >= 0.98) {
-                        yPos = topLimit;
-                        scale = (i === total - 1) ? 0.9 : 0.8;
-                        opacity = (i === total - 1) ? 1 : 0.5; // Increased default opacity
-                        if (i === total - 1) {
-                            el.className = 'absolute right-4 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-500 ease-out origin-right whitespace-nowrap text-mint-500 dark:text-mint-400 font-black drop-shadow-[0_0_8px_rgba(0,255,204,0.5)]';
-                        } else {
-                            el.className = 'absolute right-0 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-500 ease-out origin-right whitespace-nowrap text-slate-500 dark:text-slate-400';
-                        }
-                    } 
-                    else if (diff > activeZone) {
-                        yPos = bottomLimit; 
-                        scale = 0.8;
-                        opacity = 0.5; // Increased default opacity
-                        el.className = 'absolute right-0 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-500 ease-out origin-right whitespace-nowrap text-slate-500 dark:text-slate-400';
-                    } else if (diff < -activeZone) {
-                        yPos = topLimit;
-                        scale = 0.8; 
-                        opacity = 0.5; // Increased default opacity
-                        el.className = 'absolute right-0 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-500 ease-out origin-right whitespace-nowrap text-slate-500 dark:text-slate-400';
-                    } else {
-                        // Smoothly transition from bottom up to top
-                        const t = (activeZone - diff) / (activeZone * 2); 
-                        yPos = bottomLimit - t * (bottomLimit - topLimit);
-                        
-                        const peak = 1 - (Math.abs(diff) / activeZone); 
-                        scale = 0.8 + (0.2 * peak);
-                        opacity = 0.5 + (0.5 * peak);
-                        
-                        if (peak > 0.5) {
-                            el.className = 'absolute right-4 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-100 ease-out origin-right whitespace-nowrap text-mint-500 dark:text-mint-400 font-black drop-shadow-[0_0_8px_rgba(0,255,204,0.5)]';
-                        } else {
-                            el.className = 'absolute right-0 p-1 text-sm md:text-base font-bold tracking-[0.2em] transform transition-all duration-100 ease-out origin-right whitespace-nowrap text-slate-500 dark:text-slate-400';
-                        }
-                    }
-
-                    el.style.transform = `translateY(${yPos}px) scale(${scale})`;
-                    el.style.opacity = opacity;
-                });
-            }
-
-            window.addEventListener('scroll', updateScrollTracker, { passive: true });
-            // Add slight delays because layout/fonts might shift element positions
-            setTimeout(updateScrollTracker, 100);
-            setTimeout(updateScrollTracker, 1000);
-        });
-    </script>
 </body>
 </html>
