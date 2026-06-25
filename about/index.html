@@ -60,11 +60,12 @@ body{
 img,svg{ display:block; max-width:100%; }
 a{ color:inherit; text-decoration:none; }
 button{ background:none; border:0; font:inherit; color:inherit; cursor:none; }
+*, *::before, *::after{ cursor:none; }
 ::selection{ background:var(--ink); color:var(--paper); }
 
-/* hide everything from scroll-bar */
-body::-webkit-scrollbar{ display:none; }
-body{ scrollbar-width:none; }
+/* hide every scroll-bar (html + body, all browsers) */
+html, body{ scrollbar-width:none; -ms-overflow-style:none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:0; }
 
 /* =========================================================
    TYPE
@@ -176,6 +177,43 @@ body{ scrollbar-width:none; }
 .cursor.is-hover{ transform:scale(2.4); background:transparent; outline:1px solid var(--ink); }
 .cursor.is-drag { transform:scale(3.6); background:transparent; outline:1px solid var(--ink); }
 .cursor-label.is-show{ opacity:1; }
+
+/* spotlight halo behind cursor on dark sections */
+.spotlight{
+  position:fixed; top:0; left:0;
+  width:540px; height:540px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:0;
+  opacity:0;
+  background:radial-gradient(closest-side,
+    color-mix(in oklch, var(--paper-warm) 14%, transparent),
+    transparent 70%);
+  mix-blend-mode:screen;
+  transform:translate(-50%, -50%);
+  transition:opacity .55s var(--ease-out);
+  filter:blur(20px);
+  will-change:transform, opacity;
+}
+.spotlight.is-show{ opacity:1; }
+
+/* light cursor on dark sections */
+.cursor.on-dark{
+  background:var(--deep-warm);
+  mix-blend-mode:screen;
+}
+.cursor.on-dark.is-hover{
+  background:transparent;
+  outline-color:var(--deep-warm);
+}
+.cursor.on-dark.is-drag{
+  background:transparent;
+  outline-color:var(--deep-warm);
+}
+.cursor-label.on-dark{
+  background:var(--deep-warm);
+  color:var(--deep);
+}
 @media (hover:none){ body{ cursor:auto; } .cursor,.cursor-label{ display:none; } button,a{ cursor:pointer; } }
 
 /* =========================================================
@@ -216,8 +254,18 @@ body{ scrollbar-width:none; }
   font-size:14px;
   letter-spacing:.18em;
   text-transform:uppercase;
+  display:inline-flex;
+  align-items:baseline;
+  gap:.6em;
+  line-height:1;
 }
-.brand sup{ font-size:8px; letter-spacing:.2em; }
+.brand .est{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.22em;
+  color:var(--ink-soft);
+  vertical-align:baseline;
+}
 
 .cta-pill{
   display:inline-flex; align-items:center; gap:10px;
@@ -252,34 +300,139 @@ body{ scrollbar-width:none; }
    HERO
 ========================================================= */
 .hero{
+  position:relative;
   min-height:100vh;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  padding:120px var(--gutter) 40px;
+  display:flex;
+  flex-direction:column;
+  padding:96px var(--gutter) 40px;
+  overflow:hidden;
+  isolation:isolate;
 }
+.hero-photo{
+  position:absolute;
+  /* slight vertical overhang so scroll parallax never reveals an empty band */
+  top:-6%; bottom:-6%; left:0; right:0;
+  z-index:0;
+  background-image:url('/images/IMG_20251026_131027.jpg');
+  background-size:cover;
+  background-position:center 62%;
+  filter:saturate(.28) sepia(.55) hue-rotate(-14deg) brightness(.92) contrast(1.02);
+  opacity:.62;
+  mix-blend-mode:multiply;
+  transform-origin:center;
+  will-change:transform;
+  /* long, gentle fade — starts at 40%, eases to nothing at the end — so the
+     photo-to-paper transition is a slow dissolve, not a horizontal line */
+  -webkit-mask-image: linear-gradient(180deg,
+    #000 0%,
+    #000 40%,
+    rgba(0,0,0,.85) 58%,
+    rgba(0,0,0,.55) 74%,
+    rgba(0,0,0,.22) 88%,
+    transparent 100%);
+          mask-image: linear-gradient(180deg,
+    #000 0%,
+    #000 40%,
+    rgba(0,0,0,.85) 58%,
+    rgba(0,0,0,.55) 74%,
+    rgba(0,0,0,.22) 88%,
+    transparent 100%);
+}
+.hero-vignette{
+  position:absolute; inset:0; z-index:0;
+  pointer-events:none;
+  /* tiny paper film at the very top (~7%) for nav legibility,
+     then transparent through the body so the photo dominates,
+     then a long fade to paper at the bottom to merge with prologue */
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--paper) 30%, transparent) 0%,
+      transparent 8%,
+      transparent 58%,
+      color-mix(in oklch, var(--paper) 50%, transparent) 82%,
+      var(--paper) 100%),
+    radial-gradient(80% 60% at 50% 56%,
+      transparent 0%,
+      color-mix(in oklch, var(--paper) 20%, transparent) 100%);
+}
+/* extra soft transition strip welded onto the hero end so the seam between
+   the hero photo and the prologue paper becomes a slow dissolve — taller and
+   much gentler so it overlaps with the photo mask's own fade */
+.hero-seam{
+  position:absolute;
+  left:0; right:0; bottom:-1px;
+  height:58vh;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--paper) 0%, transparent) 0%,
+      color-mix(in oklch, var(--paper) 8%, transparent) 22%,
+      color-mix(in oklch, var(--paper) 24%, transparent) 44%,
+      color-mix(in oklch, var(--paper) 52%, transparent) 66%,
+      color-mix(in oklch, var(--paper) 82%, transparent) 84%,
+      var(--paper) 100%);
+}
+.hero > *:not(.hero-photo):not(.hero-vignette):not(.hero-seam){ position:relative; z-index:2; }
 .hero-top{
   display:flex; justify-content:space-between; align-items:flex-start;
 }
+.hero-mid{
+  flex:1;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:clamp(16px, 3vw, 48px);
+  padding:clamp(24px, 5vw, 64px) 0 clamp(8px, 2vw, 24px);
+}
+.hero-side{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  writing-mode:vertical-rl;
+  line-height:2;
+  white-space:nowrap;
+}
+.hero-side.l{ transform:rotate(180deg); align-self:end; }
+.hero-side.r{ align-self:start; text-align:right; }
+.hero-side strong{ font-weight:500; color:var(--ink); letter-spacing:.32em; }
 .hero-stack{
-  align-self:end;
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:0;
+  justify-self:center;
+  align-self:center;
 }
 .hero-stack .l1, .hero-stack .l2, .hero-stack .l3{
   font-family:var(--display);
-  font-weight:400;
+  font-weight:500;
+  font-variation-settings:"opsz" 96, "wdth" 110;
   text-transform:uppercase;
-  letter-spacing:.02em;
-  line-height:.88;
-  font-size:clamp(48px, 10vw, 156px);
+  letter-spacing:-.012em;
+  line-height:.86;
+  font-size:clamp(64px, 15.5vw, 244px);
   overflow:hidden;
 }
-.hero-stack .l2{ color:var(--ink-soft); padding-left:clamp(20px, 5vw, 100px); }
-.hero-stack .l3{ padding-left:clamp(40px, 10vw, 200px); }
+.hero-stack .l2{
+  color:var(--ink-soft);
+  font-style:italic;
+  font-family:var(--italic);
+  font-weight:400;
+  text-transform:none;
+  letter-spacing:-.02em;
+  font-size:clamp(56px, 13vw, 208px);
+  line-height:.94;
+  padding-left:clamp(20px, 5vw, 120px);
+  margin-top:.04em;
+}
+.hero-stack .l3{
+  padding-left:clamp(40px, 11vw, 220px);
+  margin-top:.04em;
+}
 .hero-stack span.line{
   display:block;
-  transform:translateY(105%);
   will-change:transform;
 }
 .hero-bottom{
@@ -327,58 +480,106 @@ body{ scrollbar-width:none; }
   text-align:right;
 }
 
-/* scroll hint */
-.scroll-hint{
+/* (scroll-hint removed — ENTER button alone handles the downward cue) */
+
+/* =========================================================
+   PROLOGUE
+========================================================= */
+.prologue{
+  padding-top:clamp(140px, 18vw, 240px);
+  padding-bottom:clamp(140px, 18vw, 240px);
+}
+.prologue-grid{
+  display:grid;
+  grid-template-columns:42% 1fr;
+  gap:clamp(40px, 6vw, 110px);
+  align-items:center;
+  max-width:1640px;
+  margin:0 auto;
+}
+.prologue-art{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  gap:clamp(8px, 1.2vw, 18px);
+  aspect-ratio:4 / 5;
+  width:100%;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.prologue-art .plate{
+  position:relative;
+  overflow:hidden;
+  background-color:var(--paper-warm);
+  background-size:cover;
+  background-position:center;
+  filter:grayscale(.42) sepia(.18) saturate(.78) contrast(1.05) brightness(.96);
+  outline:1px solid var(--rule);
+  outline-offset:0;
+  transition:transform .9s var(--ease-out), filter .9s var(--ease-out);
+}
+.prologue-art .plate::after{
+  content:attr(data-cap);
   position:absolute;
-  left:50%;
-  bottom:30px;
-  transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:10px;
+  left:10px; bottom:8px;
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--paper);
+  padding:3px 6px;
+  background:color-mix(in oklch, var(--ink) 70%, transparent);
+  backdrop-filter:blur(2px);
+}
+.prologue-art .plate:nth-child(1){ transform:translateY(-10px) translateX(-4px); }
+.prologue-art .plate:nth-child(2){ transform:translateY(6px) translateX(6px); }
+.prologue-art .plate:nth-child(3){ transform:translateY(-2px) translateX(-2px); }
+.prologue-art .plate:nth-child(4){ transform:translateY(8px) translateX(4px); }
+.prologue-art:hover .plate{ transform:translateY(0) translateX(0); filter:grayscale(.15) sepia(.08) saturate(.95) contrast(1.04); }
+.prologue-art .stripe-cap{
+  position:absolute; left:0; bottom:-30px;
   font-family:var(--mono);
   font-size:10px;
   letter-spacing:.22em;
   text-transform:uppercase;
   color:var(--ink-soft);
 }
-.scroll-hint .line-y{
-  width:1px; height:42px; background:var(--ink-soft);
-  transform-origin:top;
-  animation:scrollPulse 2.4s var(--ease-in-out) infinite;
-}
-@keyframes scrollPulse{
-  0%,100%{ transform:scaleY(.2); }
-  50%{ transform:scaleY(1); }
-}
-
-/* =========================================================
-   PROLOGUE
-========================================================= */
-.prologue{
-  text-align:center;
-  padding-top:clamp(120px, 18vw, 220px);
-  padding-bottom:clamp(120px, 18vw, 220px);
-}
-.prologue .label{ margin-bottom:46px; }
+.prologue-text .label{ margin-bottom:36px; }
 .prologue blockquote{
   font-family:var(--italic);
   font-style:italic;
   font-weight:400;
-  font-size:clamp(24px, 3.2vw, 44px);
-  line-height:1.35;
-  max-width:24ch;
-  margin:0 auto;
+  font-size:clamp(26px, 3.2vw, 46px);
+  line-height:1.32;
+  max-width:18ch;
+  margin:0;
   color:var(--ink);
-  letter-spacing:-.01em;
+  letter-spacing:-.005em;
+  text-align:left;
 }
 .prologue blockquote::before{ content:"“"; padding-right:.05em; color:var(--ink-faint); }
 .prologue blockquote::after { content:"”"; padding-left:.05em; color:var(--ink-faint); }
 .prologue .attr{
-  margin-top:46px;
+  margin-top:40px;
   font-family:var(--mono);
   font-size:11px;
   text-transform:uppercase;
   letter-spacing:.22em;
   color:var(--ink-soft);
+  text-align:left;
+}
+.prologue .sub-zh{
+  margin-top:30px;
+  font-family:var(--serif);
+  font-size:15px;
+  line-height:1.85;
+  color:var(--ink-soft);
+  max-width:30em;
+}
+@media (max-width:900px){
+  .prologue-grid{ grid-template-columns:1fr; gap:60px; }
+  .prologue-art{ aspect-ratio:4/5; max-height:60vh; }
 }
 
 /* =========================================================
@@ -441,6 +642,9 @@ body{ scrollbar-width:none; }
   gap:0;
 }
 .way-row{
+  /* --row-tint goes 1 → 0 as the row scrolls up through the viewport.
+     1 = faded toward paper, 0 = full ink. Drives the deepening effect. */
+  --row-tint: 1;
   display:grid;
   grid-template-columns:60px 110px 1fr;
   align-items:start;
@@ -454,7 +658,7 @@ body{ scrollbar-width:none; }
   font-size:12px;
   letter-spacing:.18em;
   padding-top:.4em;
-  color:var(--ink-soft);
+  color:color-mix(in oklch, var(--ink-soft), var(--paper) calc(var(--row-tint) * 70%));
 }
 .way-row .en{
   font-family:var(--display);
@@ -463,13 +667,17 @@ body{ scrollbar-width:none; }
   font-weight:500;
   font-size:clamp(15px, 1.1vw, 18px);
   padding-top:.4em;
+  color:color-mix(in oklch, var(--ink), var(--paper) calc(var(--row-tint) * 78%));
 }
 .way-row .cn{
   font-family:var(--serif);
   font-size:clamp(20px, 2vw, 30px);
   line-height:1.5;
   letter-spacing:.02em;
-  color:var(--ink);
+  color:color-mix(in oklch, var(--ink), var(--paper) calc(var(--row-tint) * 78%));
+}
+@media (prefers-reduced-motion: reduce){
+  .way-row{ --row-tint: 0; }
 }
 
 /* =========================================================
@@ -496,11 +704,36 @@ body{ scrollbar-width:none; }
   width:100%;
   max-width:1280px;
   margin:0 auto;
+  background:
+    repeating-linear-gradient(0deg,
+      transparent 0, transparent 23px,
+      color-mix(in oklch, var(--rule) 50%, transparent) 23px,
+      color-mix(in oklch, var(--rule) 50%, transparent) 24px),
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 23px,
+      color-mix(in oklch, var(--rule) 50%, transparent) 23px,
+      color-mix(in oklch, var(--rule) 50%, transparent) 24px);
+  border:1px solid var(--rule);
+  cursor:none;
+  overflow:hidden;
 }
-.map-canvas svg{
-  position:absolute; inset:0; width:100%; height:100%;
-  overflow:visible;
+.map-canvas canvas{
+  position:absolute; inset:0; width:100%; height:100%; display:block;
 }
+.map-corner{
+  position:absolute;
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  pointer-events:none;
+  z-index:2;
+}
+.map-corner.tl{ top:14px;  left:14px; }
+.map-corner.tr{ top:14px;  right:14px; text-align:right; }
+.map-corner.bl{ bottom:14px; left:14px; }
+.map-corner.br{ bottom:14px; right:14px; text-align:right; }
 .map-canvas .node{
   position:absolute;
   transform:translate(-50%,-50%);
@@ -509,6 +742,8 @@ body{ scrollbar-width:none; }
   font-size:11px;
   letter-spacing:.18em;
   text-transform:uppercase;
+  pointer-events:none;
+  z-index:2;
 }
 .map-canvas .node .title{
   display:block;
@@ -516,9 +751,40 @@ body{ scrollbar-width:none; }
   font-weight:500;
   font-size:clamp(13px, 1vw, 16px);
   letter-spacing:.10em;
-  margin-bottom:6px;
+  margin-bottom:2px;
+  color:var(--ink);
+  background:color-mix(in oklch, var(--paper) 88%, transparent);
+  padding:3px 8px;
 }
-.map-canvas .node .dist{ color:var(--ink-soft); }
+.map-canvas .node .title-en{
+  display:block;
+  font-family:var(--mono);
+  font-weight:400;
+  font-size:clamp(10px, .78vw, 12px);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  margin-bottom:6px;
+  color:var(--ink-soft);
+  background:color-mix(in oklch, var(--paper) 88%, transparent);
+  padding:2px 8px;
+}
+.map-canvas .node .dist{
+  color:var(--ink-soft);
+  background:color-mix(in oklch, var(--paper) 88%, transparent);
+  padding:2px 6px;
+  display:inline-block;
+}
+.map-canvas .node .tags{
+  display:block;
+  margin-top:4px;
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  background:color-mix(in oklch, var(--paper) 88%, transparent);
+  padding:2px 6px;
+}
 .map-canvas .node.center{
   font-family:var(--display);
   font-weight:500;
@@ -526,13 +792,21 @@ body{ scrollbar-width:none; }
   letter-spacing:.10em;
   font-size:clamp(14px, 1.1vw, 18px);
   white-space:nowrap;
+  color:var(--ink);
+  background:color-mix(in oklch, var(--paper) 92%, transparent);
+  padding:6px 14px;
 }
 .map-canvas .node.center::before{
   content:""; display:block;
-  width:11px; height:11px; border-radius:50%;
+  width:9px; height:9px; border-radius:50%;
   background:var(--accent);
-  margin:0 auto 12px;
+  margin:0 auto 8px;
 }
+.map .head-row{
+  display:flex; justify-content:space-between; align-items:end;
+  gap:var(--gutter); margin-bottom:24px;
+}
+.map .head-row .label{ margin:0; }
 .map .foot-line{
   margin-top:80px;
   text-align:center;
@@ -587,9 +861,9 @@ body{ scrollbar-width:none; }
 .hold-track{
   position:absolute; inset:0;
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   gap:var(--gutter);
-  width:200%;
+  width:300%;
   will-change:transform;
 }
 .hold-panel{
@@ -631,6 +905,109 @@ body{ scrollbar-width:none; }
 .hold-panel ul li span:last-child{ color:var(--ink-soft); font-family:var(--mono); }
 
 /* =========================================================
+   MOOD INTERSTITIAL — full-bleed photo plate between sections
+========================================================= */
+.mood{
+  position:relative;
+  height:clamp(360px, 56vw, 720px);
+  overflow:hidden;
+  background:var(--deep);
+  color:var(--paper-warm);
+}
+.mood-bg{
+  position:absolute;
+  top:-18%; bottom:-18%; left:0; right:0;
+  background-size:cover; background-position:center 40%;
+  filter:saturate(.22) sepia(.38) brightness(.40) contrast(1.18);
+  transform-origin:center;
+  will-change:transform;
+}
+.mood-bg::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg,
+      rgba(0,0,0,.55) 0%,
+      rgba(0,0,0,.30) 35%,
+      rgba(0,0,0,.30) 60%,
+      rgba(0,0,0,.62) 100%);
+}
+/* Scroll-driven vignette — bright center, dark corners */
+.mood-vignette{
+  position:absolute; inset:0;
+  pointer-events:none;
+  z-index:1;
+  opacity:0;
+  background:
+    radial-gradient(ellipse 78% 90% at 50% 50%,
+      transparent 0%,
+      transparent 32%,
+      rgba(0,0,0,.35) 60%,
+      rgba(0,0,0,.78) 88%,
+      rgba(0,0,0,.94) 100%);
+  mix-blend-mode:multiply;
+  will-change:opacity;
+}
+.mood-grain{
+  position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(0deg,
+      transparent 0, transparent 2px,
+      rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 3px);
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+.mood-frame{
+  position:absolute; inset:clamp(20px, 3vw, 48px);
+  border:1px solid color-mix(in oklch, var(--paper-warm) 28%, transparent);
+  pointer-events:none;
+}
+.mood-cap{
+  position:absolute; inset:0;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  padding:clamp(36px, 6vw, 72px) clamp(36px, 6vw, 72px);
+  z-index:2;
+}
+.mood-cap .top{
+  display:flex; justify-content:space-between;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--paper-warm);
+  text-shadow:0 1px 3px rgba(0,0,0,.55);
+}
+.mood-cap .mid{
+  align-self:center; justify-self:start;
+  max-width:24ch;
+}
+.mood-cap .mid .ital{
+  font-family:var(--italic); font-style:italic;
+  font-size:clamp(28px, 4vw, 64px);
+  line-height:1.2;
+  color:var(--paper-warm);
+  text-shadow:0 2px 12px rgba(0,0,0,.55);
+}
+.mood-cap .bot{
+  display:flex; justify-content:space-between; align-items:end;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--paper-warm);
+  text-shadow:0 1px 3px rgba(0,0,0,.55);
+}
+.mood-cap .bot .frame{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:clamp(38px, 6vw, 88px);
+  letter-spacing:-.01em;
+  color:var(--paper-warm);
+  line-height:.9;
+  text-shadow:0 2px 8px rgba(0,0,0,.55);
+}
+
+/* =========================================================
    WORK — 4 typographic project cards
 ========================================================= */
 .work{ padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
@@ -647,9 +1024,25 @@ body{ scrollbar-width:none; }
   padding:48px 0;
   border-bottom:1px solid var(--rule);
   position:relative;
-  transition:padding-left .6s var(--ease-out);
+  isolation:isolate;
 }
-.work-row:hover{ padding-left:24px; }
+.work-row::before{
+  content:""; position:absolute;
+  left:0; right:0; top:0; bottom:0;
+  background:color-mix(in oklch, var(--paper-warm) 50%, transparent);
+  transform-origin:left center;
+  transform:scaleX(0);
+  transition:transform .6s var(--ease-out);
+  z-index:-1;
+}
+.work-row:hover::before{ transform:scaleX(1); }
+.work-row .idx,
+.work-row .name{
+  transition:transform .55s var(--ease-out);
+  will-change:transform;
+}
+.work-row:hover .idx{ transform:translateX(18px); }
+.work-row:hover .name{ transform:translateX(18px); }
 .work-row .idx{
   font-family:var(--mono);
   font-size:13px;
@@ -787,7 +1180,7 @@ body{ scrollbar-width:none; }
   border-bottom:1px solid var(--rule);
   padding:48px 0;
 }
-.timeline-col{ padding-right:var(--gutter); }
+.timeline-col{ padding-right:var(--gutter); display:flex; flex-direction:column; }
 .timeline-col + .timeline-col{ border-left:1px solid var(--rule); padding-left:var(--gutter); }
 .timeline-col .when{
   font-family:var(--mono);
@@ -810,6 +1203,34 @@ body{ scrollbar-width:none; }
   font-size:15px;
   line-height:1.75;
   color:var(--ink-soft);
+}
+.timeline-col .phase-mark{
+  list-style:none;
+  margin-top:auto;
+  padding-top:36px;
+  display:grid;
+  gap:0;
+}
+.timeline-col .phase-mark li{
+  display:grid;
+  grid-template-columns:80px 1fr;
+  gap:18px;
+  align-items:baseline;
+  padding:14px 0;
+  border-top:1px solid var(--rule);
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.timeline-col .phase-mark li:last-child{ border-bottom:1px solid var(--rule); }
+.timeline-col .phase-mark li > span:first-child{
+  color:var(--ink-soft);
+  font-family:var(--display);
+  letter-spacing:.10em;
+}
+.timeline-col .phase-mark li > span:last-child{
+  color:var(--ink);
 }
 
 /* =========================================================
@@ -855,16 +1276,40 @@ body{ scrollbar-width:none; }
 .metrics-grid{
   display:grid;
   grid-template-columns:repeat(4, 1fr);
-  gap:var(--gutter);
+  gap:clamp(24px, 3vw, 48px);
 }
-.metric-cell .label{ color:color-mix(in oklch, var(--deep-warm) 70%, transparent); }
+.metric-cell{
+  display:flex; flex-direction:column;
+  gap:14px;
+}
+.metric-cell .label{
+  color:color-mix(in oklch, var(--deep-warm) 75%, transparent);
+  display:flex; flex-direction:column;
+  gap:4px;
+  margin-bottom:0;
+}
+.metric-cell .label .primary{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--deep-warm);
+}
+.metric-cell .label .aux{
+  font-family:var(--serif);
+  font-size:11px;
+  letter-spacing:.04em;
+  text-transform:none;
+  color:color-mix(in oklch, var(--deep-warm) 55%, transparent);
+  font-weight:400;
+}
 .metric-cell .num{
   font-family:var(--display);
   font-weight:400;
-  font-size:clamp(64px, 9vw, 132px);
+  font-size:clamp(52px, 7.5vw, 108px);
   line-height:.9;
   letter-spacing:-.02em;
-  margin:20px 0 16px;
+  margin:16px 0 14px;
   color:var(--deep-warm);
 }
 .metric-cell .num small{
@@ -872,13 +1317,75 @@ body{ scrollbar-width:none; }
   font-family:var(--mono);
   color:color-mix(in oklch, var(--deep-warm) 70%, transparent);
 }
+.metric-cell .num .plus{
+  font-size:.34em; vertical-align:top;
+  font-family:var(--mono); margin:0 .1em;
+  color:color-mix(in oklch, var(--deep-warm) 60%, transparent);
+}
 .metric-cell .cap{
   font-family:var(--display);
   text-transform:uppercase;
   letter-spacing:.08em;
-  font-size:13px;
-  line-height:1.5;
-  color:color-mix(in oklch, var(--deep-warm) 86%, transparent);
+  font-size:12px;
+  line-height:1.55;
+  color:color-mix(in oklch, var(--deep-warm) 88%, transparent);
+}
+.metric-cell .cap .aux{
+  display:block;
+  margin-top:6px;
+  font-family:var(--serif);
+  font-size:11.5px;
+  letter-spacing:.02em;
+  text-transform:none;
+  color:color-mix(in oklch, var(--deep-warm) 55%, transparent);
+}
+
+/* awards cell: two stacked ordinal rows in place of a single big number */
+.metric-awards .num-stack{
+  display:flex; flex-direction:column;
+  gap:14px;
+  margin:18px 0 14px;
+}
+.metric-awards .num-stack .row{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:18px;
+  align-items:baseline;
+  border-bottom:1px solid color-mix(in oklch, var(--deep-warm) 18%, transparent);
+  padding-bottom:14px;
+}
+.metric-awards .num-stack .row:last-child{ border-bottom:0; padding-bottom:0; }
+.metric-awards .num-stack .ord{
+  font-family:var(--display);
+  font-weight:400;
+  font-size:clamp(44px, 5.8vw, 84px);
+  line-height:.9;
+  letter-spacing:-.02em;
+  color:var(--deep-warm);
+}
+.metric-awards .num-stack .ord sup{
+  font-size:.32em; letter-spacing:.02em;
+  font-family:var(--mono);
+  color:color-mix(in oklch, var(--deep-warm) 70%, transparent);
+}
+.metric-awards .num-stack .who{
+  display:flex; flex-direction:column; gap:3px;
+}
+.metric-awards .num-stack .who .en{
+  font-family:var(--display);
+  font-weight:500;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:clamp(12px, .92vw, 14px);
+  color:var(--deep-warm);
+  line-height:1.1;
+}
+.metric-awards .num-stack .who .cn{
+  font-family:var(--serif);
+  font-size:11.5px;
+  letter-spacing:.02em;
+  color:color-mix(in oklch, var(--deep-warm) 56%, transparent);
+  line-height:1.3;
 }
 
 /* =========================================================
@@ -886,8 +1393,9 @@ body{ scrollbar-width:none; }
 ========================================================= */
 .school{ padding-top:clamp(120px, 16vw, 200px); padding-bottom:clamp(120px, 16vw, 200px); }
 .school-head{
-  display:grid; grid-template-columns:1fr 1fr; gap:var(--gutter);
+  display:grid; grid-template-columns:1.1fr .9fr; gap:var(--gutter);
   margin-bottom:80px;
+  align-items:start;
 }
 .school-head .label{ margin-bottom:24px; }
 .school-head h2{ margin-bottom:30px; }
@@ -897,6 +1405,66 @@ body{ scrollbar-width:none; }
   font-size:clamp(22px, 2.6vw, 36px);
   line-height:1.4;
   max-width:18ch;
+  margin-bottom:30px;
+}
+.school-plate{
+  width:100%;
+  aspect-ratio:5 / 4;
+  background-size:cover; background-position:center;
+  filter:grayscale(.4) sepia(.15) brightness(.96) contrast(1.04);
+  outline:1px solid var(--rule);
+  position:relative;
+}
+.school-plate::after{
+  content:attr(data-cap);
+  position:absolute;
+  left:10px; bottom:8px;
+  font-family:var(--mono);
+  font-size:9px; letter-spacing:.20em; text-transform:uppercase;
+  color:var(--paper);
+  padding:2px 6px;
+  background:color-mix(in oklch, var(--ink) 70%, transparent);
+}
+
+/* hold panel — let the second panel show a real code shot */
+.hold-panel.shot{
+  background:var(--ink);
+  color:var(--paper-warm);
+  padding:0;
+  overflow:hidden;
+  display:block;
+  position:relative;
+}
+.hold-panel.shot img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover; object-position:left top;
+  filter:contrast(1.05) brightness(.94);
+}
+.hold-panel.shot .shot-cap{
+  position:absolute; left:24px; bottom:20px; right:24px;
+  display:flex; justify-content:space-between; align-items:end;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--paper-warm);
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+  z-index:2;
+}
+.hold-panel.shot .shot-cap .right{
+  font-family:var(--italic); font-style:italic;
+  text-transform:none; letter-spacing:.01em;
+  font-size:18px;
+  max-width:18ch;
+  text-align:right;
+}
+.hold-panel.shot::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg,
+    transparent 0%, transparent 55%,
+    rgba(0,0,0,.55) 100%);
+  z-index:1;
 }
 .school-stats{
   display:grid;
@@ -955,6 +1523,25 @@ body{ scrollbar-width:none; }
   letter-spacing:.04em;
   line-height:1.2;
 }
+.blog-row .title .sub{
+  display:block;
+  margin-top:6px;
+  font-family:var(--italic);
+  font-style:italic;
+  text-transform:none;
+  letter-spacing:.005em;
+  font-size:.58em;
+  color:var(--ink-soft);
+}
+.blog-pinned .date::before{
+  content:"●";
+  display:inline-block;
+  margin-right:6px;
+  color:var(--accent);
+  font-family:var(--display);
+  font-size:8px;
+  vertical-align:middle;
+}
 .blog-row .arrow{
   font-family:var(--mono);
   font-size:18px;
@@ -966,6 +1553,69 @@ body{ scrollbar-width:none; }
   font-family:var(--mono); font-size:12px;
   letter-spacing:.18em; text-transform:uppercase;
   color:var(--ink-soft);
+}
+
+/* =========================================================
+   FIELD ROLL — horizontal photo strip / film-roll
+========================================================= */
+.roll{
+  background:var(--paper);
+  padding:clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 140px);
+  overflow:hidden;
+}
+.roll-head{
+  display:flex; justify-content:space-between; align-items:end;
+  gap:var(--gutter);
+  padding:0 var(--gutter);
+  margin-bottom:40px;
+}
+.roll-head .lhs{ display:flex; align-items:end; gap:18px; }
+.roll-head .lhs h3{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:clamp(28px, 3.8vw, 56px);
+  line-height:.95;
+  font-weight:500;
+}
+.roll-head .lhs h3 .ital{
+  font-family:var(--italic); font-style:italic;
+  text-transform:none; letter-spacing:-.005em;
+  color:var(--ink-soft);
+}
+.roll-strip{
+  display:flex;
+  gap:14px;
+  padding:14px var(--gutter);
+  width:max-content;
+  animation:roll-marq 60s linear infinite;
+}
+.roll-strip:hover{ animation-play-state:paused; }
+.roll-frame{
+  position:relative;
+  width:clamp(180px, 22vw, 320px);
+  aspect-ratio:3 / 4;
+  background-size:cover; background-position:center;
+  filter:grayscale(.42) sepia(.16) brightness(.96) contrast(1.04);
+  outline:1px solid var(--rule);
+  flex-shrink:0;
+}
+.roll-frame::after{
+  content:attr(data-cap);
+  position:absolute;
+  left:8px; bottom:8px;
+  font-family:var(--mono);
+  font-size:9px; letter-spacing:.20em; text-transform:uppercase;
+  color:var(--paper);
+  padding:2px 6px;
+  background:color-mix(in oklch, var(--ink) 70%, transparent);
+}
+.roll-frame.land{
+  aspect-ratio:4 / 3;
+}
+@keyframes roll-marq{
+  from{ transform:translateX(0); }
+  to  { transform:translateX(-50%); }
 }
 
 /* =========================================================
@@ -982,9 +1632,9 @@ body{ scrollbar-width:none; }
 }
 .contact-bg{
   position:absolute; inset:0; z-index:0;
-  background-image:url('/images/IMG_20251026_131027.jpg');
-  background-size:cover; background-position:center;
-  filter:saturate(.85) brightness(.85);
+  background-image:url('https://files.seeusercontent.com/2026/06/25/vDk5/2026-06-23_13-37-45_982.jpg');
+  background-size:cover; background-position:center 35%;
+  filter:saturate(.5) brightness(.7) contrast(1.05);
 }
 .contact-bg::after{
   content:""; position:absolute; inset:0;
@@ -1158,8 +1808,15 @@ body{ scrollbar-width:none; }
 @media (max-width:900px){
   .nav{ grid-template-columns:1fr auto 1fr; padding:18px var(--gutter); }
   .nav-left .nav-link:not(:first-child), .nav-right .nav-link:not(:last-child){ display:none; }
+  .hero-mid{ grid-template-columns:1fr; padding-top:40px; }
+  .hero-side{ display:none; }
   .hero-bottom{ grid-template-columns:1fr; gap:36px; }
   .hero-mark{ justify-self:start; text-align:left; }
+  .mood{ height:clamp(360px, 90vw, 520px); }
+  .mood-cap{ padding:36px; }
+  .mood-cap .mid .ital{ font-size:36px; }
+  .roll-frame{ width:60vw; }
+  .school-head{ grid-template-columns:1fr; }
   .about-grid{ grid-template-columns:1fr; gap:48px; }
   .way-row{ grid-template-columns:40px 1fr; }
   .way-row .en{ grid-column:2; padding-top:0; }
@@ -1171,7 +1828,7 @@ body{ scrollbar-width:none; }
   .timeline-grid{ grid-template-columns:1fr; }
   .timeline-col + .timeline-col{ border-left:0; border-top:1px solid var(--rule); padding-left:0; padding-top:48px; margin-top:48px; }
   .metrics-grid{ grid-template-columns:1fr 1fr; row-gap:60px; }
-  .school-head{ grid-template-columns:1fr; gap:40px; }
+  .metric-cell .num{ font-size:clamp(48px, 13vw, 96px); }
   .school-stats{ grid-template-columns:1fr 1fr; row-gap:40px; }
   .blog-row{ grid-template-columns:1fr auto; gap:14px; padding:24px 0; }
   .blog-row .date{ grid-column:1 / -1; }
@@ -1196,6 +1853,7 @@ body{ scrollbar-width:none; }
 ──────────────────────────────────────────────────────── -->
 <div class="cursor" id="cursor"></div>
 <div class="cursor-label" id="cursorLabel"></div>
+<div class="spotlight" id="spotlight"></div>
 
 <!-- ────────────────────────────────────────────────────────
      NAV
@@ -1205,9 +1863,8 @@ body{ scrollbar-width:none; }
     <a class="nav-link" href="https://shanchuann.cn">← Blog</a>
     <a class="nav-link" href="https://github.com/shanchuann" target="_blank" rel="noopener">GitHub</a>
   </div>
-  <a class="brand" href="#hero">张铂坤 <sup>· EST 2023</sup></a>
+  <a class="brand" href="#hero"><span>张铂坤</span><span class="est">· EST 2023</span></a>
   <div class="nav-right">
-    <a class="nav-link" href="#" data-lang>EN</a>
     <a class="cta-pill" href="#contact"><span class="dot"></span>Contact</a>
   </div>
 </header>
@@ -1215,17 +1872,27 @@ body{ scrollbar-width:none; }
 <!-- ────────────────────────────────────────────────────────
      1. HERO
 ──────────────────────────────────────────────────────── -->
-<section class="hero section" id="hero" style="padding-top:120px;">
+<section class="hero section" id="hero" style="padding-top:96px;">
+  <div class="hero-photo" aria-hidden="true"></div>
+  <div class="hero-vignette" aria-hidden="true"></div>
+  <div class="hero-seam" aria-hidden="true"></div>
+
   <div class="hero-top">
     <span class="label">Shanchuann.cn / 2023 — 2027</span>
     <span class="label">N 34.347° &nbsp; E 108.939° &nbsp; XI'AN</span>
   </div>
 
-  <h1 class="hero-stack" aria-label="Open-source work, systems and AI, by Zhang Bokun">
-    <span class="l1"><span class="line">OPEN-SOURCE</span></span>
-    <span class="l2"><span class="line">WORK</span></span>
-    <span class="l3"><span class="line">BY ZHANG BOKUN</span></span>
-  </h1>
+  <div class="hero-mid">
+    <span class="hero-side l">N° 02 — 023 &nbsp; · &nbsp; <strong>FOLIO</strong> &nbsp; · &nbsp; SHOT ON A QUIET FIELD</span>
+
+    <h1 class="hero-stack" aria-label="Open-source work — engineered &amp; assembled by Zhang Bokun">
+      <span class="l1"><span class="line">OPEN-SOURCE</span></span>
+      <span class="l2"><span class="line">engineered</span></span>
+      <span class="l3"><span class="line">BY ZHANG BOKUN</span></span>
+    </h1>
+
+    <span class="hero-side r"><strong>MMXXVI</strong> &nbsp; · &nbsp; XI'AN, CN &nbsp; · &nbsp; FIRST PRINT, JUNE</span>
+  </div>
 
   <div class="hero-bottom">
     <div class="hero-meta">
@@ -1233,29 +1900,38 @@ body{ scrollbar-width:none; }
       <span>XI'AN UNIVERSITY OF</span>
       <span>FINANCE AND ECONOMICS</span>
     </div>
-    <a class="hero-cta" href="#prologue">Enter <span aria-hidden="true">→</span></a>
+    <a class="hero-cta" href="#prologue">Enter / 入场 <span aria-hidden="true">→</span></a>
     <div class="hero-mark">
       <span>SYSTEMS · BACKEND · AI</span><br>
       <span>SINCE Q3 2023</span>
     </div>
   </div>
 
-  <div class="scroll-hint">
-    <span>Scroll</span>
-    <span class="line-y"></span>
-  </div>
 </section>
 
 <!-- ────────────────────────────────────────────────────────
      2. PROLOGUE
 ──────────────────────────────────────────────────────── -->
 <section class="prologue section" id="prologue">
-  <div class="shell">
-    <p class="label">Prologue / 序</p>
-    <blockquote class="reveal">
-      把代码当成可以反复打磨的器物 —— 在底层系统的呼吸里，慢慢寻找一种自己的诚实。
-    </blockquote>
-    <p class="attr">Zhang Bokun · MMXXVI</p>
+  <div class="prologue-grid">
+    <div class="prologue-art" data-cursor="Field studies">
+      <div class="plate" data-cap="No.01 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg');"></div>
+      <div class="plate" data-cap="No.02 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/z3mV/2026-06-23_13-37-45_933.jpg');"></div>
+      <div class="plate" data-cap="No.03 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg');"></div>
+      <div class="plate" data-cap="No.04 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/kZn9/2026-06-23_13-37-46_307.jpg');"></div>
+      <span class="stripe-cap">/ Field studies · 2026.06.23 · 4 frames</span>
+    </div>
+    <div class="prologue-text">
+      <p class="label">Prologue / 序</p>
+      <blockquote class="reveal">
+        把代码当成可以反复打磨的器物 —— 在底层系统的呼吸里，慢慢寻找一种自己的诚实。
+      </blockquote>
+      <p class="attr">Zhang Bokun · MMXXVI</p>
+      <p class="sub-zh reveal">
+        这一页是我的"序"。下面是我做过的事、用过的工具、走过的弯路 ——
+        全都写在中文里，英文标题只是为了让排版有呼吸。
+      </p>
+    </div>
   </div>
 </section>
 
@@ -1266,15 +1942,14 @@ body{ scrollbar-width:none; }
   <div class="shell">
     <h2 class="lead reveal">
       Zhang Bokun
-      <span class="sub">— a second-year software engineering student, building one commit at a time.</span>
+      <span class="sub">— a software engineering student, building one commit at a time.</span>
     </h2>
 
     <div class="about-grid">
       <div>
         <p class="label">About / 关于</p>
         <p class="body-en reveal">
-          I'M A SECOND-YEAR<br>
-          SOFTWARE ENGINEERING<br>
+          A SOFTWARE ENGINEERING<br>
           STUDENT, BUILDING<br>
           HIGH-CONCURRENCY<br>
           C++ BACKENDS AND<br>
@@ -1282,11 +1957,14 @@ body{ scrollbar-width:none; }
           TOOLS — STITCHING THE<br>
           TWO TOGETHER.
         </p>
+        <p class="body-cn reveal" style="margin-top:32px; color:var(--ink-soft); max-width:24em;">
+          一句话：写 C++ 服务端、用 AI 做趁手的工具，并把这两件事缝在一起。
+        </p>
       </div>
       <div class="ms">
         <p class="label">在做的事 / In progress</p>
         <p class="body-cn reveal">
-          我是西安财经大学软件工程本科二年级在读，正在做的事是高并发 C++ 服务端、AI 辅助的全栈工具，
+          我在西安财经大学读软件工程本科，正在做的事是高并发 C++ 服务端、AI 辅助的全栈工具，
           以及把这两件事缝合在一起。
         </p>
         <p class="body-cn reveal">
@@ -1340,49 +2018,55 @@ body{ scrollbar-width:none; }
     <h2 class="huge reveal" style="text-align:center; margin:24px 0 16px;">
       a m a p &nbsp; o f &nbsp; <em class="italic">paths.</em>
     </h2>
-    <p class="head-line">从西安财经大学出发，这四条路把我带到了不同的工地。</p>
+    <p class="head-line">从西安财经大学出发，这六条路把我带到了不同的工地。<br><span style="font-style:normal; font-family:var(--mono); font-size:.55em; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint);">Six paths · one origin.</span></p>
 
-    <div class="map-canvas" id="mapCanvas">
-      <svg viewBox="0 0 1280 880" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" fill="oklch(0.55 0.020 60 / .25)"/>
-          </pattern>
-        </defs>
-        <rect width="1280" height="880" fill="url(#dots)"/>
-        <g stroke="oklch(0.24 0.012 50)" stroke-width="1" fill="none">
-          <path d="M640 440 L 200 200" stroke-dasharray="2 6"/>
-          <path d="M640 440 L 1080 220" stroke-dasharray="2 6"/>
-          <path d="M640 440 L 180 720" stroke-dasharray="2 6"/>
-          <path d="M640 440 L 1100 700" stroke-dasharray="2 6"/>
-        </g>
-        <g fill="oklch(0.52 0.135 38)">
-          <circle cx="200"  cy="200" r="4"/>
-          <circle cx="1080" cy="220" r="4"/>
-          <circle cx="180"  cy="720" r="4"/>
-          <circle cx="1100" cy="700" r="4"/>
-        </g>
-      </svg>
+    <div class="map-canvas" id="mapCanvas" data-cursor="move ↔ snap">
+      <canvas id="mapBlocks" aria-hidden="true"></canvas>
+
+      <span class="map-corner tl">XI'AN · BLOCK MAP / 块地图</span>
+      <span class="map-corner tr">06 NODES · CURSOR MAGNETIC</span>
+      <span class="map-corner bl">N° 02 — 023 · 双语标注</span>
+      <span class="map-corner br">MOVE TO LIFT / 鼠标移动吸附</span>
 
       <div class="node center" style="left:50%; top:50%;">
-        Xi'an Univ. of Finance &amp; Economics
+        西安财经大学 / XUFE · origin
       </div>
 
       <div class="node" style="left:15.6%; top:22.7%;">
-        <span class="title">Systems · C/C++</span>
+        <span class="title">C++ 系统编程</span>
+        <span class="title-en">C++ Systems</span>
         <span class="dist">— 720 D</span>
+        <span class="tags">RAII · STL · 并发原语</span>
       </div>
       <div class="node" style="left:84.4%; top:25%;">
-        <span class="title">High-concurrency Backend</span>
+        <span class="title">高并发后端</span>
+        <span class="title-en">Backend at Scale</span>
         <span class="dist">— 450 D</span>
+        <span class="tags">epoll · Reactor · μSvc</span>
       </div>
       <div class="node" style="left:14%; top:81.8%;">
-        <span class="title">Database &amp; Storage</span>
+        <span class="title">数据库 &amp; 存储</span>
+        <span class="title-en">Databases &amp; Storage</span>
         <span class="dist">— 540 D</span>
+        <span class="tags">MySQL · Redis · LSM-Tree</span>
       </div>
       <div class="node" style="left:85.9%; top:79.5%;">
-        <span class="title">AI Engineering</span>
+        <span class="title">AI 工程</span>
+        <span class="title-en">AI Engineering</span>
         <span class="dist">— 380 D</span>
+        <span class="tags">Agent · RAG · 评测</span>
+      </div>
+      <div class="node" style="left:50%; top:11%;">
+        <span class="title">算法 &amp; 数据结构</span>
+        <span class="title-en">Algorithms &amp; DS</span>
+        <span class="dist">— 820 D</span>
+        <span class="tags">LeetCode · 图论 · DP</span>
+      </div>
+      <div class="node" style="left:50%; top:89%;">
+        <span class="title">DevOps 与工具链</span>
+        <span class="title-en">DevOps &amp; Tooling</span>
+        <span class="dist">— 300 D</span>
+        <span class="tags">Docker · CMake · Git</span>
       </div>
     </div>
 
@@ -1402,7 +2086,8 @@ body{ scrollbar-width:none; }
       <h2 class="big reveal">Hold &amp; Move</h2>
       <div class="toggle">
         <button class="is-active" data-epoch="0">Then · 2023</button>
-        <button data-epoch="1">Now · 2026</button>
+        <button data-epoch="1">Mid · 2024</button>
+        <button data-epoch="2">Now · 2026</button>
       </div>
     </div>
 
@@ -1419,7 +2104,17 @@ body{ scrollbar-width:none; }
           </ul>
         </div>
         <div class="hold-panel">
-          <span class="epoch">JUNIOR YEAR · Q2 2026</span>
+          <span class="epoch">SOPHOMORE YEAR · Q2 2024 · 过渡</span>
+          <p class="quote">从语法到工程的那段路 —— 第一次读 STL 源码，第一次明白"构建系统"到底是什么。</p>
+          <ul>
+            <li><span>Languages</span><span>C++ (learning) · Python · SQL</span></li>
+            <li><span>Reading</span><span>Effective C++ · STL 源码剖析</span></li>
+            <li><span>Built</span><span>简易聊天室 · 课程数据库系统</span></li>
+            <li><span>Tools</span><span>VS Code · Git (流畅) · CMake (入门)</span></li>
+          </ul>
+        </div>
+        <div class="hold-panel">
+          <span class="epoch">JUNIOR YEAR · Q2 2026 · 进行中</span>
           <p class="quote">现在我在写自己的网络库，让 epoll 在事务里跑得安全；让 AI 帮我读日志，但不让它替我下结论。</p>
           <ul>
             <li><span>Languages</span><span>C++17/20 · Java · TS</span></li>
@@ -1430,7 +2125,30 @@ body{ scrollbar-width:none; }
         </div>
       </div>
     </div>
-    <p class="label" style="text-align:center; margin-top:30px;">— hold &amp; drag —</p>
+    <p class="label" style="text-align:center; margin-top:30px;">— hold &amp; drag / 按住拖动 —</p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     6.5 MOOD INTERSTITIAL — full-bleed photo plate
+──────────────────────────────────────────────────────── -->
+<section class="mood" aria-hidden="true">
+  <div class="mood-bg" style="background-image:url('https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg');"></div>
+  <div class="mood-vignette"></div>
+  <div class="mood-grain"></div>
+  <div class="mood-frame"></div>
+  <div class="mood-cap">
+    <div class="top">
+      <span>§ 06½ &nbsp; · &nbsp; INTERLUDE / 间章</span>
+      <span>2026.06.23 · XI'AN</span>
+    </div>
+    <div class="mid">
+      <p class="ital">把代码<br>放下，<br>看一眼<br>地里的草。</p>
+    </div>
+    <div class="bot">
+      <span>FRAME N° 36 / FIELD</span>
+      <span class="frame">— PAUSE</span>
+    </div>
   </div>
 </section>
 
@@ -1518,7 +2236,7 @@ body{ scrollbar-width:none; }
     </div>
 
     <div class="arsenal-pane" data-pane="system">
-      <div class="since">From 2023<small>— First language. Still the one I trust most.</small></div>
+      <div class="since">From 2023<small>— 第一门语言 · still the one I trust most.</small></div>
       <p class="desc">从 C 开始，然后 C++11/17/20。STL 容器、智能指针、移动语义、模板、lambda 这些我用着不慌。Linux 系统编程是顺着 C++ 这条线自然走过来的 —— 内核一直在问我答不上的问题，我得回去补课。</p>
       <div class="keys">
         <span>C++11 / 17 / 20</span>
@@ -1529,7 +2247,7 @@ body{ scrollbar-width:none; }
     </div>
 
     <div class="arsenal-pane" data-pane="backend" hidden>
-      <div class="since">Since 2024<small>— Where my projects actually live.</small></div>
+      <div class="since">Since 2024<small>— 项目真正落地的地方 · where my projects live.</small></div>
       <p class="desc">Linux 下的进程/线程模型、IO 多路复用、事件驱动框架。TCP/IP 四层和 HTTP/HTTPS 都吃过亏才搞明白 —— 粘包、心跳、自定义协议这些是 HyperTicket 教我的。MySQL 的事务隔离与 InnoDB 锁也是这一路顺出来的。</p>
       <div class="keys">
         <span>Epoll · Reactor · Thread pool</span>
@@ -1540,7 +2258,7 @@ body{ scrollbar-width:none; }
     </div>
 
     <div class="arsenal-pane" data-pane="ai" hidden>
-      <div class="since">Since 2025<small>— Working with it daily, carefully.</small></div>
+      <div class="since">Since 2025<small>— 每天用，慎用 · daily but cautiously.</small></div>
       <p class="desc">Claude Code 是日常同事。LangChain 用来串调用与外部工具，Ollama 在本地跑小模型，Prompt 是当作"接口契约"在维护。我会让 AI 帮我读日志、复盘 bug、生成脚手架 —— 但所有架构决策和最终判断留给人。</p>
       <div class="keys">
         <span>Claude Code · Copilot</span>
@@ -1551,7 +2269,7 @@ body{ scrollbar-width:none; }
     </div>
 
     <div class="arsenal-pane" data-pane="tooling" hidden>
-      <div class="since">Always<small>— The boring stuff that decides whether a project lives.</small></div>
+      <div class="since">Always<small>— 决定项目能不能活下来的"无聊"部分。</small></div>
       <p class="desc">Git 用得多就总会练顺。CMake、Gradle 跨平台搭项目；GitHub Actions 把构建、测试、发布串起来；Docker / Docker Compose 是给同事跑起来最稳的方式；GDB 是真正出问题时的伙伴。</p>
       <div class="keys">
         <span>Git · GitHub Actions</span>
@@ -1576,16 +2294,29 @@ body{ scrollbar-width:none; }
         <div class="when">Phase I · Q3 2023</div>
         <div class="title">Enrolled.</div>
         <p class="note">软件工程本科入学。系统读 CSAPP、操作系统、计算机网络、数据库原理这一线。打基础的两年。</p>
+        <ul class="phase-mark">
+          <li><span>课程</span><span>CSAPP · OS · 网络 · 数据库</span></li>
+          <li><span>状态</span><span>打地基</span></li>
+        </ul>
       </div>
       <div class="timeline-col reveal">
         <div class="when">Phase II · Q4 2025 →</div>
         <div class="title">First Open-Source Drops.</div>
         <p class="note">11 月开始 UQBank，12 月开始 HyperTicket；穿插 ChronoLite 和 Hexo Viz。数模竞赛拿到陕西赛区一等奖。</p>
+        <ul class="phase-mark">
+          <li><span>开源</span><span>UQBank · HyperTicket · ChronoLite</span></li>
+          <li><span>奖项</span><span>数模 · 陕西赛区一等奖</span></li>
+        </ul>
       </div>
       <div class="timeline-col reveal">
         <div class="when">Phase III · Q2 2027</div>
         <div class="title">Graduation.</div>
         <p class="note">毕业。在那之前要把 HyperTicket 跑完压测、把 ChronoLite 拆成独立 release、把本地小模型嵌进运维链路里。</p>
+        <ul class="phase-mark">
+          <li><span>压测</span><span>HyperTicket · full bench</span></li>
+          <li><span>分发</span><span>ChronoLite · independent release</span></li>
+          <li><span>实验</span><span>本地小模型 · 嵌入运维链路</span></li>
+        </ul>
       </div>
     </div>
   </div>
@@ -1611,24 +2342,66 @@ body{ scrollbar-width:none; }
   <div class="metrics-body">
     <div class="metrics-grid">
       <div class="metric-cell reveal">
-        <p class="label">Open-source projects</p>
-        <p class="num" data-count="4">0</p>
-        <p class="cap">on github, public &amp; maintained</p>
+        <p class="label">
+          <span class="primary">Open-source</span>
+          <span class="aux">开源项目</span>
+        </p>
+        <p class="num" data-count="14">0</p>
+        <p class="cap">
+          ACTIVE REPOS ON GITHUB
+          <span class="aux">14 个活跃仓库 + 6 个教学仓库 · 共 20 个，公开维护中</span>
+        </p>
       </div>
-      <div class="metric-cell reveal">
-        <p class="label">Shaanxi Math Modeling</p>
-        <p class="num"><small>1<sup>ST</sup></small> Prize</p>
-        <p class="cap">2025 national contest, regional finals — team lead</p>
+
+      <div class="metric-cell metric-awards reveal">
+        <p class="label">
+          <span class="primary">Awards</span>
+          <span class="aux">省赛奖项 · 队长</span>
+        </p>
+        <div class="num-stack">
+          <div class="row">
+            <span class="ord">1<sup>ST</sup></span>
+            <span class="who">
+              <span class="en">Math Modeling</span>
+              <span class="cn">2025 数学建模 · 陕西省一等奖</span>
+            </span>
+          </div>
+          <div class="row">
+            <span class="ord">3<sup>RD</sup></span>
+            <span class="who">
+              <span class="en">Computer Design</span>
+              <span class="cn">计算机设计大赛 · 陕西省三等奖</span>
+            </span>
+          </div>
+        </div>
+        <p class="cap">
+          SHAANXI · TEAM LEAD
+          <span class="aux">两项省赛奖项 · 均为队长</span>
+        </p>
       </div>
+
       <div class="metric-cell reveal">
-        <p class="label">Training programs</p>
-        <p class="num" data-count="2">0</p>
-        <p class="cap">tsinghua rcore os camp &nbsp;·&nbsp; bytedance youth camp</p>
+        <p class="label">
+          <span class="primary">Camps</span>
+          <span class="aux">训练营</span>
+        </p>
+        <p class="num" data-count="3">0</p>
+        <p class="cap">
+          THREE TRAINING PROGRAMS
+          <span class="aux">清华 rCore OS · 字节青训营 · 携程前端训练营</span>
+        </p>
       </div>
+
       <div class="metric-cell reveal">
-        <p class="label">Live products</p>
+        <p class="label">
+          <span class="primary">Live</span>
+          <span class="aux">线上产品</span>
+        </p>
         <p class="num" data-count="1">0</p>
-        <p class="cap">uqbank.shanchuann.cn — in real use</p>
+        <p class="cap">
+          IN REAL USE
+          <span class="aux">uqbank.shanchuann.cn · 正在被使用</span>
+        </p>
       </div>
     </div>
   </div>
@@ -1658,9 +2431,12 @@ body{ scrollbar-width:none; }
         <h2 class="big reveal">Xi'an University of Finance and Economics</h2>
         <p class="body-cn">软件工程本科 · 2023.09 — 2027.06 · 本科在读。</p>
       </div>
-      <p class="quote reveal">
-        基础课程是地基 —— 我在这里把操作系统、计算机网络、数据库原理一寸寸读厚。
-      </p>
+      <div>
+        <p class="quote reveal">
+          基础课程是地基 —— 我在这里把操作系统、计算机网络、数据库原理一寸寸读厚。
+        </p>
+        <div class="school-plate reveal" data-cap="No.04 · 校园 / xufe" style="background-image:url('/images/mmexport1761643789786.jpg');"></div>
+      </div>
     </div>
 
     <div class="school-stats">
@@ -1679,14 +2455,57 @@ body{ scrollbar-width:none; }
   <div class="shell">
     <div class="head">
       <div>
-        <p class="label">Field notes</p>
+        <p class="label">Field notes / 博客近作</p>
         <h2 class="big reveal">From the blog.</h2>
       </div>
-      <a class="cta-pill" href="https://shanchuann.cn" target="_blank" rel="noopener">All posts ↗</a>
+      <a class="cta-pill" href="https://shanchuann.cn" target="_blank" rel="noopener"><span class="dot"></span>All posts / 全部文章 ↗</a>
+    </div>
+    <!-- pinned book row, always visible -->
+    <div class="blog-list">
+      <a class="blog-row blog-pinned" href="https://shanchuan-1.gitbook.io/clanguagebook" target="_blank" rel="noopener">
+        <span class="date">GITBOOK · 在写</span>
+        <span class="title">
+          C 语言圣经
+          <span class="sub">— a book I'm writing on C, chapter by chapter.</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
     </div>
     <div class="blog-list" id="blogList">
-      <div class="blog-empty">— loading recent posts —</div>
+      <div class="blog-empty">— loading recent posts / 加载中 —</div>
     </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────
+     12.5 FIELD ROLL — horizontal photo strip
+──────────────────────────────────────────────────────── -->
+<section class="roll" aria-hidden="true">
+  <div class="roll-head">
+    <div class="lhs">
+      <span class="label">Field roll / 胶卷</span>
+      <h3>One <span class="ital">afternoon</span>, twelve frames.</h3>
+    </div>
+    <span class="label">2026.06.23 · XI'AN</span>
+  </div>
+  <div class="roll-strip">
+    <div class="roll-frame" data-cap="No.05 · 13:37:45.907" style="background-image:url('https://files.seeusercontent.com/2026/06/25/l3Gk/2026-06-23_13-37-45_907.jpg');"></div>
+    <div class="roll-frame" data-cap="No.06 · 13:37:45.945" style="background-image:url('https://files.seeusercontent.com/2026/06/25/Ou9i/2026-06-23_13-37-45_945.jpg');"></div>
+    <div class="roll-frame" data-cap="No.07 · 13:37:45.965" style="background-image:url('https://files.seeusercontent.com/2026/06/25/5Tlv/2026-06-23_13-37-45_965.jpg');"></div>
+    <div class="roll-frame" data-cap="No.08 · 13:37:46.317" style="background-image:url('https://files.seeusercontent.com/2026/06/25/1ixN/2026-06-23_13-37-46_317.jpg');"></div>
+    <div class="roll-frame" data-cap="No.09 · 13:37:46.435" style="background-image:url('https://files.seeusercontent.com/2026/06/25/kY1o/2026-06-23_13-37-46_435.jpg');"></div>
+    <div class="roll-frame" data-cap="No.10 · 13:37:45.845" style="background-image:url('https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg');"></div>
+    <div class="roll-frame" data-cap="No.11 · 13:37:46.028" style="background-image:url('https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg');"></div>
+    <div class="roll-frame" data-cap="No.12 · 13:37:46.409" style="background-image:url('https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg');"></div>
+    <!-- duplicate for marquee loop -->
+    <div class="roll-frame" data-cap="No.05 · 13:37:45.907" style="background-image:url('https://files.seeusercontent.com/2026/06/25/l3Gk/2026-06-23_13-37-45_907.jpg');"></div>
+    <div class="roll-frame" data-cap="No.06 · 13:37:45.945" style="background-image:url('https://files.seeusercontent.com/2026/06/25/Ou9i/2026-06-23_13-37-45_945.jpg');"></div>
+    <div class="roll-frame" data-cap="No.07 · 13:37:45.965" style="background-image:url('https://files.seeusercontent.com/2026/06/25/5Tlv/2026-06-23_13-37-45_965.jpg');"></div>
+    <div class="roll-frame" data-cap="No.08 · 13:37:46.317" style="background-image:url('https://files.seeusercontent.com/2026/06/25/1ixN/2026-06-23_13-37-46_317.jpg');"></div>
+    <div class="roll-frame" data-cap="No.09 · 13:37:46.435" style="background-image:url('https://files.seeusercontent.com/2026/06/25/kY1o/2026-06-23_13-37-46_435.jpg');"></div>
+    <div class="roll-frame" data-cap="No.10 · 13:37:45.845" style="background-image:url('https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg');"></div>
+    <div class="roll-frame" data-cap="No.11 · 13:37:46.028" style="background-image:url('https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg');"></div>
+    <div class="roll-frame" data-cap="No.12 · 13:37:46.409" style="background-image:url('https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg');"></div>
   </div>
 </section>
 
@@ -1763,7 +2582,7 @@ body{ scrollbar-width:none; }
         <span class="plus">+</span>
       </button>
       <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
-        因为我大二就用上了别人写的 jsoncpp、libevent、Hexo —— 我至少得还回去一点点。也因为开源是我目前唯一能拿出来给陌生人审查的"工作记录"。代码摆在那儿，谁都能验真，比履历上的形容词扎实得多。
+        因为我在本科期间就用上了别人写的 jsoncpp、libevent、Hexo —— 我至少得还回去一点点。也因为开源是我目前唯一能拿出来给陌生人审查的"工作记录"。代码摆在那儿，谁都能验真，比履历上的形容词扎实得多。
       </p></div></div></div>
     </div>
 
@@ -1835,13 +2654,18 @@ body{ scrollbar-width:none; }
   /* ── Cursor ── */
   const cursor = document.getElementById('cursor');
   const cursorLabel = document.getElementById('cursorLabel');
+  const spotlight = document.getElementById('spotlight');
   let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
+  let sx = cx, sy = cy; // spotlight lerped slower than the dot
   addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
   function loop(){
     cx += (tx - cx) * 0.22;
     cy += (ty - cy) * 0.22;
+    sx += (tx - sx) * 0.10;
+    sy += (ty - sy) * 0.10;
     cursor.style.transform = `translate(${cx-5}px, ${cy-5}px)`;
     cursorLabel.style.transform = `translate(${tx+14}px, ${ty+14}px)`;
+    spotlight.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`;
     requestAnimationFrame(loop);
   }
   loop();
@@ -1860,39 +2684,201 @@ body{ scrollbar-width:none; }
     });
   });
 
-  /* ── Hero stack reveal ── */
+  /* light cursor + spotlight halo on dark sections */
+  document.querySelectorAll('.metrics, .contact, .mood').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.classList.add('on-dark');
+      cursorLabel.classList.add('on-dark');
+      spotlight.classList.add('is-show');
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.classList.remove('on-dark');
+      cursorLabel.classList.remove('on-dark');
+      spotlight.classList.remove('is-show');
+    });
+  });
+
+  /* ── Magnetic buttons — subtle pull toward cursor on hover ── */
   if (!reduced) {
-    gsap.to('.hero-stack .line', {
-      yPercent: 0, duration: 1.4, stagger: 0.12,
-      ease: 'expo.out', delay: 0.2
+    document.querySelectorAll('.cta-pill, .hero-cta, .work-row .open, .faq-q .plus').forEach(el => {
+      const RADIUS = 80;
+      const STR = 0.32;
+      el.addEventListener('mousemove', e => {
+        const r = el.getBoundingClientRect();
+        const ex = e.clientX - (r.left + r.width/2);
+        const ey = e.clientY - (r.top + r.height/2);
+        const d = Math.hypot(ex, ey);
+        if (d > RADIUS) return;
+        gsap.to(el, { x: ex * STR, y: ey * STR, duration: .4, ease: 'expo.out' });
+      });
+      el.addEventListener('mouseleave', () => {
+        gsap.to(el, { x: 0, y: 0, duration: .7, ease: 'expo.out' });
+      });
     });
-    gsap.from('.hero-meta span, .hero-mark span, .hero-cta', {
+  }
+
+  /* ── Tilt the prologue collage with cursor ── */
+  if (!reduced) {
+    const art = document.querySelector('.prologue-art');
+    if (art) {
+      art.addEventListener('mousemove', e => {
+        const r = art.getBoundingClientRect();
+        const rx = ((e.clientY - r.top) / r.height - 0.5) * -6;
+        const ry = ((e.clientX - r.left) / r.width  - 0.5) *  8;
+        gsap.to(art, { rotateX: rx, rotateY: ry, transformPerspective: 900, duration: .6, ease: 'expo.out' });
+      });
+      art.addEventListener('mouseleave', () => {
+        gsap.to(art, { rotateX: 0, rotateY: 0, duration: 1.0, ease: 'expo.out' });
+      });
+    }
+  }
+
+  /* ── Parallax: mood photo & contact photo scroll-driven scale + drift ── */
+  if (!reduced) {
+    gsap.to('.mood-bg', {
+      yPercent: -10, scale: 1.06, ease: 'none',
+      scrollTrigger: { trigger: '.mood', start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+    /* Vignette deepens as the mood photo scrolls into view */
+    gsap.fromTo('.mood-vignette',
+      { opacity: 0 },
+      {
+        opacity: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: '.mood', start: 'top 85%', end: 'bottom 25%', scrub: true }
+      }
+    );
+    gsap.to('.contact-bg', {
+      yPercent: -8, scale: 1.06, ease: 'none',
+      scrollTrigger: { trigger: '.contact', start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+    /* school + section-label slide-in */
+    gsap.from('.school .label, .timeline .label, .blog .label, .arsenal .label, .faq .label, .work .label, .way .label, .map .label', {
+      x: -24, opacity: 0, duration: 1, ease: 'expo.out',
+      stagger: 0.05,
+      scrollTrigger: { trigger: '.timeline', start: 'top 90%' }
+    });
+
+    /* Way rows: text color deepens as each row scrolls up through the viewport.
+       Each row's --row-tint scrubs 1 → 0 between "top 85% of viewport" and "top 35%". */
+    document.querySelectorAll('.way-row').forEach(row => {
+      gsap.fromTo(row,
+        { '--row-tint': 1 },
+        {
+          '--row-tint': 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: row,
+            start: 'top 85%',
+            end: 'top 35%',
+            scrub: true
+          }
+        }
+      );
+    });
+  }
+
+  /* ── Way rows: number scales on hover ── */
+  document.querySelectorAll('.way-row').forEach(row => {
+    const num = row.querySelector('.num');
+    if (!num) return;
+    row.addEventListener('mouseenter', () => gsap.to(num, { letterSpacing: '.4em', color: 'var(--accent)', duration: .4, ease: 'expo.out' }));
+    row.addEventListener('mouseleave', () => gsap.to(num, { letterSpacing: '.18em', color: 'var(--ink-soft)', duration: .55, ease: 'expo.out' }));
+  });
+
+  /* ── Brand mark: hover splits last name ── */
+  const brand = document.querySelector('.brand > span:first-child');
+  if (brand && !reduced) {
+    const original = brand.textContent;
+    const chars = original.split('').map(c => `<span style="display:inline-block;">${c}</span>`).join('');
+    brand.innerHTML = chars;
+    const spans = brand.querySelectorAll('span');
+    brand.parentElement.addEventListener('mouseenter', () => {
+      gsap.to(spans, { y: -3, duration: .35, stagger: 0.04, ease: 'expo.out' });
+    });
+    brand.parentElement.addEventListener('mouseleave', () => {
+      gsap.to(spans, { y: 0, duration: .5, stagger: { each: 0.03, from: 'end' }, ease: 'expo.out' });
+    });
+  }
+
+  /* ── Hero stack reveal — char-level stagger ── */
+  if (!reduced) {
+    document.querySelectorAll('.hero-stack .line').forEach(line => {
+      const text = line.textContent;
+      const chars = [...text].map(c => {
+        const span = document.createElement('span');
+        span.textContent = c;
+        span.style.display = 'inline-block';
+        span.style.willChange = 'transform';
+        return span;
+      });
+      line.textContent = '';
+      chars.forEach(c => line.appendChild(c));
+      gsap.from(chars, {
+        yPercent: 110, opacity: 0,
+        duration: 1.4, stagger: 0.025, ease: 'expo.out', delay: 0.3
+      });
+    });
+    gsap.from('.hero-meta span, .hero-mark span, .hero-cta, .hero-top .label, .hero-side', {
       y: 18, opacity: 0, duration: 1, stagger: 0.06,
-      ease: 'expo.out', delay: 0.9
+      ease: 'expo.out', delay: 1.0
     });
+    gsap.fromTo('.hero-photo',
+      { scale: 1.14, opacity: 0 },
+      { scale: 1, opacity: 0.62, duration: 2.6, ease: 'expo.out', delay: 0 }
+    );
+    gsap.to('.hero-photo', {
+      yPercent: 18,
+      ease: 'none',
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+    });
+    /* hero sidebars: subtle drift on scroll */
+    gsap.to('.hero-side.l', { yPercent: -10, ease: 'none',
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
+    gsap.to('.hero-side.r', { yPercent: 10, ease: 'none',
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
   } else {
     gsap.set('.hero-stack .line', { yPercent: 0 });
   }
 
-  /* ── Reveal on scroll ── */
-  document.querySelectorAll('.reveal').forEach(el => {
-    ScrollTrigger.create({
-      trigger: el, start: 'top 88%',
-      onEnter: () => el.classList.add('is-in')
+  /* ── Reveal on scroll (IntersectionObserver — more reliable w/ smooth-scroll libs) ── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-in');
+        io.unobserve(entry.target);
+      }
     });
-  });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  /* Safety net — if for any reason an element above the fold never intersects, force it visible after 1.6s */
+  setTimeout(() => {
+    document.querySelectorAll('.reveal').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0) el.classList.add('is-in');
+    });
+    ScrollTrigger.refresh();
+  }, 1600);
 
-  /* ── HOLD draggable ── */
+  /* ── HOLD draggable (3 epochs: Then · 2023 / Mid · 2024 / Now · 2026) ── */
   const stage = document.getElementById('holdStage');
   const track = document.getElementById('holdTrack');
   const toggles = document.querySelectorAll('.hold .toggle button');
   if (stage && track) {
-    let bounds = { minX: -stage.offsetWidth, maxX: 0 };
-    const setBounds = () => { bounds = { minX: -stage.offsetWidth, maxX: 0 }; };
+    const PANELS = toggles.length; // 3
+    const step = () => stage.offsetWidth; // one panel's slide distance
+    let bounds = { minX: -step() * (PANELS - 1), maxX: 0 };
+    const setBounds = () => { bounds = { minX: -step() * (PANELS - 1), maxX: 0 }; };
     setBounds();
     addEventListener('resize', setBounds);
 
-    const drag = Draggable.create(track, {
+    const snapTo = (i) => {
+      const target = -step() * i;
+      gsap.to(track, { x: target, duration: 0.8, ease: 'expo.inOut' });
+      toggles.forEach((b, j) => b.classList.toggle('is-active', i === j));
+    };
+
+    Draggable.create(track, {
       type: 'x',
       bounds: () => bounds,
       inertia: false,
@@ -1900,19 +2886,15 @@ body{ scrollbar-width:none; }
       onDragStart(){ cursor.classList.add('is-drag'); document.body.classList.add('is-dragging'); },
       onDragEnd(){
         cursor.classList.remove('is-drag'); document.body.classList.remove('is-dragging');
-        const half = stage.offsetWidth * -0.5;
-        const target = this.x < half ? bounds.minX : 0;
-        gsap.to(track, { x: target, duration: 0.7, ease: 'expo.out' });
-        toggles.forEach((b,i) => b.classList.toggle('is-active', (target === 0 ? i===0 : i===1)));
+        const s = step();
+        // nearest panel index based on current x
+        const i = Math.max(0, Math.min(PANELS - 1, Math.round(-this.x / s)));
+        snapTo(i);
       }
     })[0];
 
     toggles.forEach((btn, i) => {
-      btn.addEventListener('click', () => {
-        const target = i === 0 ? 0 : bounds.minX;
-        gsap.to(track, { x: target, duration: 0.9, ease: 'expo.inOut' });
-        toggles.forEach((b,j) => b.classList.toggle('is-active', i===j));
-      });
+      btn.addEventListener('click', () => snapTo(i));
     });
   }
 
@@ -1953,36 +2935,146 @@ body{ scrollbar-width:none; }
     });
   });
 
-  /* ── Atom feed ── */
+  /* ── Map: block-grid heightmap with magnetic cursor lift ── */
+  const mapCanvas = document.getElementById('mapBlocks');
+  if (mapCanvas) {
+    const ctx = mapCanvas.getContext('2d');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const COLS = 28, ROWS = 18;
+    // each cell has a baseline "altitude" 0..1 — sampled with layered sin waves so we get ridges,
+    // not noise — and a live lift amount driven by cursor proximity.
+    const baseline = new Float32Array(COLS * ROWS);
+    const lift     = new Float32Array(COLS * ROWS);
+    const idx = (cx, cy) => cy * COLS + cx;
+
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const fx = x / COLS, fy = y / ROWS;
+        const ridge = Math.sin(fx * 4.2 + 0.6) * Math.cos(fy * 3.1 - 0.3);
+        const noise = Math.sin((x*0.9 + y*1.7) * 1.1) * 0.18;
+        const fall  = 1 - Math.hypot(fx - 0.5, fy - 0.5) * 1.05; // pull peaks toward middle
+        baseline[idx(x,y)] = Math.max(0, 0.42 + ridge*0.30 + noise + fall*0.18);
+      }
+    }
+
+    const accent = [186, 96, 52];  // burnt sienna RGB (oklch 0.52/0.135/38 approx)
+    const ink    = [50, 38, 30];
+
+    let mx = -9999, my = -9999, lastMoveT = 0;
+    const stage = mapCanvas.parentElement;
+    stage.addEventListener('mousemove', e => {
+      const r = mapCanvas.getBoundingClientRect();
+      mx = (e.clientX - r.left) / r.width;
+      my = (e.clientY - r.top)  / r.height;
+      lastMoveT = performance.now();
+    });
+    stage.addEventListener('mouseleave', () => { mx = my = -9999; });
+
+    const resize = () => {
+      const r = mapCanvas.getBoundingClientRect();
+      mapCanvas.width  = Math.round(r.width  * dpr);
+      mapCanvas.height = Math.round(r.height * dpr);
+    };
+    resize();
+    addEventListener('resize', resize);
+
+    const RADIUS = 0.16; // magnetic radius in normalized coords
+    const draw = () => {
+      const w = mapCanvas.width, h = mapCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cellW = w / COLS;
+      const cellH = h / ROWS;
+      const t = performance.now() / 1000;
+      // when idle, sweep a soft "wind" wave across the map so it never feels static
+      const idle = performance.now() - lastMoveT > 900;
+
+      // depth-sort: draw back rows first
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const fx = (x + 0.5) / COLS;
+          const fy = (y + 0.5) / ROWS;
+          const d  = Math.hypot(fx - mx, fy - my);
+          let targetLift = d < RADIUS ? (1 - d / RADIUS) : 0;
+          if (idle) {
+            // a slow diagonal sine wave breathing
+            const wave = Math.sin((fx * 6 + fy * 4) - t * 1.4) * 0.5 + 0.5;
+            targetLift = Math.max(targetLift, wave * 0.35);
+          }
+          const i = idx(x, y);
+          lift[i] += (targetLift - lift[i]) * 0.16;
+          const elev = baseline[i] + lift[i] * 0.85;
+
+          // isometric-ish offset: lift pushes the block "up" in screen Y
+          const dx = x * cellW;
+          const dy = y * cellH;
+          const blockH = Math.min(cellH * 0.9, cellH * (0.18 + elev * 0.95));
+          const top = dy + (cellH - blockH);
+
+          // tint: ink darkness scaled by elev, accent on the peak edge
+          const tone = Math.min(1, elev);
+          const lifted = lift[i];
+          const r = Math.round(ink[0] + (accent[0] - ink[0]) * lifted * 0.85);
+          const g = Math.round(ink[1] + (accent[1] - ink[1]) * lifted * 0.85);
+          const b = Math.round(ink[2] + (accent[2] - ink[2]) * lifted * 0.85);
+          const alpha = 0.18 + tone * 0.55 + lifted * 0.3;
+
+          // body
+          ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.fillRect(dx + cellW*0.12, top, cellW * 0.76, blockH);
+
+          // top cap — lighter sliver to suggest dimension
+          ctx.fillStyle = `rgba(${r+30},${g+24},${b+18},${Math.min(1, alpha + 0.18)})`;
+          ctx.fillRect(dx + cellW*0.12, top, cellW * 0.76, Math.max(1.5*dpr, blockH*0.07));
+        }
+      }
+      requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  /* ── Atom feed ── same-origin in production (shanchuann.cn/atom.xml), CORS-free */
   (async () => {
     const list = document.getElementById('blogList');
-    try {
-      const res = await fetch('https://shanchuann.cn/atom.xml', { credentials: 'omit' });
-      if (!res.ok) throw new Error('feed status ' + res.status);
-      const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
-      const entries = [...xml.querySelectorAll('entry')].slice(0, 2);
-      if (!entries.length) throw new Error('no entries');
-      list.innerHTML = '';
-      entries.forEach(e => {
-        const title = e.querySelector('title')?.textContent?.trim() || 'Untitled';
-        const link = e.querySelector('link')?.getAttribute('href') || 'https://shanchuann.cn';
-        const updated = e.querySelector('updated')?.textContent || e.querySelector('published')?.textContent || '';
-        const d = updated ? new Date(updated) : null;
-        const dateStr = d ? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` : '';
-        const row = document.createElement('a');
-        row.className = 'blog-row';
-        row.href = link; row.target = '_blank'; row.rel = 'noopener';
-        row.innerHTML = `<span class="date">${dateStr}</span><span class="title">${title}</span><span class="arrow">↗</span>`;
-        list.appendChild(row);
-      });
-    } catch (err) {
+    /* Try same-origin first; fall back to absolute if running outside the site */
+    const sources = ['/atom.xml', 'https://shanchuann.cn/atom.xml'];
+    let xml = null;
+    for (const src of sources) {
+      try {
+        const res = await fetch(src, { credentials: 'omit' });
+        if (!res.ok) continue;
+        xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+        break;
+      } catch (_) { /* try next */ }
+    }
+    if (!xml) {
       list.innerHTML = `
         <a class="blog-row" href="https://shanchuann.cn" target="_blank" rel="noopener">
-          <span class="date">visit blog</span>
-          <span class="title">shanchuann.cn — field notes, in chinese.</span>
+          <span class="date">VISIT BLOG · 直接访问</span>
+          <span class="title">shanchuann.cn<span class="sub">— field notes, in Chinese.</span></span>
           <span class="arrow">↗</span>
         </a>`;
+      return;
     }
+    const entries = [...xml.querySelectorAll('entry')].slice(0, 4);
+    if (!entries.length) {
+      list.innerHTML = `<div class="blog-empty">no recent posts / 暂无近作</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    entries.forEach(e => {
+      const title = e.querySelector('title')?.textContent?.trim() || 'Untitled';
+      const link = e.querySelector('link')?.getAttribute('href') || 'https://shanchuann.cn';
+      const updated = e.querySelector('updated')?.textContent || e.querySelector('published')?.textContent || '';
+      const d = updated ? new Date(updated) : null;
+      const dateStr = d ? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` : '';
+      const row = document.createElement('a');
+      row.className = 'blog-row';
+      row.href = link; row.target = '_blank'; row.rel = 'noopener';
+      row.innerHTML = `<span class="date">${dateStr}</span><span class="title">${title}</span><span class="arrow">↗</span>`;
+      list.appendChild(row);
+    });
   })();
 
   /* ── Local time ── */
