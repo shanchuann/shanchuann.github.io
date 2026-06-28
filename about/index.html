@@ -9,7 +9,10 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://files.seeusercontent.com" crossorigin>
+<link rel="dns-prefetch" href="https://files.seeusercontent.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,700&family=Fragment+Mono&family=Lustria&family=Noto+Serif+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="https://files.seeusercontent.com/2026/06/25/5pTt/IMG_20251026_131027.jpg" fetchpriority="high">
 
 <style>
 /* =========================================================
@@ -241,6 +244,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   letter-spacing:.18em;
   color:var(--ink);
   position:relative;
+  transition:color .35s var(--ease-out);
+}
+.brand, .brand .est, .menu-trigger, .cta-pill, .menu-trigger .bars i, .cta-pill .dot{
+  transition:color .35s var(--ease-out), background .35s var(--ease-out), border-color .35s var(--ease-out);
 }
 .nav-link::after{
   content:""; position:absolute; left:0; right:0; bottom:-3px;
@@ -248,6 +255,194 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   transition:transform .5s var(--ease-out);
 }
 .nav-link:hover::after{ transform:scaleX(1); transform-origin:left; }
+
+/* Inverted nav palette when the nav band is overlapping a dark section.
+   `.on-dark` is toggled on .nav by JS as the user scrolls. We also disable
+   the multiply blend (which would otherwise eat the light text on dark bg). */
+.nav.on-dark{ mix-blend-mode:normal !important; }
+.nav.on-dark .nav-link,
+.nav.on-dark .brand,
+.nav.on-dark .menu-trigger{ color:var(--paper); }
+.nav.on-dark .brand .est{ color:color-mix(in oklch, var(--paper) 65%, transparent); }
+.nav.on-dark .nav-link::after,
+.nav.on-dark .menu-trigger .bars i{ background:var(--paper); }
+.nav.on-dark .cta-pill{
+  color:var(--paper);
+  /* slightly softer border so the 1px stroke doesn't read as jagged against the dark bg */
+  border-color:color-mix(in oklch, var(--paper) 55%, transparent);
+}
+.nav.on-dark .cta-pill::before{ background:var(--paper); }
+.nav.on-dark .cta-pill:hover{ color:var(--ink); }
+.nav.on-dark .cta-pill .dot{ background:var(--accent); }
+/* The thin scroll progress bar at top should also flip palette on dark */
+.scroll-progress.on-dark{ background:color-mix(in oklch, var(--paper) 14%, transparent); }
+.scroll-progress.on-dark > i{ background:linear-gradient(90deg, var(--accent), var(--paper)); }
+
+/* =========================================================
+   PAGE LOADER — full-screen splash, fades out on window.load
+========================================================= */
+.loader{
+  position:fixed; inset:0;
+  background:var(--paper);
+  z-index:9999;
+  display:grid; place-items:center;
+  transition:opacity .7s var(--ease-out), visibility .7s;
+}
+.loader.is-done{ opacity:0; visibility:hidden; }
+.loader-inner{
+  width:min(440px, 82vw);
+  text-align:center;
+  padding:0 var(--gutter);
+}
+.loader-mark{
+  display:inline-flex; align-items:baseline; gap:14px;
+  font-family:var(--display);
+  font-weight:500;
+  font-size:14px; letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:48px;
+}
+.loader-mark .est{
+  font-family:var(--mono);
+  font-size:10px; letter-spacing:.24em;
+  color:var(--ink-soft);
+}
+.loader-pct{
+  display:inline-flex; align-items:flex-start; justify-content:center;
+  gap:8px;
+  font-family:var(--display);
+  font-weight:500;
+  font-size:clamp(80px, 14vw, 160px);
+  line-height:.95;
+  color:var(--ink);
+  letter-spacing:-.02em;
+}
+.loader-pct .aux{
+  font-family:var(--mono);
+  font-size:14px; letter-spacing:.20em;
+  color:var(--ink-soft);
+  margin-top:.85em;
+}
+.loader-bar{
+  height:1px;
+  background:color-mix(in oklch, var(--ink) 12%, transparent);
+  margin:36px auto 22px;
+  position:relative;
+  overflow:hidden;
+}
+.loader-bar i{
+  display:block; height:100%; width:0%;
+  background:var(--ink);
+  transition:width .3s linear;
+}
+.loader-meta{
+  font-family:var(--mono);
+  font-size:10px; letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.loader-meta .sep{ margin:0 10px; color:var(--accent); }
+/* When loader is on screen, lock body scroll */
+body.is-loading{ overflow:hidden; }
+
+/* =========================================================
+   SCROLL PROGRESS — thin paper-ink bar at very top
+========================================================= */
+.scroll-progress{
+  position:fixed; top:0; left:0; right:0;
+  height:2px; z-index:1500;
+  background:color-mix(in oklch, var(--ink) 8%, transparent);
+  pointer-events:none;
+}
+.scroll-progress > i{
+  display:block; height:100%; width:0%;
+  background:linear-gradient(90deg, var(--accent), var(--ink));
+  transform-origin:left center;
+  will-change:width;
+  transition:width .12s linear;
+}
+
+/* =========================================================
+   SECTION INDICATOR — floating chip at bottom-right
+========================================================= */
+.section-pip{
+  position:fixed;
+  right:clamp(14px, 2vw, 28px);
+  bottom:clamp(14px, 2vw, 28px);
+  z-index:1400;
+  display:inline-flex; align-items:center; gap:12px;
+  padding:10px 16px;
+  border:1px solid color-mix(in oklch, var(--ink) 40%, transparent);
+  border-radius:999px;
+  background:color-mix(in oklch, var(--paper) 88%, transparent);
+  backdrop-filter:blur(6px);
+  font-family:var(--mono);
+  font-size:11px; letter-spacing:.20em; text-transform:uppercase;
+  color:var(--ink);
+  opacity:0; transform:translateY(8px);
+  transition:opacity .45s var(--ease-out), transform .55s var(--ease-out), background .35s, color .35s;
+  mix-blend-mode:multiply;
+  pointer-events:none;
+}
+.section-pip.is-show{ opacity:1; transform:translateY(0); }
+.section-pip .pip-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in oklch, var(--accent) 22%, transparent);
+}
+.section-pip .pip-num{
+  font-family:var(--display); font-weight:500;
+  font-size:13px; letter-spacing:.06em;
+  color:var(--ink-soft);
+}
+.section-pip .pip-bar{
+  position:relative;
+  width:48px; height:2px;
+  background:color-mix(in oklch, var(--ink) 18%, transparent);
+  border-radius:1px; overflow:hidden;
+}
+.section-pip .pip-bar i{
+  position:absolute; left:0; top:0; bottom:0;
+  width:0%;
+  background:var(--ink);
+  transition:width .35s var(--ease-out);
+}
+/* on dark sections the chip flips palette */
+.section-pip.on-dark{
+  background:color-mix(in oklch, #000 78%, var(--ink) 22%);
+  border-color:color-mix(in oklch, var(--paper) 40%, transparent);
+  color:var(--paper);
+  mix-blend-mode:normal !important;
+  backdrop-filter:blur(8px);
+}
+.section-pip.on-dark .pip-num   { color:color-mix(in oklch, var(--paper) 80%, transparent); }
+.section-pip.on-dark .pip-bar   { background:color-mix(in oklch, var(--paper) 22%, transparent); }
+.section-pip.on-dark .pip-bar i { background:var(--paper); }
+.section-pip.on-dark .pip-dot   { box-shadow:0 0 0 3px color-mix(in oklch, var(--accent) 30%, transparent); }
+
+/* =========================================================
+   HERO PARTICLES — gentle drifting dust
+========================================================= */
+.hero-dust{
+  position:absolute; inset:0; z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+}
+.hero-dust i{
+  position:absolute;
+  width:2px; height:2px; border-radius:50%;
+  background:color-mix(in oklch, var(--paper-warm) 60%, transparent);
+  opacity:.5;
+  will-change:transform, opacity;
+  animation:dust-rise var(--dust-d, 24s) linear var(--dust-delay, 0s) infinite;
+}
+@keyframes dust-rise{
+  0%   { transform:translate3d(0, 12vh, 0)   scale(.85); opacity:0; }
+  10%  { opacity:.55; }
+  90%  { opacity:.55; }
+  100% { transform:translate3d(var(--dust-x, 30px), -110vh, 0) scale(1); opacity:0; }
+}
 .brand{
   font-family:var(--display);
   font-weight:500;
@@ -279,6 +474,13 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   color:var(--ink);
   overflow:hidden;
   position:relative;
+  isolation:isolate;
+  /* Force a dedicated compositing layer so the rounded 1px border is anti-aliased
+     by the GPU rather than the CPU rasteriser — fixes the jagged edge that shows
+     on dark backgrounds when the on-dark variant flips the border to paper. */
+  transform:translateZ(0);
+  backface-visibility:hidden;
+  -webkit-font-smoothing:antialiased;
   transition:color .4s var(--ease-out);
 }
 .cta-pill::before{
@@ -294,6 +496,315 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   width:6px; height:6px; border-radius:50%;
   background:var(--accent);
   display:inline-block;
+}
+
+/* trigger button in nav */
+.menu-trigger{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--mono);
+  font-size:11px; letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--ink);
+  background:none; border:0;
+  cursor:none;
+}
+.menu-trigger .bars{
+  display:inline-flex; flex-direction:column; gap:3px;
+}
+.menu-trigger .bars i{
+  display:block; width:18px; height:1px; background:var(--ink);
+  transition:transform .4s var(--ease-out);
+}
+.menu-trigger:hover .bars i:first-child{ transform:translateX(-3px); }
+.menu-trigger:hover .bars i:last-child{  transform:translateX(3px);  }
+
+/* =========================================================
+   MENU OVERLAY
+========================================================= */
+.menu-overlay{
+  position:fixed; inset:0;
+  background:var(--paper);
+  z-index:2000;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  opacity:0; visibility:hidden;
+  transition:opacity .55s var(--ease-out), visibility .55s;
+  overflow:hidden;
+}
+.menu-overlay.is-open{ opacity:1; visibility:visible; }
+body.menu-open{ overflow:hidden; }
+
+/* paper film/grain texture on overlay */
+.menu-overlay::before{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse at 20% 10%, color-mix(in oklch, var(--paper-warm) 60%, transparent), transparent 60%),
+    radial-gradient(ellipse at 80% 90%, color-mix(in oklch, var(--paper-soft) 60%, transparent), transparent 60%);
+  pointer-events:none;
+}
+
+/* ── Side decorations: one bold pixel-art floral silhouette per side ── */
+.menu-deco{
+  position:absolute;
+  top:0; bottom:0;
+  width:clamp(200px, 22vw, 380px);
+  pointer-events:none;
+  z-index:1;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  overflow:hidden;
+  /* enter from bottom on menu open */
+  opacity:0;
+  clip-path:inset(0 0 100% 0);
+  transition:opacity .8s var(--ease-out) .15s, clip-path 1.2s cubic-bezier(.22,.61,.36,1) .15s;
+}
+.menu-overlay.is-open .menu-deco{
+  opacity:1;
+  clip-path:inset(0 0 0% 0);
+}
+.menu-deco.l{ left:0; }
+.menu-deco.r{ right:0; transition-delay:.28s; }
+
+.menu-deco svg{
+  display:block;
+  width:100%;
+  height:100%;
+  color:var(--ink);
+  /* slow breathing of the whole silhouette */
+  animation:deco-breathe 7s ease-in-out infinite;
+  transform-origin:50% 100%;
+  filter:drop-shadow(0 12px 24px color-mix(in oklch, var(--ink) 12%, transparent));
+}
+.menu-deco.r svg{ animation-duration:8.5s; animation-delay:-2s; }
+
+@keyframes deco-breathe{
+  0%,100% { transform:translateY(0) scale(1); }
+  50%     { transform:translateY(-8px) scale(1.02); }
+}
+
+/* subtle sway on the bloom heads — transform-box:fill-box makes transform-origin
+   resolve in element-local coordinates for SVG groups */
+@keyframes deco-sway-l{
+  0%,100% { transform:rotate(0deg); }
+  50%     { transform:rotate(-1.8deg); }
+}
+@keyframes deco-sway-r{
+  0%,100% { transform:rotate(0deg); }
+  50%     { transform:rotate(2.2deg); }
+}
+.menu-deco .head{
+  transform-box:fill-box;
+  transform-origin:50% 100%;
+}
+.menu-deco.l .head{ animation:deco-sway-l 5.5s ease-in-out infinite; }
+.menu-deco.r .head{ animation:deco-sway-r 6.2s ease-in-out -1.2s infinite; }
+.menu-deco .bud{
+  transform-box:fill-box;
+  transform-origin:50% 100%;
+  animation:deco-sway-r 4.8s ease-in-out -0.6s infinite;
+}
+
+@media (max-width: 880px){ .menu-deco{ display:none; } }
+
+/* top bar */
+.menu-nav{
+  position:relative; z-index:2;
+  display:grid; grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  padding:22px var(--gutter);
+}
+.menu-nav .left,
+.menu-nav .right{ display:flex; align-items:center; gap:28px; }
+.menu-nav .right{ justify-content:flex-end; }
+
+.menu-close{
+  display:inline-flex; align-items:center; gap:14px;
+  background:none; border:0;
+  font-family:var(--mono);
+  font-size:11px; letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--ink);
+  cursor:none;
+}
+.menu-close .x{
+  width:22px; height:22px;
+  display:inline-grid; place-items:center;
+  font-size:18px; line-height:1;
+  transition:transform .4s var(--ease-out);
+}
+.menu-close:hover .x{ transform:rotate(90deg); }
+
+/* main list */
+.menu-list{
+  position:relative; z-index:2;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:clamp(2px, .6vw, 6px);
+  padding:24px var(--gutter);
+}
+.menu-list a{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(34px, 5.2vw, 72px);
+  line-height:1.15;
+  letter-spacing:.005em;
+  color:var(--ink);
+  text-transform:uppercase;
+  position:relative;
+  padding:.05em .2em;
+  opacity:.92;
+  transition:opacity .35s var(--ease-out), letter-spacing .55s var(--ease-out), color .35s;
+}
+.menu-list a .num{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.20em;
+  color:var(--ink-faint);
+  vertical-align:super;
+  margin-right:.4em;
+  opacity:0;
+  transition:opacity .4s var(--ease-out), transform .4s var(--ease-out);
+  transform:translateX(-6px);
+  display:inline-block;
+}
+.menu-list a:hover{ opacity:1; letter-spacing:.04em; color:var(--accent); }
+.menu-list a:hover .num{ opacity:1; transform:translateX(0); }
+
+/* stagger reveal on open */
+.menu-overlay .menu-list a{
+  transform:translateY(24px); opacity:0;
+  transition:opacity .6s var(--ease-out), transform .6s var(--ease-out), letter-spacing .55s var(--ease-out), color .35s;
+}
+.menu-overlay.is-open .menu-list a{
+  transform:translateY(0); opacity:.92;
+  transition-delay:calc(.10s + var(--i, 0) * 60ms);
+}
+.menu-overlay.is-open .menu-list a:hover{ opacity:1; }
+
+/* bottom info */
+.menu-foot{
+  position:relative; z-index:2;
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:var(--gutter);
+  padding:28px var(--gutter) 36px;
+  border-top:1px solid var(--rule);
+  font-family:var(--mono);
+}
+.menu-foot .col{ display:flex; flex-direction:column; gap:6px; }
+.menu-foot .aux{
+  font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.menu-foot a{
+  font-size:13px; letter-spacing:.10em; color:var(--ink);
+  position:relative;
+}
+.menu-foot a::after{
+  content:""; position:absolute; left:0; right:0; bottom:-2px;
+  height:1px; background:var(--ink);
+  transform:scaleX(0); transform-origin:right;
+  transition:transform .5s var(--ease-out);
+}
+.menu-foot a:hover::after{ transform:scaleX(1); transform-origin:left; }
+
+@media (max-width: 880px){
+  .menu-list a{ font-size:clamp(26px, 8vw, 44px); }
+  .menu-foot{ grid-template-columns:1fr 1fr; gap:18px; padding:20px var(--gutter) 28px; }
+  .menu-foot .col:nth-child(3){ grid-column:1 / -1; }
+  .menu-nav .right .cta-pill{ display:none; }
+}
+
+/* =========================================================
+   LIGHTBOX — click any photo to view full-size
+========================================================= */
+.zoomable{ cursor:none; }
+.lightbox{
+  position:fixed; inset:0;
+  background:color-mix(in oklch, var(--ink) 92%, transparent);
+  z-index:3000;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  opacity:0; visibility:hidden;
+  transition:opacity .35s var(--ease-out), visibility .35s;
+  padding:24px;
+  backdrop-filter:blur(2px);
+}
+.lightbox.is-open{ opacity:1; visibility:visible; }
+.lightbox-top{
+  display:flex; justify-content:space-between; align-items:center;
+  color:var(--paper);
+  font-family:var(--mono);
+  font-size:11px; letter-spacing:.22em; text-transform:uppercase;
+  padding:8px 8px 0;
+}
+.lightbox-close{
+  background:none; border:0; color:inherit;
+  font:inherit;
+  display:inline-flex; align-items:center; gap:12px;
+  cursor:none;
+}
+.lightbox-close .x{
+  display:inline-grid; place-items:center;
+  width:24px; height:24px; font-size:18px; line-height:1;
+  transition:transform .4s var(--ease-out);
+}
+.lightbox-close:hover .x{ transform:rotate(90deg); }
+.lightbox-stage{
+  position:relative;
+  display:grid; place-items:center;
+  overflow:hidden;
+}
+.lightbox-img{
+  max-width:min(92vw, 1600px);
+  max-height:80vh;
+  object-fit:contain;
+  outline:1px solid color-mix(in oklch, var(--paper) 25%, transparent);
+  background:#0a0a0a;
+  transform:scale(.985);
+  opacity:0;
+  transition:opacity .45s var(--ease-out) .05s, transform .55s var(--ease-out) .05s;
+}
+.lightbox.is-open .lightbox-img.is-loaded{ opacity:1; transform:scale(1); }
+.lightbox-spinner{
+  position:absolute;
+  width:24px; height:24px; border-radius:50%;
+  border:1px solid color-mix(in oklch, var(--paper) 30%, transparent);
+  border-top-color:var(--paper);
+  animation:lb-spin .8s linear infinite;
+  opacity:0; transition:opacity .25s;
+}
+.lightbox.is-loading .lightbox-spinner{ opacity:1; }
+@keyframes lb-spin{ to{ transform:rotate(360deg); } }
+.lightbox-cap{
+  color:color-mix(in oklch, var(--paper) 75%, transparent);
+  font-family:var(--mono);
+  font-size:11px; letter-spacing:.20em; text-transform:uppercase;
+  text-align:center;
+  padding:14px 8px 6px;
+  min-height:1.2em;
+}
+.lightbox-nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:none; border:1px solid color-mix(in oklch, var(--paper) 25%, transparent);
+  color:var(--paper);
+  width:44px; height:44px; border-radius:50%;
+  font:inherit;
+  display:grid; place-items:center;
+  cursor:none;
+  transition:background .3s var(--ease-out), transform .35s var(--ease-out);
+}
+.lightbox-nav:hover{ background:color-mix(in oklch, var(--paper) 12%, transparent); }
+.lightbox-nav.prev{ left:24px; }
+.lightbox-nav.next{ right:24px; }
+.lightbox-nav:hover.prev{ transform:translate(-3px, -50%); }
+.lightbox-nav:hover.next{ transform:translate(3px, -50%); }
+body.lightbox-open{ overflow:hidden; }
+@media (max-width:680px){
+  .lightbox-nav{ width:36px; height:36px; }
+  .lightbox-nav.prev{ left:10px; }
+  .lightbox-nav.next{ right:10px; }
 }
 
 /* =========================================================
@@ -313,7 +824,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   /* slight vertical overhang so scroll parallax never reveals an empty band */
   top:-6%; bottom:-6%; left:0; right:0;
   z-index:0;
-  background-image:url('/images/IMG_20251026_131027.jpg');
+  background-image:url('https://files.seeusercontent.com/2026/06/25/5pTt/IMG_20251026_131027.jpg');
   background-size:cover;
   background-position:center 62%;
   filter:saturate(.28) sepia(.55) hue-rotate(-14deg) brightness(.92) contrast(1.02);
@@ -517,7 +1028,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   filter:grayscale(.42) sepia(.18) saturate(.78) contrast(1.05) brightness(.96);
   outline:1px solid var(--rule);
   outline-offset:0;
-  transition:transform .9s var(--ease-out), filter .9s var(--ease-out);
+  transform:translateZ(0);
+  transition:transform .9s var(--ease-out);
 }
 .prologue-art .plate::after{
   content:attr(data-cap);
@@ -529,14 +1041,13 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   text-transform:uppercase;
   color:var(--paper);
   padding:3px 6px;
-  background:color-mix(in oklch, var(--ink) 70%, transparent);
-  backdrop-filter:blur(2px);
+  background:color-mix(in oklch, var(--ink) 82%, transparent);
 }
-.prologue-art .plate:nth-child(1){ transform:translateY(-10px) translateX(-4px); }
-.prologue-art .plate:nth-child(2){ transform:translateY(6px) translateX(6px); }
-.prologue-art .plate:nth-child(3){ transform:translateY(-2px) translateX(-2px); }
-.prologue-art .plate:nth-child(4){ transform:translateY(8px) translateX(4px); }
-.prologue-art:hover .plate{ transform:translateY(0) translateX(0); filter:grayscale(.15) sepia(.08) saturate(.95) contrast(1.04); }
+.prologue-art .plate:nth-child(1){ transform:translate3d(-4px,-10px,0); }
+.prologue-art .plate:nth-child(2){ transform:translate3d(6px,6px,0); }
+.prologue-art .plate:nth-child(3){ transform:translate3d(-2px,-2px,0); }
+.prologue-art .plate:nth-child(4){ transform:translate3d(4px,8px,0); }
+.prologue-art:hover .plate{ transform:translate3d(0,0,0); }
 .prologue-art .stripe-cap{
   position:absolute; left:0; bottom:-30px;
   font-family:var(--mono);
@@ -643,7 +1154,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
 }
 .way-row{
   /* --row-tint goes 1 → 0 as the row scrolls up through the viewport.
-     1 = faded toward paper, 0 = full ink. Drives the deepening effect. */
+     1 = almost paper (text barely visible), 0 = full ink. Drives a deep fade-in. */
   --row-tint: 1;
   display:grid;
   grid-template-columns:60px 110px 1fr;
@@ -651,6 +1162,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   gap:var(--gutter);
   padding:48px 0;
   border-top:1px solid var(--rule);
+  /* lift up as we deepen — translateY tracks the tint */
+  transform:translateY(calc(var(--row-tint) * 18px));
+  will-change:transform;
 }
 .way-row:last-child{ border-bottom:1px solid var(--rule); }
 .way-row .num{
@@ -658,7 +1172,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   font-size:12px;
   letter-spacing:.18em;
   padding-top:.4em;
-  color:color-mix(in oklch, var(--ink-soft), var(--paper) calc(var(--row-tint) * 70%));
+  color:color-mix(in oklch, var(--ink-soft), var(--paper) calc(var(--row-tint) * 92%));
 }
 .way-row .en{
   font-family:var(--display);
@@ -667,17 +1181,23 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   font-weight:500;
   font-size:clamp(15px, 1.1vw, 18px);
   padding-top:.4em;
-  color:color-mix(in oklch, var(--ink), var(--paper) calc(var(--row-tint) * 78%));
+  color:color-mix(in oklch, var(--ink), var(--paper) calc(var(--row-tint) * 95%));
 }
 .way-row .cn{
   font-family:var(--serif);
   font-size:clamp(20px, 2vw, 30px);
   line-height:1.5;
   letter-spacing:.02em;
-  color:color-mix(in oklch, var(--ink), var(--paper) calc(var(--row-tint) * 78%));
+  color:color-mix(in oklch, var(--ink), var(--paper) calc(var(--row-tint) * 95%));
+}
+.way-row .en,
+.way-row .cn{
+  /* slight horizontal slide that resolves alongside the colour */
+  transform:translateX(calc(var(--row-tint) * -12px));
 }
 @media (prefers-reduced-motion: reduce){
-  .way-row{ --row-tint: 0; }
+  .way-row{ --row-tint: 0; transform:none; }
+  .way-row .en, .way-row .cn{ transform:none; }
 }
 
 /* =========================================================
@@ -920,7 +1440,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   background-size:cover; background-position:center 40%;
   filter:saturate(.22) sepia(.38) brightness(.40) contrast(1.18);
   transform-origin:center;
+  transform:translateZ(0);
   will-change:transform;
+  backface-visibility:hidden;
 }
 .mood-bg::after{
   content:""; position:absolute; inset:0;
@@ -1028,7 +1550,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
 }
 .work-row::before{
   content:""; position:absolute;
-  left:0; right:0; top:0; bottom:0;
+  /* bleed beyond the row on both sides so the highlight feels "framed" and the
+     index number has visible breathing room on the left when the row is hovered */
+  left:calc(var(--gutter) * -1);
+  right:calc(var(--gutter) * -.5);
+  top:0; bottom:0;
   background:color-mix(in oklch, var(--paper-warm) 50%, transparent);
   transform-origin:left center;
   transform:scaleX(0);
@@ -1109,12 +1635,32 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   padding-bottom:clamp(120px, 16vw, 200px);
 }
 .arsenal h2{ margin-bottom:60px; }
+/* sticky tab row: tabs content aligns with the shell content; background is a
+   pseudo-element that stretches the full viewport width (so the band reads as a
+   continuous opaque header — no glass effect, no color seam at the edges). */
 .arsenal-tabs{
+  position:sticky;
+  top:64px;                /* sit just below the fixed nav (~62px tall) */
+  z-index:50;
   display:flex; flex-wrap:wrap;
   gap:32px;
-  margin-bottom:60px;
+  padding:22px 0;
+  margin-bottom:40px;
   border-bottom:1px solid var(--rule);
-  padding-bottom:24px;
+  background:transparent;
+}
+/* Full-width opaque band behind the tabs. Extends upward to also cover the nav
+   strip when the user has scrolled into the section, so content scrolling under
+   it is cleanly blocked. */
+.arsenal-tabs::before{
+  content:"";
+  position:absolute;
+  left:50%; transform:translateX(-50%);
+  width:100vw;
+  top:-72px; bottom:0;
+  background:var(--paper-soft);
+  z-index:-1;
+  pointer-events:none;
 }
 .arsenal-tabs button{
   font-family:var(--display);
@@ -1123,17 +1669,29 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   font-size:clamp(18px, 1.8vw, 26px);
   color:var(--ink-faint);
   position:relative;
+  transition:color .35s var(--ease-out);
+  cursor:none;
 }
+.arsenal-tabs button:hover{ color:var(--ink-soft); }
 .arsenal-tabs button.is-active{ color:var(--ink); }
 .arsenal-tabs button.is-active::after{
-  content:""; position:absolute; left:0; right:0; bottom:-25px;
-  height:1px; background:var(--ink);
+  content:""; position:absolute; left:0; right:0; bottom:-22px;
+  height:2px; background:var(--ink);
+  transform-origin:left;
+  animation:arsenal-underline .5s var(--ease-out);
 }
+@keyframes arsenal-underline{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+/* panes now stack vertically; each takes a generous slice so scroll-through reads as discrete moments */
+.arsenal-panes{ display:flex; flex-direction:column; gap:0; }
 .arsenal-pane{
   display:grid;
   grid-template-columns:.8fr 1fr 1fr;
   gap:var(--gutter);
+  padding:clamp(60px, 9vw, 120px) 0;
+  border-bottom:1px dashed color-mix(in oklch, var(--rule) 70%, transparent);
+  scroll-margin-top:120px;
 }
+.arsenal-pane:last-child{ border-bottom:0; }
 .arsenal-pane .since{
   font-family:var(--display);
   text-transform:uppercase;
@@ -1589,8 +2147,14 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   padding:14px var(--gutter);
   width:max-content;
   animation:roll-marq 60s linear infinite;
+  will-change:transform;
+  transform:translateZ(0);
+  backface-visibility:hidden;
 }
 .roll-strip:hover{ animation-play-state:paused; }
+.roll-strip.is-paused{ animation-play-state:paused; }
+/* Skip rendering the whole roll section when it's off-screen. */
+.roll{ content-visibility:auto; contain-intrinsic-size:auto 480px; }
 .roll-frame{
   position:relative;
   width:clamp(180px, 22vw, 320px);
@@ -1632,9 +2196,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
 }
 .contact-bg{
   position:absolute; inset:0; z-index:0;
-  background-image:url('https://files.seeusercontent.com/2026/06/25/vDk5/2026-06-23_13-37-45_982.jpg');
   background-size:cover; background-position:center 35%;
   filter:saturate(.5) brightness(.7) contrast(1.05);
+  transform:translateZ(0);
+  will-change:transform;
+  backface-visibility:hidden;
 }
 .contact-bg::after{
   content:""; position:absolute; inset:0;
@@ -1846,7 +2412,133 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
 }
 </style>
 </head>
-<body>
+<body class="is-loading">
+
+<!-- ────────────────────────────────────────────────────────
+     LOADER — full-screen splash, fades on window.load
+──────────────────────────────────────────────────────── -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-inner">
+    <div class="loader-mark">
+      <span>张铂坤 · Zhang Bokun</span>
+      <span class="est">EST · 2023</span>
+    </div>
+    <div class="loader-pct"><span id="loaderPct">00</span><span class="aux">%</span></div>
+    <div class="loader-bar"><i id="loaderBar"></i></div>
+    <div class="loader-meta">
+      <span>FOLIO · MMXXVI</span><span class="sep">·</span><span>XI'AN, CN</span>
+    </div>
+  </div>
+</div>
+<script>
+  /* Inline loader: starts the second the markup is parsed.
+     Truly preloads every image the page will use (data-bg + hero photo) so by the
+     time the splash fades out, scrolling is buttery — no late image decoding. */
+  (function(){
+    var pctEl = document.getElementById('loaderPct');
+    var barEl = document.getElementById('loaderBar');
+    var loader = document.getElementById('loader');
+    if (!pctEl || !barEl || !loader) return;
+
+    var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Collect every image URL the page will eventually paint. */
+    var urlMap = Object.create(null); // src -> [elements that want this bg]
+    document.querySelectorAll('[data-bg]').forEach(function(el){
+      var src = el.getAttribute('data-bg');
+      if (!src) return;
+      (urlMap[src] = urlMap[src] || []).push(el);
+    });
+    /* Hero photo lives in CSS (no data-bg) — still preload to count against total. */
+    var heroUrl = 'https://files.seeusercontent.com/2026/06/25/5pTt/IMG_20251026_131027.jpg';
+    if (!urlMap[heroUrl]) urlMap[heroUrl] = []; // no DOM to assign, just track
+
+    var urls = Object.keys(urlMap);
+    var total = urls.length;
+    var loaded = 0;
+    var winLoaded = false;
+    var done = false;
+
+    /* Treat "ready" as: window.load fired AND all fonts have settled.
+       Webfont swap-in is a notorious source of late-paint reflow that reads as jank. */
+    var fontsReady = false;
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function(){ fontsReady = true; });
+    } else {
+      fontsReady = true;
+    }
+    window.addEventListener('load', function(){
+      /* small post-load tick to let any layout settle */
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ winLoaded = true; });
+      });
+    });
+    /* hard ceiling — never block more than 9s on a stuck CDN */
+    setTimeout(function(){ winLoaded = true; fontsReady = true; loaded = total; }, 9000);
+
+    /* As each image finishes, attach it to all DOM consumers right away so the
+       browser already has it painted by the time the user scrolls there. */
+    function applyBg(src){
+      var els = urlMap[src]; if (!els) return;
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        el.style.backgroundImage = "url('" + src + "')";
+        el.removeAttribute('data-bg');
+      }
+    }
+    /* For each URL, fetch AND decode before counting it done. Decoding off the
+       critical path here means scrolling later doesn't pay the decode cost. */
+    urls.forEach(function(src){
+      var img = new Image();
+      img.decoding = 'async';
+      var settle = function(){ loaded++; applyBg(src); };
+      if (typeof img.decode === 'function') {
+        img.src = src;
+        img.decode().then(settle, settle);
+      } else {
+        img.onload = img.onerror = settle;
+        img.src = src;
+      }
+    });
+
+    function finish(){
+      if (done) return; done = true;
+      /* Refresh ScrollTrigger right before reveal so every trigger's start/end
+         positions reflect the now-painted page (otherwise first scroll can
+         twitch as positions recompute). */
+      try { if (window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh(); } catch(_) {}
+      loader.classList.add('is-done');
+      document.body.classList.remove('is-loading');
+      setTimeout(function(){ loader.style.display = 'none'; }, 800);
+    }
+
+    if (reduced) {
+      pctEl.textContent = '100'; barEl.style.width = '100%';
+      window.addEventListener('load', finish);
+      setTimeout(finish, 80);
+      return;
+    }
+
+    /* Progress = real share of images loaded, capped at 95% until everything is ready. */
+    var progress = 0;
+    function tick(){
+      if (done) return;
+      var imgPct = total > 0 ? (loaded / total) * 100 : 100;
+      var ready  = winLoaded && fontsReady && loaded === total;
+      var target = ready ? 100 : Math.min(imgPct, 95);
+      if (progress < target) {
+        var step = Math.max(0.35, (target - progress) * 0.14);
+        progress = Math.min(target, progress + step);
+      }
+      var p = Math.floor(progress);
+      pctEl.textContent = (p < 10 ? '0' + p : '' + p);
+      barEl.style.width = progress + '%';
+      if (progress >= 100) { setTimeout(finish, 260); return; }
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+</script>
 
 <!-- ────────────────────────────────────────────────────────
      CURSOR
@@ -1854,6 +2546,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
 <div class="cursor" id="cursor"></div>
 <div class="cursor-label" id="cursorLabel"></div>
 <div class="spotlight" id="spotlight"></div>
+
+<!-- thin top scroll progress bar -->
+<div class="scroll-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
+
+<!-- floating section indicator (bottom-right) -->
+<aside class="section-pip" id="sectionPip" aria-hidden="true">
+  <span class="pip-dot"></span>
+  <span class="pip-num" id="pipNum">01</span>
+  <span class="pip-label" id="pipLabel">Intro</span>
+  <span class="pip-bar"><i id="pipBar"></i></span>
+</aside>
 
 <!-- ────────────────────────────────────────────────────────
      NAV
@@ -1866,8 +2569,77 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   <a class="brand" href="#hero"><span>张铂坤</span><span class="est">· EST 2023</span></a>
   <div class="nav-right">
     <a class="cta-pill" href="#contact"><span class="dot"></span>Contact</a>
+    <button class="menu-trigger" id="menuOpen" aria-label="Open menu" aria-controls="menuOverlay" aria-expanded="false">
+      <span class="bars" aria-hidden="true"><i></i><i></i></span>
+      <span>Menu</span>
+    </button>
   </div>
 </header>
+
+<!-- ────────────────────────────────────────────────────────
+     MENU OVERLAY
+──────────────────────────────────────────────────────── -->
+<div class="menu-overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Site menu">
+  <header class="menu-nav">
+    <div class="left">
+      <button class="menu-close" id="menuClose" aria-label="Close menu">
+        <span class="x" aria-hidden="true">✕</span>
+        <span>Close</span>
+      </button>
+    </div>
+    <a class="brand" href="#hero" data-menu-link><span>张铂坤</span><span class="est">· EST 2023</span></a>
+    <div class="right">
+      <a class="cta-pill" href="#contact" data-menu-link><span class="dot"></span>Contact</a>
+    </div>
+  </header>
+
+  <nav class="menu-list" aria-label="Primary">
+    <a href="#hero"     data-menu-link style="--i:0"><span class="num">01</span>Intro</a>
+    <a href="#prologue" data-menu-link style="--i:1"><span class="num">02</span>Prologue</a>
+    <a href="#about"    data-menu-link style="--i:2"><span class="num">03</span>About</a>
+    <a href="#map"      data-menu-link style="--i:3"><span class="num">04</span>Map</a>
+    <a href="#work"     data-menu-link style="--i:4"><span class="num">05</span>Work</a>
+    <a href="#metrics"  data-menu-link style="--i:5"><span class="num">06</span>Metrics</a>
+    <a href="#blog"     data-menu-link style="--i:6"><span class="num">07</span>Blog</a>
+    <a href="#contact"  data-menu-link style="--i:7"><span class="num">08</span>Contact</a>
+    <a href="#faq"      data-menu-link style="--i:8"><span class="num">09</span>FAQ</a>
+  </nav>
+
+  <footer class="menu-foot">
+    <div class="col">
+      <span class="aux">Email</span>
+      <a href="mailto:1537521192@qq.com">1537521192@qq.com</a>
+    </div>
+    <div class="col">
+      <span class="aux">Phone</span>
+      <a href="tel:+8613008569663">+86 130 0856 9663</a>
+    </div>
+    <div class="col">
+      <span class="aux">Elsewhere</span>
+      <a href="https://github.com/shanchuann" target="_blank" rel="noopener">github.com/shanchuann</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ────────────────────────────────────────────────────────
+     LIGHTBOX
+──────────────────────────────────────────────────────── -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Image viewer">
+  <div class="lightbox-top">
+    <span class="lb-counter" id="lbCounter">— / —</span>
+    <button class="lightbox-close" id="lbClose" aria-label="Close viewer">
+      <span class="x" aria-hidden="true">✕</span>
+      <span>Close</span>
+    </button>
+  </div>
+  <div class="lightbox-stage">
+    <button class="lightbox-nav prev" id="lbPrev" aria-label="Previous image">‹</button>
+    <span class="lightbox-spinner" aria-hidden="true"></span>
+    <img class="lightbox-img" id="lbImg" alt="">
+    <button class="lightbox-nav next" id="lbNext" aria-label="Next image">›</button>
+  </div>
+  <div class="lightbox-cap" id="lbCap"></div>
+</div>
 
 <!-- ────────────────────────────────────────────────────────
      1. HERO
@@ -1876,6 +2648,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
   <div class="hero-photo" aria-hidden="true"></div>
   <div class="hero-vignette" aria-hidden="true"></div>
   <div class="hero-seam" aria-hidden="true"></div>
+  <div class="hero-dust" id="heroDust" aria-hidden="true"></div>
 
   <div class="hero-top">
     <span class="label">Shanchuann.cn / 2023 — 2027</span>
@@ -1915,10 +2688,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
 <section class="prologue section" id="prologue">
   <div class="prologue-grid">
     <div class="prologue-art" data-cursor="Field studies">
-      <div class="plate" data-cap="No.01 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg');"></div>
-      <div class="plate" data-cap="No.02 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/z3mV/2026-06-23_13-37-45_933.jpg');"></div>
-      <div class="plate" data-cap="No.03 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg');"></div>
-      <div class="plate" data-cap="No.04 · 06.23" style="background-image:url('https://files.seeusercontent.com/2026/06/25/kZn9/2026-06-23_13-37-46_307.jpg');"></div>
+      <div class="plate" data-cap="No.01 · 06.23" data-bg="https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg"></div>
+      <div class="plate" data-cap="No.02 · 06.23" data-bg="https://files.seeusercontent.com/2026/06/25/z3mV/2026-06-23_13-37-45_933.jpg"></div>
+      <div class="plate" data-cap="No.03 · 06.23" data-bg="https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg"></div>
+      <div class="plate" data-cap="No.04 · 06.23" data-bg="https://files.seeusercontent.com/2026/06/25/kZn9/2026-06-23_13-37-46_307.jpg"></div>
       <span class="stripe-cap">/ Field studies · 2026.06.23 · 4 frames</span>
     </div>
     <div class="prologue-text">
@@ -1930,6 +2703,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       <p class="sub-zh reveal">
         这一页是我的"序"。下面是我做过的事、用过的工具、走过的弯路 ——
         全都写在中文里，英文标题只是为了让排版有呼吸。
+      </p>
+      <p class="sub-zh reveal">
+        没有 PPT 风的成就罗列，也不打"AI 全栈"的标签。如果你正在面试我、招我、或者只是想看看一个本科生怎么写代码 ——
+        往下翻就行，慢一点没关系。
       </p>
     </div>
   </div>
@@ -1971,6 +2748,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
           比起"颠覆"和"重塑"，我更愿意把代码当成可以反复打磨的器物 ——
           先把问题写清楚，再写代码；信任工具，但不让工具替我思考。
         </p>
+        <p class="body-cn reveal">
+          下午常常一个人在西安南郊的工位坐着，写 reactor、读 STL 源码、调日志库；晚上把当天的修补写成博客。
+          做的项目不一定大，但每一行都得能讲清楚为什么这么写。
+        </p>
       </div>
     </div>
   </div>
@@ -2004,6 +2785,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         <span class="num">03</span>
         <span class="en">One thing at a time</span>
         <span class="cn">一次只做一件事，做到能讲清楚为止。讲不清楚的，就还没做完。</span>
+      </div>
+      <div class="way-row reveal">
+        <span class="num">04</span>
+        <span class="en">Read before writing</span>
+        <span class="cn">动手前先把现有代码读一遍。在别人的逻辑上修补，比自己另起一摊要诚实得多。</span>
+      </div>
+      <div class="way-row reveal">
+        <span class="num">05</span>
+        <span class="en">Ship small, often</span>
+        <span class="cn">小步、频繁、可回滚。先让一条最窄的路跑通，再去拓宽 —— 比一次性铺好高速路靠谱得多。</span>
+      </div>
+      <div class="way-row reveal">
+        <span class="num">06</span>
+        <span class="en">Leave the place tidier</span>
+        <span class="cn">改动结束前，把顺手发现的小坑填一下。不是大重构，只是别让下一个看到这段代码的人骂出声。</span>
       </div>
     </div>
   </div>
@@ -2074,6 +2870,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       &nbsp;&nbsp;&nbsp; 1000 公里以外的清华操作系统训练营 ／ 字节青训营，<br>
       也算同一张地图上的两座坐标。 &nbsp;&nbsp;&nbsp;
     </p>
+    <p class="foot-line reveal" style="opacity:.78;">
+      &nbsp;&nbsp;&nbsp; 每条线后面的"D"是这块地我大概翻了多少天 ——<br>
+      数字会变，方向不会。 &nbsp;&nbsp;&nbsp;
+    </p>
   </div>
 </section>
 
@@ -2090,6 +2890,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         <button data-epoch="2">Now · 2026</button>
       </div>
     </div>
+    <p class="reveal" style="font-family:var(--serif); font-size:clamp(15px, 1.2vw, 18px); line-height:1.7; color:var(--ink-soft); max-width:48em; margin:8px 0 28px;">
+      按住任意一格，把它拖到下一个时段 —— 三年里我从"打开终端要查命令"走到"自己写网络库"。<br>
+      <span style="font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint);">drag through three epochs · 2023 → 2024 → 2026</span>
+    </p>
 
     <div class="hold-stage" id="holdStage" data-cursor="hold">
       <div class="hold-track" id="holdTrack">
@@ -2133,7 +2937,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
      6.5 MOOD INTERSTITIAL — full-bleed photo plate
 ──────────────────────────────────────────────────────── -->
 <section class="mood" aria-hidden="true">
-  <div class="mood-bg" style="background-image:url('https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg');"></div>
+  <div class="mood-bg" data-bg="https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg"></div>
   <div class="mood-vignette"></div>
   <div class="mood-grain"></div>
   <div class="mood-frame"></div>
@@ -2172,6 +2976,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         </div>
         <div class="desc">
           <p>在单机上把"几万个连接"压成"一个事件循环" —— 主从 Reactor + one loop per thread + 业务线程池；下单与取消放进事务里，靠 <code>SELECT … FOR UPDATE</code> 行锁根治超卖。已在 Linux 完成完整部署与压测。</p>
+          <p style="margin-top:14px; color:var(--ink-soft);">真正学到的不是网络模型，是"读一遍 InnoDB 锁文档"和"用 wrk 压一晚上"的耐心 —— 这个项目教会我把每一条事务边界都写下来。</p>
           <div class="stack"><span>C++17</span><span>epoll Reactor</span><span>MySQL</span><span>jsoncpp</span><span>ChronoLite</span><span>React · TS</span></div>
         </div>
         <span class="open">↗</span>
@@ -2185,6 +2990,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         </div>
         <div class="desc">
           <p>给 Hexo 装一张可视化的脸 —— Markdown 编辑与实时预览、Front Matter 表单化、Git 集成、Hexo 命令一键执行。内置多模型 AI 助手（DeepSeek / GLM / OpenAI）做摘要、对话编辑与逐行 Diff 审查。Material 3 无边框桌面端，GitHub Actions 打包发布。</p>
+          <p style="margin-top:14px; color:var(--ink-soft);">这是我第一次为"自己每天都要用的工具"写代码。痛点很具体：忘记 front matter、忘记图床路径、忘记 commit 顺序 —— 工具的好坏，就看它替你少记多少。</p>
           <div class="stack"><span>C++17</span><span>Qt 6 / QML</span><span>Material Design 3</span><span>SQLite</span><span>Multi-LLM</span></div>
         </div>
         <span class="open">↗</span>
@@ -2198,6 +3004,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         </div>
         <div class="desc">
           <p>为高并发服务端和资源受限环境写的日志库 —— 双缓冲交换 + 后台写线程，业务线程不等磁盘 IO；纳秒时间戳、文件大小与时间双重轮转、过期自动清理。printf 与流式两种 API；CMake 静态/动态库；已嵌进 HyperTicket 等项目当基础组件。</p>
+          <p style="margin-top:14px; color:var(--ink-soft);">最早只是 HyperTicket 里的一个内部模块，发现"延迟刷盘"和"格式化代价"在压测里居然是大头之后，索性拆出来独立维护；从此每个项目都少写一份"打不出日志怎么办"。</p>
           <div class="stack"><span>C++11 / 17</span><span>CMake</span><span>Linux / Windows</span><span>Double-buffer</span></div>
         </div>
         <span class="open">↗</span>
@@ -2211,6 +3018,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         </div>
         <div class="desc">
           <p>开源考试平台 —— 题库、智能组卷、在线考试、RBAC、数据分析、自动化工作流；JWT 鉴权，Docker Compose 部署，预留 Ollama 接口为后续主观题批阅与难度分级铺路。线上版本：uqbank.shanchuann.cn。</p>
+          <p style="margin-top:14px; color:var(--ink-soft);">第一次把"立项 → 上线 → 有人在用"这条全链路独立跑通的产品。后续围绕真实用户反馈做了三轮迭代，也是这次让我明白"上线"只是中间检查点，不是终点。</p>
           <div class="stack"><span>Java 17</span><span>Spring Boot</span><span>Vue 3 · TS</span><span>PostgreSQL</span><span>Docker</span><span>Ollama</span></div>
         </div>
         <span class="open">↗</span>
@@ -2235,9 +3043,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       <button data-tab="tooling">Tooling</button>
     </div>
 
-    <div class="arsenal-pane" data-pane="system">
+    <div class="arsenal-panes">
+    <div class="arsenal-pane" data-pane="system" id="arsenal-system">
       <div class="since">From 2023<small>— 第一门语言 · still the one I trust most.</small></div>
-      <p class="desc">从 C 开始，然后 C++11/17/20。STL 容器、智能指针、移动语义、模板、lambda 这些我用着不慌。Linux 系统编程是顺着 C++ 这条线自然走过来的 —— 内核一直在问我答不上的问题，我得回去补课。</p>
+      <p class="desc">从 C 开始，然后 C++11/17/20。STL 容器、智能指针、移动语义、模板、lambda 这些我用着不慌。Linux 系统编程是顺着 C++ 这条线自然走过来的 —— 内核一直在问我答不上的问题，我得回去补课。最近的练手清单：用 std::ranges 重写一遍 STL 算法、用 coroutine 抽象 epoll、用 perf 看自己写的反应器到底慢在哪。</p>
       <div class="keys">
         <span>C++11 / 17 / 20</span>
         <span>STL · RAII · Move semantics</span>
@@ -2246,9 +3055,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       </div>
     </div>
 
-    <div class="arsenal-pane" data-pane="backend" hidden>
+    <div class="arsenal-pane" data-pane="backend" id="arsenal-backend">
       <div class="since">Since 2024<small>— 项目真正落地的地方 · where my projects live.</small></div>
-      <p class="desc">Linux 下的进程/线程模型、IO 多路复用、事件驱动框架。TCP/IP 四层和 HTTP/HTTPS 都吃过亏才搞明白 —— 粘包、心跳、自定义协议这些是 HyperTicket 教我的。MySQL 的事务隔离与 InnoDB 锁也是这一路顺出来的。</p>
+      <p class="desc">Linux 下的进程/线程模型、IO 多路复用、事件驱动框架。TCP/IP 四层和 HTTP/HTTPS 都吃过亏才搞明白 —— 粘包、心跳、自定义协议这些是 HyperTicket 教我的。MySQL 的事务隔离与 InnoDB 锁也是这一路顺出来的。Redis 主要用来兜热点和做幂等键；这一块我还在补，缓存击穿/穿透/雪崩这些课本概念在生产里只是冰山一角。</p>
       <div class="keys">
         <span>Epoll · Reactor · Thread pool</span>
         <span>TCP/IP · HTTP/HTTPS</span>
@@ -2257,9 +3066,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       </div>
     </div>
 
-    <div class="arsenal-pane" data-pane="ai" hidden>
+    <div class="arsenal-pane" data-pane="ai" id="arsenal-ai">
       <div class="since">Since 2025<small>— 每天用，慎用 · daily but cautiously.</small></div>
-      <p class="desc">Claude Code 是日常同事。LangChain 用来串调用与外部工具，Ollama 在本地跑小模型，Prompt 是当作"接口契约"在维护。我会让 AI 帮我读日志、复盘 bug、生成脚手架 —— 但所有架构决策和最终判断留给人。</p>
+      <p class="desc">Claude Code 是日常同事。LangChain 用来串调用与外部工具，Ollama 在本地跑小模型，Prompt 是当作"接口契约"在维护。我会让 AI 帮我读日志、复盘 bug、生成脚手架 —— 但所有架构决策和最终判断留给人。Hexo Viz 里的多模型助手就是按这个思路写的：不让 AI 替你提交，先让它写出 Diff，你逐行点头再走。</p>
       <div class="keys">
         <span>Claude Code · Copilot</span>
         <span>LangChain</span>
@@ -2268,9 +3077,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       </div>
     </div>
 
-    <div class="arsenal-pane" data-pane="tooling" hidden>
+    <div class="arsenal-pane" data-pane="tooling" id="arsenal-tooling">
       <div class="since">Always<small>— 决定项目能不能活下来的"无聊"部分。</small></div>
-      <p class="desc">Git 用得多就总会练顺。CMake、Gradle 跨平台搭项目；GitHub Actions 把构建、测试、发布串起来；Docker / Docker Compose 是给同事跑起来最稳的方式；GDB 是真正出问题时的伙伴。</p>
+      <p class="desc">Git 用得多就总会练顺。CMake、Gradle 跨平台搭项目；GitHub Actions 把构建、测试、发布串起来；Docker / Docker Compose 是给同事跑起来最稳的方式；GDB 是真正出问题时的伙伴。我习惯把每个项目的"一行起步指令"写进 README ——<code>docker compose up</code> 就能跑的项目，比贴十张架构图都有说服力。</p>
       <div class="keys">
         <span>Git · GitHub Actions</span>
         <span>CMake · Gradle</span>
@@ -2278,6 +3087,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         <span>GDB</span>
       </div>
     </div>
+    </div><!-- /arsenal-panes -->
   </div>
 </section>
 
@@ -2293,7 +3103,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       <div class="timeline-col reveal">
         <div class="when">Phase I · Q3 2023</div>
         <div class="title">Enrolled.</div>
-        <p class="note">软件工程本科入学。系统读 CSAPP、操作系统、计算机网络、数据库原理这一线。打基础的两年。</p>
+        <p class="note">软件工程本科入学。系统读 CSAPP、操作系统、计算机网络、数据库原理这一线。打基础的两年 —— 现在回看，慢点反而值得：先把"为什么这样设计"搞明白，工程上才能少踩坑。</p>
         <ul class="phase-mark">
           <li><span>课程</span><span>CSAPP · OS · 网络 · 数据库</span></li>
           <li><span>状态</span><span>打地基</span></li>
@@ -2302,7 +3112,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       <div class="timeline-col reveal">
         <div class="when">Phase II · Q4 2025 →</div>
         <div class="title">First Open-Source Drops.</div>
-        <p class="note">11 月开始 UQBank，12 月开始 HyperTicket；穿插 ChronoLite 和 Hexo Viz。数模竞赛拿到陕西赛区一等奖。</p>
+        <p class="note">11 月开始 UQBank，12 月开始 HyperTicket；穿插 ChronoLite 和 Hexo Viz。数模竞赛拿到陕西赛区一等奖。这段时间最大的变化是开始用工程的方法做项目 —— 写 README、写测试、把仓库公开，让陌生人能复现我的工作。</p>
         <ul class="phase-mark">
           <li><span>开源</span><span>UQBank · HyperTicket · ChronoLite</span></li>
           <li><span>奖项</span><span>数模 · 陕西赛区一等奖</span></li>
@@ -2311,7 +3121,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       <div class="timeline-col reveal">
         <div class="when">Phase III · Q2 2027</div>
         <div class="title">Graduation.</div>
-        <p class="note">毕业。在那之前要把 HyperTicket 跑完压测、把 ChronoLite 拆成独立 release、把本地小模型嵌进运维链路里。</p>
+        <p class="note">毕业。在那之前要把 HyperTicket 跑完压测、把 ChronoLite 拆成独立 release、把本地小模型嵌进运维链路里。求职方向偏向 C++ / 后端 / Infra；如果有合适的实习机会愿意提前进入工业环境磨一段。</p>
         <ul class="phase-mark">
           <li><span>压测</span><span>HyperTicket · full bench</span></li>
           <li><span>分发</span><span>ChronoLite · independent release</span></li>
@@ -2430,12 +3240,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         <p class="label">School / 学校</p>
         <h2 class="big reveal">Xi'an University of Finance and Economics</h2>
         <p class="body-cn">软件工程本科 · 2023.09 — 2027.06 · 本科在读。</p>
+        <p class="body-cn reveal" style="margin-top:18px; color:var(--ink-soft);">
+          财经类院校里的工科生：上午听别人讲计量经济学，下午自己读 CSAPP 的并发章节。
+          学校本身不是顶尖工程院校，但它给了我一个相对安静、能长期专注的环境 ——
+          剩下的"卷"，靠自己卷。
+        </p>
       </div>
       <div>
         <p class="quote reveal">
           基础课程是地基 —— 我在这里把操作系统、计算机网络、数据库原理一寸寸读厚。
         </p>
-        <div class="school-plate reveal" data-cap="No.04 · 校园 / xufe" style="background-image:url('/images/mmexport1761643789786.jpg');"></div>
+        <p class="body-cn reveal" style="color:var(--ink-soft); margin-top:14px;">
+          课外把清华 rCore 训练营、字节青训营这两块外部材料补进来，
+          算是给"软工本科生该懂的东西"加了两根额外的钢筋。
+        </p>
+        <div class="school-plate reveal" data-cap="No.04 · 校园 / xufe" data-bg="/images/mmexport1761643789786.jpg"></div>
       </div>
     </div>
 
@@ -2457,11 +3276,15 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       <div>
         <p class="label">Field notes / 博客近作</p>
         <h2 class="big reveal">From the blog.</h2>
+        <p class="reveal" style="font-family:var(--serif); font-size:clamp(14px, 1vw, 17px); line-height:1.75; color:var(--ink-soft); max-width:36em; margin-top:18px;">
+          博客更像是把当天踩过的坑写成"以后能复用的笔记"。题材偏 C/C++、操作系统、网络、数据库、以及 AI 辅助开发的一些小观察 ——
+          基本都是中文，结构松散但足够诚实。
+        </p>
       </div>
       <a class="cta-pill" href="https://shanchuann.cn" target="_blank" rel="noopener"><span class="dot"></span>All posts / 全部文章 ↗</a>
     </div>
-    <!-- pinned book row, always visible -->
-    <div class="blog-list">
+    <!-- pinned GitBook row + fetched recent posts share a single list (no gap) -->
+    <div class="blog-list" id="blogList">
       <a class="blog-row blog-pinned" href="https://shanchuan-1.gitbook.io/clanguagebook" target="_blank" rel="noopener">
         <span class="date">GITBOOK · 在写</span>
         <span class="title">
@@ -2470,9 +3293,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         </span>
         <span class="arrow">↗</span>
       </a>
-    </div>
-    <div class="blog-list" id="blogList">
-      <div class="blog-empty">— loading recent posts / 加载中 —</div>
+      <div class="blog-empty" id="blogLoading">— loading recent posts / 加载中 —</div>
     </div>
   </div>
 </section>
@@ -2489,23 +3310,23 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
     <span class="label">2026.06.23 · XI'AN</span>
   </div>
   <div class="roll-strip">
-    <div class="roll-frame" data-cap="No.05 · 13:37:45.907" style="background-image:url('https://files.seeusercontent.com/2026/06/25/l3Gk/2026-06-23_13-37-45_907.jpg');"></div>
-    <div class="roll-frame" data-cap="No.06 · 13:37:45.945" style="background-image:url('https://files.seeusercontent.com/2026/06/25/Ou9i/2026-06-23_13-37-45_945.jpg');"></div>
-    <div class="roll-frame" data-cap="No.07 · 13:37:45.965" style="background-image:url('https://files.seeusercontent.com/2026/06/25/5Tlv/2026-06-23_13-37-45_965.jpg');"></div>
-    <div class="roll-frame" data-cap="No.08 · 13:37:46.317" style="background-image:url('https://files.seeusercontent.com/2026/06/25/1ixN/2026-06-23_13-37-46_317.jpg');"></div>
-    <div class="roll-frame" data-cap="No.09 · 13:37:46.435" style="background-image:url('https://files.seeusercontent.com/2026/06/25/kY1o/2026-06-23_13-37-46_435.jpg');"></div>
-    <div class="roll-frame" data-cap="No.10 · 13:37:45.845" style="background-image:url('https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg');"></div>
-    <div class="roll-frame" data-cap="No.11 · 13:37:46.028" style="background-image:url('https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg');"></div>
-    <div class="roll-frame" data-cap="No.12 · 13:37:46.409" style="background-image:url('https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg');"></div>
+    <div class="roll-frame" data-cap="No.05 · 13:37:45.907" data-bg="https://files.seeusercontent.com/2026/06/25/l3Gk/2026-06-23_13-37-45_907.jpg"></div>
+    <div class="roll-frame" data-cap="No.06 · 13:37:45.945" data-bg="https://files.seeusercontent.com/2026/06/25/Ou9i/2026-06-23_13-37-45_945.jpg"></div>
+    <div class="roll-frame" data-cap="No.07 · 13:37:45.965" data-bg="https://files.seeusercontent.com/2026/06/25/5Tlv/2026-06-23_13-37-45_965.jpg"></div>
+    <div class="roll-frame" data-cap="No.08 · 13:37:46.317" data-bg="https://files.seeusercontent.com/2026/06/25/1ixN/2026-06-23_13-37-46_317.jpg"></div>
+    <div class="roll-frame" data-cap="No.09 · 13:37:46.435" data-bg="https://files.seeusercontent.com/2026/06/25/kY1o/2026-06-23_13-37-46_435.jpg"></div>
+    <div class="roll-frame" data-cap="No.10 · 13:37:45.845" data-bg="https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg"></div>
+    <div class="roll-frame" data-cap="No.11 · 13:37:46.028" data-bg="https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg"></div>
+    <div class="roll-frame" data-cap="No.12 · 13:37:46.409" data-bg="https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg"></div>
     <!-- duplicate for marquee loop -->
-    <div class="roll-frame" data-cap="No.05 · 13:37:45.907" style="background-image:url('https://files.seeusercontent.com/2026/06/25/l3Gk/2026-06-23_13-37-45_907.jpg');"></div>
-    <div class="roll-frame" data-cap="No.06 · 13:37:45.945" style="background-image:url('https://files.seeusercontent.com/2026/06/25/Ou9i/2026-06-23_13-37-45_945.jpg');"></div>
-    <div class="roll-frame" data-cap="No.07 · 13:37:45.965" style="background-image:url('https://files.seeusercontent.com/2026/06/25/5Tlv/2026-06-23_13-37-45_965.jpg');"></div>
-    <div class="roll-frame" data-cap="No.08 · 13:37:46.317" style="background-image:url('https://files.seeusercontent.com/2026/06/25/1ixN/2026-06-23_13-37-46_317.jpg');"></div>
-    <div class="roll-frame" data-cap="No.09 · 13:37:46.435" style="background-image:url('https://files.seeusercontent.com/2026/06/25/kY1o/2026-06-23_13-37-46_435.jpg');"></div>
-    <div class="roll-frame" data-cap="No.10 · 13:37:45.845" style="background-image:url('https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg');"></div>
-    <div class="roll-frame" data-cap="No.11 · 13:37:46.028" style="background-image:url('https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg');"></div>
-    <div class="roll-frame" data-cap="No.12 · 13:37:46.409" style="background-image:url('https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg');"></div>
+    <div class="roll-frame" data-cap="No.05 · 13:37:45.907" data-bg="https://files.seeusercontent.com/2026/06/25/l3Gk/2026-06-23_13-37-45_907.jpg"></div>
+    <div class="roll-frame" data-cap="No.06 · 13:37:45.945" data-bg="https://files.seeusercontent.com/2026/06/25/Ou9i/2026-06-23_13-37-45_945.jpg"></div>
+    <div class="roll-frame" data-cap="No.07 · 13:37:45.965" data-bg="https://files.seeusercontent.com/2026/06/25/5Tlv/2026-06-23_13-37-45_965.jpg"></div>
+    <div class="roll-frame" data-cap="No.08 · 13:37:46.317" data-bg="https://files.seeusercontent.com/2026/06/25/1ixN/2026-06-23_13-37-46_317.jpg"></div>
+    <div class="roll-frame" data-cap="No.09 · 13:37:46.435" data-bg="https://files.seeusercontent.com/2026/06/25/kY1o/2026-06-23_13-37-46_435.jpg"></div>
+    <div class="roll-frame" data-cap="No.10 · 13:37:45.845" data-bg="https://files.seeusercontent.com/2026/06/25/naP8/2026-06-23_13-37-45_845.jpg"></div>
+    <div class="roll-frame" data-cap="No.11 · 13:37:46.028" data-bg="https://files.seeusercontent.com/2026/06/25/oh7Z/2026-06-23_13-37-46_028.jpg"></div>
+    <div class="roll-frame" data-cap="No.12 · 13:37:46.409" data-bg="https://files.seeusercontent.com/2026/06/25/xyR7/2026-06-23_13-37-46_409.jpg"></div>
   </div>
 </section>
 
@@ -2513,14 +3334,15 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
      13. CONTACT
 ──────────────────────────────────────────────────────── -->
 <section class="contact section" id="contact">
-  <div class="contact-bg"></div>
+  <div class="contact-bg" data-bg="https://files.seeusercontent.com/2026/06/25/vDk5/2026-06-23_13-37-45_982.jpg"></div>
   <div class="contact-top">
     <span>Get in touch / 联系</span>
     <span>§ 13</span>
   </div>
 
   <div class="contact-center">
-    <p class="pre reveal">如果你看到了这里 —— 写邮件、提 issue、甚至打电话都行。回得不快，但一定回。</p>
+    <p class="pre reveal">如果你看到了这里 —— 写邮件、提 issue、甚至打电话都行。回得不快，但一定回。<br>
+      实习 / 校招 / 开源合作 / 技术讨论都欢迎；只要你愿意把问题写清楚，我就愿意花时间回。</p>
     <h2 class="reveal">
       Let's<br><span class="ital">build something.</span>
     </h2>
@@ -2607,6 +3429,28 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
         邮件 <a href="mailto:1537521192@qq.com" style="text-decoration:underline;">1537521192@qq.com</a> 是我最常看的。技术问题直接在 GitHub issue 提，公开讨论对大家都好。电话 +86 130 0856 9663 留给真的紧急的事。我回复不快但一定回。
       </p></div></div></div>
     </div>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">06</span>
+        <span class="q">这个站点是怎么搭出来的？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        博客主体跑在 Hexo + Butterfly 上，这一页 about 是手写的单文件 HTML —— GSAP + Lenis 做动画，IntersectionObserver 处理懒加载与渐入，所有图片走 CDN 兜底。配色、字体、间距全部用 CSS 变量挂在 <code>:root</code> 上，方便回头一处改全局改。整页约 3000 多行，写的时候 Claude Code 是我的"对照同事" —— 但每一段标点都是我自己点头之后再合并的。
+      </p></div></div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">
+        <span class="num">07</span>
+        <span class="q">关于求职 / 实习，有什么想说的？</span>
+        <span class="plus">+</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner"><div class="faq-a-body"><p>
+        方向偏 C++ / 后端 / 系统软件 / Infra；对 AI 工程（Agent · 评测 · 本地化部署）也有持续投入。我做事偏慢、偏认真，不擅长把简历写得花里胡哨；但你能从 GitHub 上读到我每一个 commit 的"心智过程"。如果你的团队需要一个愿意自己读源码、自己写文档、自己复盘的本科生 —— 我大概率是个还不错的选项。
+      </p></div></div></div>
+    </div>
   </div>
 </section>
 
@@ -2684,25 +3528,192 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
     });
   });
 
-  /* light cursor + spotlight halo on dark sections */
-  document.querySelectorAll('.metrics, .contact, .mood').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      cursor.classList.add('on-dark');
-      cursorLabel.classList.add('on-dark');
-      spotlight.classList.add('is-show');
+  /* light cursor + spotlight halo on dark sections.
+     We check what's under the cursor at its CURRENT screen position — driven by
+     both mousemove (instant on real motion) and scroll (so the cursor stays
+     visible when a dark section scrolls in under a stationary pointer). */
+  (() => {
+    let lastDark = null;
+    /* track latest known pointer position; default to centre so first reading is sane */
+    let px = innerWidth / 2, py = innerHeight / 2;
+    const setDark = (isDark) => {
+      if (isDark === lastDark) return;
+      lastDark = isDark;
+      cursor.classList.toggle('on-dark', isDark);
+      cursorLabel.classList.toggle('on-dark', isDark);
+      spotlight.classList.toggle('is-show', isDark);
+    };
+    const probe = () => {
+      const el = document.elementFromPoint(px, py);
+      if (!el) return;
+      setDark(!!el.closest('.metrics, .contact, .mood'));
+    };
+    addEventListener('mousemove', (e) => {
+      px = e.clientX; py = e.clientY;
+      probe();
     });
-    el.addEventListener('mouseleave', () => {
-      cursor.classList.remove('on-dark');
-      cursorLabel.classList.remove('on-dark');
-      spotlight.classList.remove('is-show');
+    /* re-probe on scroll so the colour follows the cursor when the page (not the
+       cursor) is what moved. rAF-throttled to stay cheap. */
+    let scrollTick = false;
+    addEventListener('scroll', () => {
+      if (scrollTick) return;
+      scrollTick = true;
+      requestAnimationFrame(() => { probe(); scrollTick = false; });
+    }, { passive: true });
+  })();
+
+  /* ── Menu overlay ── */
+  (() => {
+    const overlay = document.getElementById('menuOverlay');
+    const openBtn = document.getElementById('menuOpen');
+    const closeBtn = document.getElementById('menuClose');
+    if (!overlay || !openBtn || !closeBtn) return;
+
+    const setOpen = (open) => {
+      overlay.classList.toggle('is-open', open);
+      overlay.setAttribute('aria-hidden', String(!open));
+      openBtn.setAttribute('aria-expanded', String(open));
+      document.body.classList.toggle('menu-open', open);
+      if (open) closeBtn.focus(); else openBtn.focus();
+    };
+
+    openBtn.addEventListener('click', () => setOpen(true));
+    closeBtn.addEventListener('click', () => setOpen(false));
+
+    /* clicking any link inside the menu closes it; smooth-scroll via Lenis if present */
+    overlay.querySelectorAll('[data-menu-link]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const href = a.getAttribute('href') || '';
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          setOpen(false);
+          if (target) {
+            const doScroll = () => {
+              if (typeof lenis !== 'undefined' && lenis) lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+              else target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            setTimeout(doScroll, 320);
+          }
+        } else {
+          setOpen(false);
+        }
+      });
     });
-  });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) setOpen(false);
+    });
+  })();
+
+  /* ── Lightbox: click any photo to view full size ── */
+  (() => {
+    const lb       = document.getElementById('lightbox');
+    const lbImg    = document.getElementById('lbImg');
+    const lbCap    = document.getElementById('lbCap');
+    const lbCount  = document.getElementById('lbCounter');
+    const lbClose  = document.getElementById('lbClose');
+    const lbPrev   = document.getElementById('lbPrev');
+    const lbNext   = document.getElementById('lbNext');
+    if (!lb || !lbImg) return;
+
+    /* Photo elements eligible for the viewer.
+       Use elements with foreground presence — skip decorative full-bleed backgrounds. */
+    const selector = '.prologue-art .plate, .roll-frame, .school-plate';
+    const items = [];
+    document.querySelectorAll(selector).forEach(el => {
+      el.classList.add('zoomable');
+      if (!el.hasAttribute('data-cursor')) el.setAttribute('data-cursor', 'view');
+      items.push(el);
+    });
+
+    const getURL = (el) => {
+      const dataBg = el.getAttribute('data-bg');
+      if (dataBg) return dataBg;
+      const bg = el.style.backgroundImage || getComputedStyle(el).backgroundImage;
+      const m = bg && bg.match(/url\((['"]?)(.*?)\1\)/);
+      return m ? m[2] : null;
+    };
+    const getCap = (el) => el.getAttribute('data-cap') || '';
+
+    let current = -1;
+    const open = (idx) => {
+      current = idx;
+      const el = items[idx];
+      const url = getURL(el);
+      if (!url) return;
+      lb.classList.add('is-open', 'is-loading');
+      lb.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('lightbox-open');
+      lbImg.classList.remove('is-loaded');
+      lbImg.src = '';
+      lbCap.textContent = getCap(el);
+      lbCount.textContent = `${idx + 1} / ${items.length}`;
+      const preload = new Image();
+      preload.decoding = 'async';
+      preload.onload = () => {
+        lbImg.src = url;
+        lbImg.alt = getCap(el) || 'Full-size photo';
+        requestAnimationFrame(() => {
+          lbImg.classList.add('is-loaded');
+          lb.classList.remove('is-loading');
+        });
+      };
+      preload.onerror = () => lb.classList.remove('is-loading');
+      preload.src = url;
+    };
+    const close = () => {
+      lb.classList.remove('is-open', 'is-loading');
+      lb.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('lightbox-open');
+      lbImg.classList.remove('is-loaded');
+      setTimeout(() => { lbImg.src = ''; }, 400);
+    };
+    const step = (delta) => {
+      if (current < 0) return;
+      const next = (current + delta + items.length) % items.length;
+      open(next);
+    };
+
+    items.forEach((el, i) => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        open(i);
+      });
+      /* Re-bind cursor label hover — the original `a, button, [data-cursor]`
+         binding ran before we set data-cursor on these elements. */
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('is-hover');
+        cursorLabel.textContent = 'View';
+        cursorLabel.classList.add('is-show');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('is-hover');
+        cursorLabel.classList.remove('is-show');
+      });
+    });
+
+    lbClose.addEventListener('click', close);
+    lbPrev.addEventListener('click', () => step(-1));
+    lbNext.addEventListener('click', () => step(1));
+    lb.addEventListener('click', (e) => {
+      /* clicking the dark area (not the image / nav / close) closes the viewer */
+      if (e.target === lb || e.target.classList.contains('lightbox-stage')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!lb.classList.contains('is-open')) return;
+      if (e.key === 'Escape')      close();
+      else if (e.key === 'ArrowLeft')  step(-1);
+      else if (e.key === 'ArrowRight') step(1);
+    });
+  })();
 
   /* ── Magnetic buttons — subtle pull toward cursor on hover ── */
   if (!reduced) {
-    document.querySelectorAll('.cta-pill, .hero-cta, .work-row .open, .faq-q .plus').forEach(el => {
-      const RADIUS = 80;
-      const STR = 0.32;
+    document.querySelectorAll('.cta-pill, .hero-cta, .work-row .open, .faq-q .plus, .menu-list a, .blog-row .arrow, .menu-trigger').forEach(el => {
+      const RADIUS = 90;
+      const STR = el.classList.contains('menu-list') || el.matches('.menu-list a') ? 0.18 : 0.32;
       el.addEventListener('mousemove', e => {
         const r = el.getBoundingClientRect();
         const ex = e.clientX - (r.left + r.width/2);
@@ -2716,6 +3727,164 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       });
     });
   }
+
+  /* ── Scroll progress bar (top) ── */
+  (() => {
+    const bar = document.getElementById('scrollProgress');
+    if (!bar) return;
+    const doc = document.documentElement;
+    let ticking = false;
+    const update = () => {
+      const max = doc.scrollHeight - innerHeight;
+      const pct = max > 0 ? Math.min(100, Math.max(0, (scrollY / max) * 100)) : 0;
+      bar.style.width = pct + '%';
+      ticking = false;
+    };
+    addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    update();
+  })();
+
+  /* ── Section indicator (bottom-right chip): shows current section + progress ── */
+  (() => {
+    const pip   = document.getElementById('sectionPip');
+    const pNum  = document.getElementById('pipNum');
+    const pLbl  = document.getElementById('pipLabel');
+    const pBar  = document.getElementById('pipBar');
+    if (!pip || !pNum || !pLbl || !pBar) return;
+
+    /* Section → display label map (order matters; matches menu) */
+    const map = [
+      ['hero',     'Intro'],
+      ['prologue', 'Prologue'],
+      ['about',    'About'],
+      ['map',      'Map'],
+      ['work',     'Work'],
+      ['metrics',  'Metrics'],
+      ['blog',     'Blog'],
+      ['contact',  'Contact'],
+      ['faq',      'FAQ'],
+    ];
+    const sections = map
+      .map(([id, label], i) => ({ id, label, idx: i, el: document.getElementById(id) }))
+      .filter(s => s.el);
+
+    let current = -1;
+    const setCurrent = (i) => {
+      if (i === current || i < 0 || i >= sections.length) return;
+      current = i;
+      const s = sections[i];
+      pNum.textContent = String(i + 1).padStart(2, '0');
+      pLbl.textContent = s.label;
+    };
+
+    /* Find which section is most prominently in viewport, drive the mini progress bar
+       by how far through the page we are. */
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      let best = 0, bestScore = -Infinity;
+      const vh = innerHeight;
+      sections.forEach((s, i) => {
+        const r = s.el.getBoundingClientRect();
+        const top = Math.max(0, r.top);
+        const bot = Math.min(vh, r.bottom);
+        const visible = Math.max(0, bot - top);
+        /* Slight bias toward sections that started above the fold */
+        const score = visible - (r.top < 0 ? r.top * 0.04 : 0);
+        if (score > bestScore) { bestScore = score; best = i; }
+      });
+      setCurrent(best);
+      /* Section-local progress: how far you've scrolled through the active one */
+      const s = sections[best];
+      const r = s.el.getBoundingClientRect();
+      const passed = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
+      pBar.style.width = (passed * 100).toFixed(1) + '%';
+      /* Dark-section detection — flip palette whenever the pip actually overlaps a dark
+         section's viewport range, not just when the menu "current" is dark.
+         The pip sits near the bottom-right; we test the y-band around it. */
+      const pipR = pip.getBoundingClientRect();
+      const pipY = pipR.height ? (pipR.top + pipR.height / 2) : vh - 36;
+      const darkEls = document.querySelectorAll('.metrics, .contact, .mood');
+      let overDark = false;
+      darkEls.forEach(de => {
+        const dr = de.getBoundingClientRect();
+        if (dr.top <= pipY && dr.bottom >= pipY) overDark = true;
+      });
+      pip.classList.toggle('on-dark', overDark);
+      /* Same check for the fixed top nav + scroll progress bar — they sit in the
+         0–~64px band, so any dark section whose viewport range crosses that band
+         calls for the inverted palette. */
+      const navEl = document.querySelector('.nav');
+      const sp    = document.querySelector('.scroll-progress');
+      const navBand = 64; // matches nav height + a touch of slack
+      let navOverDark = false;
+      darkEls.forEach(de => {
+        const dr = de.getBoundingClientRect();
+        if (dr.top < navBand && dr.bottom > 0) navOverDark = true;
+      });
+      if (navEl) navEl.classList.toggle('on-dark', navOverDark);
+      if (sp)    sp.classList.toggle('on-dark', navOverDark);
+      /* Show once user has actually scrolled into the page */
+      pip.classList.toggle('is-show', scrollY > vh * 0.5);
+    };
+    addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    addEventListener('resize', update);
+    update();
+  })();
+
+  /* ── Hero floating dust particles ── */
+  (() => {
+    if (reduced) return;
+    const host = document.getElementById('heroDust');
+    if (!host) return;
+    const N = 28;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < N; i++){
+      const i_ = document.createElement('i');
+      const x = Math.random() * 100;
+      const sz = 1 + Math.random() * 2.5;
+      const drift = (Math.random() - .5) * 80; /* px lateral drift */
+      const dur = 18 + Math.random() * 22;
+      const delay = -Math.random() * dur;
+      i_.style.cssText = `
+        left:${x.toFixed(2)}%;
+        width:${sz.toFixed(2)}px; height:${sz.toFixed(2)}px;
+        --dust-x:${drift.toFixed(1)}px;
+        --dust-d:${dur.toFixed(1)}s;
+        --dust-delay:${delay.toFixed(1)}s;
+        opacity:${(0.25 + Math.random() * 0.35).toFixed(2)};
+      `;
+      frag.appendChild(i_);
+    }
+    host.appendChild(frag);
+  })();
+
+  /* ── Work-row hover: index slides + accent line draws ── */
+  document.querySelectorAll('.work-row').forEach(row => {
+    const idx = row.querySelector('.idx');
+    const open = row.querySelector('.open');
+    if (!idx) return;
+    row.addEventListener('mouseenter', () => {
+      gsap.to(idx,  { x: 6,  color: 'var(--accent)', duration: .45, ease: 'expo.out' });
+      if (open) gsap.to(open, { rotate: 45, duration: .55, ease: 'expo.out' });
+    });
+    row.addEventListener('mouseleave', () => {
+      gsap.to(idx,  { x: 0,  color: 'var(--ink-soft)', duration: .55, ease: 'expo.out' });
+      if (open) gsap.to(open, { rotate: 0, duration: .65, ease: 'expo.out' });
+    });
+  });
+
+  /* ── Blog rows: arrow slides on hover ── */
+  document.querySelectorAll('.blog-row').forEach(row => {
+    const arrow = row.querySelector('.arrow');
+    if (!arrow) return;
+    row.addEventListener('mouseenter', () => gsap.to(arrow, { x: 8, y: -4, duration: .4, ease: 'expo.out' }));
+    row.addEventListener('mouseleave', () => gsap.to(arrow, { x: 0, y: 0,  duration: .55, ease: 'expo.out' }));
+  });
 
   /* ── Tilt the prologue collage with cursor ── */
   if (!reduced) {
@@ -2759,8 +3928,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
       scrollTrigger: { trigger: '.timeline', start: 'top 90%' }
     });
 
-    /* Way rows: text color deepens as each row scrolls up through the viewport.
-       Each row's --row-tint scrubs 1 → 0 between "top 85% of viewport" and "top 35%". */
+    /* Way rows: text color deepens (and lifts) as each row scrolls up through the viewport.
+       Wider scrub range so the fade is slow and visible. */
     document.querySelectorAll('.way-row').forEach(row => {
       gsap.fromTo(row,
         { '--row-tint': 1 },
@@ -2769,9 +3938,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
           ease: 'none',
           scrollTrigger: {
             trigger: row,
-            start: 'top 85%',
-            end: 'top 35%',
-            scrub: true
+            start: 'top 95%',
+            end: 'top 25%',
+            scrub: 0.6
           }
         }
       );
@@ -2860,6 +4029,55 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
     ScrollTrigger.refresh();
   }, 1600);
 
+  /* ── Lazy-load background images (data-bg → background-image when near viewport) ── */
+  {
+    const bgEls = document.querySelectorAll('[data-bg]');
+    const loadBg = (el) => {
+      const src = el.getAttribute('data-bg');
+      if (!src) return;
+      // Preload via Image() so the decode happens off main thread before paint
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        el.style.backgroundImage = `url('${src}')`;
+        el.removeAttribute('data-bg');
+      };
+      img.src = src;
+    };
+    if ('IntersectionObserver' in window) {
+      const bgIO = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (en.isIntersecting) {
+            loadBg(en.target);
+            bgIO.unobserve(en.target);
+          }
+        });
+      }, { rootMargin: '300px 0px' });
+      bgEls.forEach(el => bgIO.observe(el));
+    } else {
+      bgEls.forEach(loadBg);
+    }
+  }
+
+  /* ── Pause off-screen marquees to save GPU/CPU ── */
+  {
+    const strip = document.querySelector('.roll-strip');
+    if (strip && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => strip.classList.toggle('is-paused', !en.isIntersecting));
+      }, { rootMargin: '100px 0px' });
+      io.observe(strip);
+    }
+    /* Same idea for the metrics marquee */
+    const mq = document.querySelector('.marquee-inner');
+    if (mq && 'IntersectionObserver' in window) {
+      const io2 = new IntersectionObserver((entries) => {
+        entries.forEach(en => { mq.style.animationPlayState = en.isIntersecting ? 'running' : 'paused'; });
+      }, { rootMargin: '100px 0px' });
+      io2.observe(mq.parentElement);
+    }
+  }
+
   /* ── HOLD draggable (3 epochs: Then · 2023 / Mid · 2024 / Now · 2026) ── */
   const stage = document.getElementById('holdStage');
   const track = document.getElementById('holdTrack');
@@ -2898,18 +4116,87 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
     });
   }
 
-  /* ── Arsenal tabs ── */
-  document.querySelectorAll('.arsenal-tabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
-      document.querySelectorAll('.arsenal-tabs button').forEach(b => b.classList.toggle('is-active', b===btn));
-      document.querySelectorAll('.arsenal-pane').forEach(p => {
-        const match = p.dataset.pane === tab;
-        p.hidden = !match;
-        if (match) gsap.fromTo(p, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: .6, ease: 'expo.out' });
+  /* ── Arsenal tabs (sticky + scroll-driven active state) ──
+     All panes are visible and stacked. Tabs stick to the top while scrolling
+     through the section; the active tab is whichever pane is most in view. */
+  (() => {
+    const tabs = [...document.querySelectorAll('.arsenal-tabs button')];
+    const panes = [...document.querySelectorAll('.arsenal-pane')];
+    if (!tabs.length || !panes.length) return;
+
+    /* Track current active name so we only animate the underline when it actually
+       changes — re-applying the class to the same button is a no-op. This kills
+       the "underline replays on every scroll-tick" artefact. */
+    let activeName = null;
+    const setActive = (name) => {
+      if (name === activeName) return;
+      activeName = name;
+      tabs.forEach(b => b.classList.toggle('is-active', b.dataset.tab === name));
+    };
+
+    /* spy-lock prevents scroll-spy from updating active state while a click is
+       smoothly scrolling. Otherwise dragging from Systems → Tooling would flash
+       Backend / AI underlines on the way. */
+    let spyLock = false;
+    let lockTimeout = null;
+
+    /* Click → smooth-scroll the matching pane to land just under the sticky tabs. */
+    const tabsEl0 = document.querySelector('.arsenal-tabs');
+    tabs.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tab = btn.dataset.tab;
+        const target = document.querySelector(`.arsenal-pane[data-pane="${tab}"]`);
+        if (!target) return;
+        spyLock = true;
+        setActive(tab);
+        const stickyTop = 64;
+        const tabH = tabsEl0 ? tabsEl0.offsetHeight : 80;
+        const clearance = stickyTop + tabH + 20;
+        const absoluteY = target.getBoundingClientRect().top + scrollY - clearance;
+        const releaseLock = () => {
+          clearTimeout(lockTimeout);
+          lockTimeout = setTimeout(() => { spyLock = false; }, 60);
+        };
+        if (typeof lenis !== 'undefined' && lenis) {
+          lenis.scrollTo(absoluteY, {
+            duration: 1.1,
+            easing: t => 1 - Math.pow(1 - t, 4),
+            onComplete: releaseLock,
+          });
+          /* fallback in case onComplete isn't called by this Lenis version */
+          clearTimeout(lockTimeout);
+          lockTimeout = setTimeout(() => { spyLock = false; }, 1400);
+        } else {
+          scrollTo({ top: absoluteY, behavior: 'smooth' });
+          clearTimeout(lockTimeout);
+          lockTimeout = setTimeout(() => { spyLock = false; }, 1200);
+        }
       });
     });
-  });
+
+    /* Scroll-driven highlight: classic sticky scroll-spy. */
+    const tabsEl = document.querySelector('.arsenal-tabs');
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      if (spyLock) return;          /* frozen during programmatic scroll */
+      const tabsR = tabsEl.getBoundingClientRect();
+      const line = tabsR.bottom + 24;
+      let active = panes[0];
+      for (const p of panes) {
+        const r = p.getBoundingClientRect();
+        if (r.top <= line) active = p;
+        else break;
+      }
+      setActive(active.dataset.pane);
+    };
+    addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    addEventListener('resize', update);
+    update();
+  })();
 
   /* ── FAQ accordion ── */
   document.querySelectorAll('.faq-item').forEach(item => {
@@ -3034,47 +4321,89 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ display:none; width:0; height:
     draw();
   }
 
-  /* ── Atom feed ── same-origin in production (shanchuann.cn/atom.xml), CORS-free */
+  /* ── Recent posts ──
+     Preferred path: /recent.json (produced by scripts/recent-posts.js at build time).
+     Fallback: /atom.xml (if hexo-generator-feed is installed).
+     Last resort: a single VISIT BLOG link. */
   (async () => {
     const list = document.getElementById('blogList');
-    /* Try same-origin first; fall back to absolute if running outside the site */
-    const sources = ['/atom.xml', 'https://shanchuann.cn/atom.xml'];
-    let xml = null;
-    for (const src of sources) {
+    const fmtDate = (s) => {
+      const d = s ? new Date(s) : null;
+      return d && !isNaN(d) ? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` : '';
+    };
+    /* Pinned GitBook row stays at top; we only swap the loading placeholder for fetched rows. */
+    const loading = document.getElementById('blogLoading');
+    const clearLoading = () => { if (loading && loading.parentNode) loading.parentNode.removeChild(loading); };
+    const renderRows = (rows) => {
+      clearLoading();
+      if (!rows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'blog-empty';
+        empty.textContent = 'no recent posts / 暂无近作';
+        list.appendChild(empty);
+        return;
+      }
+      rows.forEach(r => {
+        const row = document.createElement('a');
+        row.className = 'blog-row';
+        row.href = r.url; row.target = '_blank'; row.rel = 'noopener';
+        const sub = r.excerpt ? `<span class="sub">— ${r.excerpt}</span>` : '';
+        row.innerHTML = `<span class="date">${fmtDate(r.date)}</span><span class="title">${r.title}${sub}</span><span class="arrow">↗</span>`;
+        list.appendChild(row);
+      });
+    };
+    const fallback = () => {
+      clearLoading();
+      const row = document.createElement('a');
+      row.className = 'blog-row';
+      row.href = 'https://shanchuann.cn'; row.target = '_blank'; row.rel = 'noopener';
+      row.innerHTML = `
+        <span class="date">VISIT BLOG · 直接访问</span>
+        <span class="title">shanchuann.cn<span class="sub">— field notes, in Chinese.</span></span>
+        <span class="arrow">↗</span>`;
+      list.appendChild(row);
+    };
+
+    /* 1) Try /recent.json (and absolute as last resort for non-prod previews) */
+    const jsonSources = ['/recent.json', 'https://shanchuann.cn/recent.json'];
+    for (const src of jsonSources) {
       try {
         const res = await fetch(src, { credentials: 'omit' });
         if (!res.ok) continue;
-        xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
-        break;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) {
+          renderRows(data.slice(0, 4).map(p => ({
+            title: p.title || 'Untitled',
+            url: p.url || 'https://shanchuann.cn',
+            date: p.updated || p.date,
+            excerpt: p.excerpt || ''
+          })));
+          return;
+        }
       } catch (_) { /* try next */ }
     }
-    if (!xml) {
-      list.innerHTML = `
-        <a class="blog-row" href="https://shanchuann.cn" target="_blank" rel="noopener">
-          <span class="date">VISIT BLOG · 直接访问</span>
-          <span class="title">shanchuann.cn<span class="sub">— field notes, in Chinese.</span></span>
-          <span class="arrow">↗</span>
-        </a>`;
-      return;
+
+    /* 2) Try /atom.xml in case hexo-generator-feed is installed */
+    const xmlSources = ['/atom.xml', 'https://shanchuann.cn/atom.xml'];
+    for (const src of xmlSources) {
+      try {
+        const res = await fetch(src, { credentials: 'omit' });
+        if (!res.ok) continue;
+        const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+        const entries = [...xml.querySelectorAll('entry')].slice(0, 4);
+        if (!entries.length) continue;
+        renderRows(entries.map(e => ({
+          title: e.querySelector('title')?.textContent?.trim() || 'Untitled',
+          url: e.querySelector('link')?.getAttribute('href') || 'https://shanchuann.cn',
+          date: e.querySelector('updated')?.textContent || e.querySelector('published')?.textContent || '',
+          excerpt: ''
+        })));
+        return;
+      } catch (_) { /* try next */ }
     }
-    const entries = [...xml.querySelectorAll('entry')].slice(0, 4);
-    if (!entries.length) {
-      list.innerHTML = `<div class="blog-empty">no recent posts / 暂无近作</div>`;
-      return;
-    }
-    list.innerHTML = '';
-    entries.forEach(e => {
-      const title = e.querySelector('title')?.textContent?.trim() || 'Untitled';
-      const link = e.querySelector('link')?.getAttribute('href') || 'https://shanchuann.cn';
-      const updated = e.querySelector('updated')?.textContent || e.querySelector('published')?.textContent || '';
-      const d = updated ? new Date(updated) : null;
-      const dateStr = d ? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}` : '';
-      const row = document.createElement('a');
-      row.className = 'blog-row';
-      row.href = link; row.target = '_blank'; row.rel = 'noopener';
-      row.innerHTML = `<span class="date">${dateStr}</span><span class="title">${title}</span><span class="arrow">↗</span>`;
-      list.appendChild(row);
-    });
+
+    /* 3) Last resort */
+    fallback();
   })();
 
   /* ── Local time ── */
