@@ -1,0 +1,358 @@
+/* =========================================================================
+   山川不念旧 · 配色层
+   配色来源：两张东京黄昏图，用中位切分量化取出的主色簇，不是凭感觉调的
+   =========================================================================
+   头图 images/tokyo-night-top.jpg（东京夜景，2560×1438，已本地化）
+     天空上部 #163f55 · 天际线 #414b55 · 地面 #2c3240
+     主色簇 #113951 20% · #1f4359 17% · #080c15 16% · #141e2a 14% · #202934 12% · #325366 11%
+     暖色像素（东京塔与窗光）只占 0.05%
+   背景 39aadc29…（浅草寺黄昏）
+     天空上部 #1d435e · 天际线 #1f3040 · 地面 #2d2828
+     主色簇 #24425a 25% · #0c0e12 15% · #1a1e25 14% · #3a3537 11% · #111c27 11%
+     暖色高光 #da8545（五重塔与本堂灯火，占 2.8%）
+
+   两张图是同一个世界：冷结构 + 一点暖光。所以：
+   · 结构色（底 / 卡 / 文字）走暮蓝 #24425a 与建筑灰 #46525d
+   · 强调色走灯火琥珀 #da8545 —— 但它直接当文字只有 2.8:1，压到 #ad5f28 才够
+     （白字压它 4.7:1，它压浅色卡 4.5:1），暗色下的强调文字再提亮到 #e0a061
+   · 默认模式改为暗色：两张图都是夜景，浅色模式反而是少数派
+   ========================================================================= */
+
+/* ====================================================== 明亮模式（少数派） */
+html:not([data-theme='dark']) {
+  --global-bg: #e9eef3;
+
+  /* 卡面：从建筑灰 #46525d 提亮出来的冷白，不是暖纸 */
+  --card-bg: rgba(250, 252, 254, .86);
+  --card-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), 0 1px 1px rgba(20, 35, 50, .05), 0 16px 38px -22px rgba(20, 35, 50, .30);
+  --card-hover-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 2px 4px rgba(20, 35, 50, .07), 0 24px 52px -24px rgba(20, 35, 50, .38);
+
+  --font-color: #1e2a35;
+  --text-highlight-color: #0f1a24;
+  --card-meta: #4e5b67;
+  --toc-link-color: #4a5b69;
+  --blockquote-color: #4e5b67;
+  --headline-presudo: #aebbc7;
+  --light-grey: #dde4ea;
+
+  --sidebar-bg: #eef2f6;
+  --sidebar-menu-bg: #ffffff;
+  --search-bg: #eef2f6;
+  --search-input-color: #1e2a35;
+  --search-a-color: #1e2a35;
+  --scrollbar-color: #a9b8c5;
+  --mark-bg: rgba(14, 34, 52, .54);
+  --preloader-bg: #1e2a35;
+  --preloader-color: #eef2f6;
+
+  /* 毛玻璃 */
+  --glass-card: blur(24px) saturate(140%);
+  --glass-bar: rgba(248, 251, 253, .74);
+  --glass-bar-blur: blur(18px) saturate(150%);
+  --glass-drawer: rgba(248, 251, 253, .92);
+  --glass-chip: rgba(252, 254, 255, .74);
+  --glass-chip-blur: blur(16px) saturate(140%);
+  --glass-edge: rgba(255, 255, 255, .60);
+  --glass-ink: #934818;
+  --glass-ink-on: #ffffff;
+
+  /* 正文里的链接与行内代码（theme_color 是按暗色定的，这里收回来） */
+  --link-ink: #3d6079;
+  --code-ink: #96481a;
+}
+
+/* ====================================================== 暗黑模式（默认） */
+[data-theme='dark'] {
+  --global-bg: #0b131b;
+
+  /* 卡面：暮蓝 #24425a 压深后的半透明玻璃，透出背后的照片 */
+  --card-bg: rgba(15, 27, 38, .80);
+  --card-box-shadow: inset 0 1px 0 rgba(168, 205, 235, .10), 0 1px 1px rgba(0, 0, 0, .45), 0 18px 44px -24px rgba(0, 0, 0, .90);
+  --card-hover-box-shadow: inset 0 1px 0 rgba(168, 205, 235, .16), 0 2px 6px rgba(0, 0, 0, .50), 0 26px 56px -26px rgba(0, 0, 0, .95);
+
+  --font-color: rgba(228, 238, 246, .88);
+  --text-highlight-color: rgba(240, 246, 251, .96);
+  --card-meta: #a3b6c6;
+  --toc-link-color: rgba(196, 214, 228, .82);
+  --headline-presudo: rgba(196, 214, 228, .20);
+
+  --sidebar-bg: #0b131b;
+  --sidebar-menu-bg: #15222d;
+  --search-bg: #0b131b;
+  --search-input-color: rgba(228, 238, 246, .88);
+  --search-a-color: rgba(228, 238, 246, .88);
+  --scrollbar-color: #2b4356;
+  --mark-bg: rgba(12, 30, 46, .60);
+  --preloader-bg: #081019;
+  --preloader-color: rgba(228, 238, 246, .88);
+  --blockquote-bg: rgba(150, 180, 205, .10);
+
+  /* 毛玻璃 */
+  --glass-card: blur(24px) saturate(130%);
+  --glass-bar: rgba(9, 17, 25, .66);
+  --glass-bar-blur: blur(18px) saturate(140%);
+  --glass-drawer: rgba(9, 16, 24, .92);
+  --glass-chip: rgba(18, 32, 44, .70);
+  --glass-chip-blur: blur(16px) saturate(140%);
+  --glass-edge: rgba(176, 212, 240, .12);
+  --glass-ink: #e0a061;
+  --glass-ink-on: #0b131b;
+
+  --link-ink: #a6bacb;
+  --code-ink: #e0a061;
+}
+
+/* ============================================================ 背景与压层 */
+/* 背景图由 _config.butterfly.yml 的 background 提供（裸 URL，不是 url(...)） */
+
+/* 浅色模式：给夜景压一层冷白，让照片退成底纹。压得太厚会起雾，
+   所以只压到还能读得下去的下限（正文对比度仍在 5:1 以上）。 */
+html:not([data-theme='dark']) #web_bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(232, 238, 244, .34), rgba(222, 231, 239, .46));
+}
+
+/* 暗色模式：主题原本在这里压 70% 纯黑，换成一层很轻的暮蓝，照片还是照片 */
+[data-theme='dark'] #web_bg::before {
+  background: linear-gradient(180deg, rgba(6, 12, 18, .16), rgba(6, 12, 18, .40));
+}
+
+/* =========================================================================
+   毛玻璃
+   =========================================================================
+   背景换成照片之后，卡片上的 backdrop-filter 终于是看得见的了：浅草寺的
+   灯火和塔影会从卡面底下透出来。这是这次换图顺带解锁的效果。
+   ========================================================================= */
+
+/* 卡面：与主题的卡片选择器保持一致，共用一份模糊。
+   如果滚动时觉得发涩（长列表里每个卡面都要合成一次），把这一段删掉即可 ——
+   半透明卡面与顶部内高光会保留，"磨砂"的观感基本不丢。 */
+.cardHover,
+.type-404 .error-content,
+.layout > div:first-child:not(.nc),
+#recent-posts .recent-post-item,
+#article-container .shuoshuo-item,
+#aside-content .card-widget,
+.layout .pagination > *:not(.space) {
+  -webkit-backdrop-filter: var(--glass-card);
+  backdrop-filter: var(--glass-card);
+}
+
+/* 导航栏：固定在内容之上，滚动时卡片从底下经过 */
+#page-header.nav-fixed #nav,
+#page-header.not-top-img #nav {
+  background: var(--glass-bar);
+  -webkit-backdrop-filter: var(--glass-bar-blur);
+  backdrop-filter: var(--glass-bar-blur);
+  box-shadow: 0 1px 0 var(--glass-edge), 0 10px 30px -22px rgba(0, 0, 0, .55);
+}
+
+/* 移动端抽屉 */
+#sidebar-menus {
+  background: var(--glass-drawer);
+  -webkit-backdrop-filter: var(--glass-bar-blur);
+  backdrop-filter: var(--glass-bar-blur);
+}
+
+/* 右侧悬浮按钮：玻璃片 + 琥珀图标 */
+#rightside > div > button,
+#rightside > div > a {
+  background: var(--glass-chip);
+  color: var(--glass-ink);
+  -webkit-backdrop-filter: var(--glass-chip-blur);
+  backdrop-filter: var(--glass-chip-blur);
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 6px 18px -12px rgba(0, 0, 0, .55);
+}
+
+#rightside > div > button:hover,
+#rightside > div > a:hover {
+  background: var(--glass-ink);
+  color: var(--glass-ink-on);
+}
+
+/* ================================================== 强调色：按模式分别落地 */
+/* theme_color 只能给一组值。填充类（按钮 / 分页器 / 目录）用 #ad5f28 在两种
+   模式下都成立；但"当文字用"的强调色在深卡上只有 3.5:1，这里逐条提亮。
+   下面这串选择器是从编译产物里反查出来的全部 color:#ad5f28 规则。 */
+[data-theme='dark'] a:hover,
+[data-theme='dark'] .container .highlight-tools i:hover,
+[data-theme='dark'] .article-sort-item.year:hover:before,
+[data-theme='dark'] .article-sort-item-title:hover,
+[data-theme='dark'] .category-lists .category-list a:hover,
+[data-theme='dark'] #recent-posts .recent-post-item > .recent-post-info > .article-title:hover,
+[data-theme='dark'] #recent-posts .recent-post-item > .recent-post-info > .article-meta-wrap a:hover,
+[data-theme='dark'] #article-container .shuoshuo-footer .shuoshuo-tag,
+[data-theme='dark'] #article-container .shuoshuo-footer .shuoshuo-comment-btn:hover,
+[data-theme='dark'] #aside-content .card-tag-cloud a:hover,
+[data-theme='dark'] #aside-content .aside-list > .aside-list-item .content > .title:hover,
+[data-theme='dark'] #aside-content .aside-list > .aside-list-item .content > .comment:hover,
+[data-theme='dark'] #aside-content #card-toc .toc-content .toc-link:hover,
+[data-theme='dark'] .site-data > a:hover div,
+[data-theme='dark'] #footer a:hover,
+[data-theme='dark'] #page-header.nav-fixed #nav #blog-info:hover,
+[data-theme='dark'] #page-header.nav-fixed #nav a:hover,
+[data-theme='dark'] #page-header.nav-fixed #nav span.site-page:hover,
+[data-theme='dark'] #page-header.nav-fixed #nav #toggle-menu:hover,
+[data-theme='dark'] #post-info #post-meta a:hover,
+[data-theme='dark'] #post .tag_share .post-meta__tags,
+[data-theme='dark'] #post .post-copyright:before,
+[data-theme='dark'] #post .post-copyright .post-copyright-meta,
+[data-theme='dark'] .container .tabs > .tab-to-top button:hover,
+[data-theme='dark'] .search-dialog .search-nav,
+[data-theme='dark'] .search-dialog .search-nav .search-close-button:hover,
+[data-theme='dark'] .search-dialog .search-result-list .local-search-hit-item[value]::before,
+[data-theme='dark'] .search-dialog .ais-Hits-list .local-search-hit-item[value]::before,
+[data-theme='dark'] .search-dialog .search-result-list .ais-Hits-item[value]::before,
+[data-theme='dark'] .search-dialog .ais-Hits-list .ais-Hits-item[value]::before,
+[data-theme='dark'] .search-dialog .search-result-list .local-search-hit-item a:hover,
+[data-theme='dark'] .search-dialog .ais-Hits-list .local-search-hit-item a:hover,
+[data-theme='dark'] .search-dialog .search-result-list .ais-Hits-item a:hover,
+[data-theme='dark'] .search-dialog .ais-Hits-list .ais-Hits-item a:hover {
+  color: var(--glass-ink);
+}
+
+/* 浅色模式跑同一批选择器：theme_color 给的 #ad5f28 压在浅卡上只有 3.6:1，
+   这里换成压深一档的 #9a4d1a（浅卡上 4.7:1）；填充色仍是 #ad5f28，不动。 */
+/* 浅色模式跑同一批选择器：theme_color 给的 #ad5f28 压在浅卡上只有 3.6:1，
+   这里换成压深一档的 #9a4d1a（浅卡上 4.7:1）；填充色仍是 #ad5f28，不动。 */
+html:not([data-theme='dark']) a:hover,
+html:not([data-theme='dark']) .container .highlight-tools i:hover,
+html:not([data-theme='dark']) .article-sort-item.year:hover:before,
+html:not([data-theme='dark']) .article-sort-item-title:hover,
+html:not([data-theme='dark']) .category-lists .category-list a:hover,
+html:not([data-theme='dark']) #recent-posts .recent-post-item > .recent-post-info > .article-title:hover,
+html:not([data-theme='dark']) #recent-posts .recent-post-item > .recent-post-info > .article-meta-wrap a:hover,
+html:not([data-theme='dark']) #article-container .shuoshuo-footer .shuoshuo-tag,
+html:not([data-theme='dark']) #article-container .shuoshuo-footer .shuoshuo-comment-btn:hover,
+html:not([data-theme='dark']) #aside-content .card-tag-cloud a:hover,
+html:not([data-theme='dark']) #aside-content .aside-list > .aside-list-item .content > .title:hover,
+html:not([data-theme='dark']) #aside-content .aside-list > .aside-list-item .content > .comment:hover,
+html:not([data-theme='dark']) #aside-content #card-toc .toc-content .toc-link:hover,
+html:not([data-theme='dark']) .site-data > a:hover div,
+html:not([data-theme='dark']) #footer a:hover,
+html:not([data-theme='dark']) #page-header.nav-fixed #nav #blog-info:hover,
+html:not([data-theme='dark']) #page-header.nav-fixed #nav a:hover,
+html:not([data-theme='dark']) #page-header.nav-fixed #nav span.site-page:hover,
+html:not([data-theme='dark']) #page-header.nav-fixed #nav #toggle-menu:hover,
+html:not([data-theme='dark']) #post-info #post-meta a:hover,
+html:not([data-theme='dark']) #post .tag_share .post-meta__tags,
+html:not([data-theme='dark']) #post .post-copyright:before,
+html:not([data-theme='dark']) #post .post-copyright .post-copyright-meta,
+html:not([data-theme='dark']) .container .tabs > .tab-to-top button:hover,
+html:not([data-theme='dark']) .search-dialog .search-nav,
+html:not([data-theme='dark']) .search-dialog .search-nav .search-close-button:hover,
+html:not([data-theme='dark']) .search-dialog .search-result-list .local-search-hit-item[value]::before,
+html:not([data-theme='dark']) .search-dialog .ais-Hits-list .local-search-hit-item[value]::before,
+html:not([data-theme='dark']) .search-dialog .search-result-list .ais-Hits-item[value]::before,
+html:not([data-theme='dark']) .search-dialog .ais-Hits-list .ais-Hits-item[value]::before,
+html:not([data-theme='dark']) .search-dialog .search-result-list .local-search-hit-item a:hover,
+html:not([data-theme='dark']) .search-dialog .ais-Hits-list .local-search-hit-item a:hover,
+html:not([data-theme='dark']) .search-dialog .search-result-list .ais-Hits-item a:hover,
+html:not([data-theme='dark']) .search-dialog .ais-Hits-list .ais-Hits-item a:hover {
+  color: var(--glass-ink);
+}
+
+/* 主题的暗色行内代码是中性灰 #2c2c2c，在这套冷色系统里像块补丁，换成同一族 */
+[data-theme='dark'] .container code {
+  background: rgba(150, 180, 205, .12);
+}
+
+/* 正文里的链接与行内代码：两套模式各取各的 */
+.container a {
+  color: var(--link-ink);
+}
+
+.container code {
+  color: var(--code-ink);
+}
+
+/* 老浏览器不支持 backdrop-filter 时退回不透明卡面，避免文字压在照片上 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html:not([data-theme='dark']) {
+    --card-bg: #fafcfe;
+  }
+
+  [data-theme='dark'] {
+    --card-bg: #101d28;
+  }
+}
+
+/* ================================================================== 页脚 */
+/* 主题拿 theme_color 的 #ad5f28 铺页脚，再压一层 --mark-bg。浅色模式下那层
+   压层原本太浅，白字压上去只有 3.5:1 —— --mark-bg 换成深暮蓝压层后是 7.7:1，
+   这里只需把页脚文字与悬停固定成冷白／暖白两档。 */
+html:not([data-theme='dark']) #footer,
+html:not([data-theme='dark']) #footer * {
+  color: #eef3f7;
+}
+
+html:not([data-theme='dark']) #footer a:hover {
+  color: #ffdcbb;
+}
+
+
+/* ================================================================ 头图文字 */
+/* 两张图里都有硬高光（东京塔、云缝、窗光）。主题自带的 text-shadow 只有
+   2px 2px 4px rgba(0,0,0,.15)，压不住这些点：副标题在亮处最低只剩 2.9:1。
+   加一层有偏移的暗影，把高光处的字托起来（p05 仍在 7:1 以上）。 */
+#page-header #site-title,
+#page-header #site-subtitle,
+#post-info .post-title,
+#post-info #post-meta {
+  text-shadow: 0 1px 2px rgba(4, 12, 20, .55), 0 3px 14px rgba(4, 12, 20, .45);
+}
+
+
+/* ============================================== 头图与背景之间的衔接 */
+/* 原本头图下沿是一条硬边，直接和底下的背景照片撞上。给头图底部加一层
+   渐变遮罩，东京那张就溶进浅草寺那张；滚动提示的箭头挪到渐变之上，
+   免得被一起吃掉。 */
+#page-header {
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 30px), rgba(0, 0, 0, .45) calc(100% - 12px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 30px), rgba(0, 0, 0, .45) calc(100% - 12px), transparent 100%);
+}
+
+/* 首页头图占满一屏，衔接带也放长 */
+#page-header.full_page {
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 104px), rgba(0, 0, 0, .42) calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 104px), rgba(0, 0, 0, .42) calc(100% - 40px), transparent 100%);
+}
+
+#page-header #scroll-down {
+  bottom: 112px;
+}
+
+/* 头图自己的底色。主题给的是强调色 #ad5f28，头图还没下完时会先闪一块棕黄，
+   换成暮蓝：头图是夜景，等图的时候看到的应该是天色而不是强调色。 */
+#page-header {
+  background-color: #0b131b;
+}
+
+/* 背景视差：背景层加高一点，滚动时由脚本往上推 4vh（source/js/parallax.js），
+   读起来像是被从下往上拉进视野。
+   另外：主题的 enter_transitions 会给 #web_bg 挂一条 4 秒的 to_show
+   （opacity 0→1），于是每次进站背景照片和上面那层遮罩都是慢慢显出来的。
+   遮罩本来就该立刻在位，这里把这条动画关掉；其余入场动画（正文上移、
+   标题缩放）保留。想要短一点的淡入，把 none 换成 to_show .6s 即可。 */
+#web_bg {
+  top: -4vh;
+  height: 108vh;
+  animation: none;
+}
+
+/* 触底继续滚（回弹）时页脚下方会漏出一条缝，露出的是背景照片。
+   阴影不占布局、也不会撑出滚动条：偏移量就是往下盖住的深度，
+   两条错开叠在一起盖住 300px（间隔 150px 小于页脚高度，所以是连续的）。 */
+#footer {
+  box-shadow: 0 150px 0 0 #0f1d2b, 0 300px 0 0 #0f1d2b;
+}
+
+/* 提示条：颜色在 _config.butterfly.yml 的 snackbar 里按模式给，
+   这里只把主题的 5px 圆角与 85% 不透明度收进这套玻璃语言。 */
+.snackbar-container.snackbar-css {
+  border-radius: 12px;
+  opacity: 1 !important;
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 10px 26px -14px rgba(0, 0, 0, .6);
+}

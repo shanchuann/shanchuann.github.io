@@ -1,0 +1,518 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>LangChain 短期记忆 | 山川不念旧</title><meta name="author" content="张念川"><meta name="copyright" content="张念川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0b131b"><meta name="description" content="代码仓库ChainReaction  找 LangChain 的记忆功能时，很多人会先去翻有没有一个叫 Memory 的类。v1 里没有这个东西。短期记忆就是 agent state 里的一份消息历史，加上你自己挂上去的字段，再交给 checkpointer 按 thread 存下来。把这三件事的分工弄清楚，后面大部分问题都能自己判断。 这篇先用最小例子跑通两轮对话，证明第二轮真的记得第一轮；然">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LangChain 短期记忆">
+<meta property="og:url" content="https://shanchuann.cn/2025/11/22/LangChain%20%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86/index.html">
+<meta property="og:site_name" content="山川不念旧">
+<meta property="og:description" content="代码仓库ChainReaction  找 LangChain 的记忆功能时，很多人会先去翻有没有一个叫 Memory 的类。v1 里没有这个东西。短期记忆就是 agent state 里的一份消息历史，加上你自己挂上去的字段，再交给 checkpointer 按 thread 存下来。把这三件事的分工弄清楚，后面大部分问题都能自己判断。 这篇先用最小例子跑通两轮对话，证明第二轮真的记得第一轮；然">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png">
+<meta property="article:published_time" content="2025-11-22T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-04T18:11:41.010Z">
+<meta property="article:author" content="张念川">
+<meta property="article:tag" content="Core components">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LangChain 短期记忆",
+  "url": "https://shanchuann.cn/2025/11/22/LangChain%20%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86/",
+  "image": "https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png",
+  "datePublished": "2025-11-22T12:00:00.000Z",
+  "dateModified": "2026-10-04T18:11:41.010Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "张念川",
+      "url": "https://shanchuann.cn"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2025/09/25/NAM3XhUgxbjpVrJ.png"><link rel="canonical" href="https://shanchuann.cn/2025/11/22/LangChain%20%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0b131b')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#eef2f6')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: {"appId":"L7P2ELNLTD","apiKey":"d6168abb683b7c70b4ef9bbee1fa469a","indexName":"Shanchuan","hitsPerPage":6,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，耗时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#9a4d1a","bgDark":"#16242f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LangChain 短期记忆',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start --><link rel="preload" as="image" href="/images/sensoji-dusk.jpg"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.0.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background-image: url(/images/sensoji-dusk.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">98</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" href="/html/Trip/index.html"><i class="fa-fw fas fa-code"></i><span> 携程前端</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">山川不念旧</span></a><a class="nav-page-title" href="/"><span class="site-name">LangChain 短期记忆</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" href="/html/Trip/index.html"><i class="fa-fw fas fa-code"></i><span> 携程前端</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">LangChain 短期记忆</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-11-22T12:00:00.000Z" title="发表于 2025-11-22 20:00:00">2025-11-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-04T18:11:41.010Z" title="更新于 2026-10-05 02:11:41">2026-10-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LangChain/">LangChain</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>代码仓库<a target="_blank" rel="noopener" href="https://github.com/shanchuann/ChainReaction">ChainReaction</a></p>
+</blockquote>
+<p>找 LangChain 的记忆功能时，很多人会先去翻有没有一个叫 Memory 的类。v1 里没有这个东西。短期记忆就是 agent state 里的一份消息历史，加上你自己挂上去的字段，再交给 checkpointer 按 thread 存下来。把这三件事的分工弄清楚，后面大部分问题都能自己判断。</p>
+<p>这篇先用最小例子跑通两轮对话，证明第二轮真的记得第一轮；然后解释 <code>thread_id</code> 和 checkpointer 的关系，以及换 thread 之后会发生什么；接着扩展自定义 state 字段，最后处理消息历史把上下文窗口撑爆的情况。文里的终端输出都是在 Windows 上连 DeepSeek 真跑出来的，脚本放在仓库的 <a target="_blank" rel="noopener" href="https://github.com/shanchuann/ChainReaction/tree/main/ShortTermMemory">ShortTermMemory&#x2F;</a> 目录下。</p>
+<p>顺带划一下短期和长期的分界。短期记忆活在一个 thread 里，thread 结束或者你换掉 <code>thread_id</code>，它就够不着了。跨会话记住用户偏好、历史结论，那是 <a target="_blank" rel="noopener" href="https://docs.langchain.com/oss/python/langchain/long-term-memory">long-term memory</a> 的活，用的是另一套 Store 机制。这篇只谈 thread 内的部分。</p>
+<h2 id="短期记忆就是-state"><a href="#短期记忆就是-state" class="headerlink" title="短期记忆就是 state"></a>短期记忆就是 state</h2><p><code>create_agent</code> 默认用 <a target="_blank" rel="noopener" href="https://reference.langchain.com/python/langchain/agents/middleware/types/AgentState"><code>AgentState</code></a> 管记忆，里面只有一个内置字段 <code>messages</code>，类型是 <code>list[BaseMessage]</code>，装的是当前 thread 的完整对话历史。官方文档把它描述成 append-only：新消息往后面加，已有的不会被替换。</p>
+<p>这就是为什么翻遍文档也找不到一个 Memory 类。真要做成独立模块，它得自己维护消息列表、自己判断什么时候读、什么时候写、还要自己处理并发。LangChain 把这部分交给了图里的 state 和 checkpointer，agent 本身保持无状态。好处是 state 里除了消息还能放别的东西，工具和中间件读写的是同一份数据，不用在几个系统之间同步。</p>
+<p>想让它跨轮记住东西，就要在创建 agent 时给一个 checkpointer：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"></span><br><span class="line"><span class="comment"># 全篇共用的模型配置，后面片段里出现的 model 都指这个</span></span><br><span class="line">model = ChatOpenAI(</span><br><span class="line">    api_key=os.getenv(<span class="string">&#x27;DEEPSEEK_API_KEY&#x27;</span>),</span><br><span class="line">    base_url=<span class="string">&quot;https://api.deepseek.com/v1&quot;</span>,</span><br><span class="line">    model=<span class="string">&quot;deepseek-chat&quot;</span>,</span><br><span class="line">    temperature=<span class="number">0.1</span>,</span><br><span class="line">    max_tokens=<span class="number">1000</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> create_agent</span><br><span class="line"><span class="keyword">from</span> langgraph.checkpoint.memory <span class="keyword">import</span> InMemorySaver</span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[],</span><br><span class="line">    checkpointer=InMemorySaver(),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">config = &#123;<span class="string">&quot;configurable&quot;</span>: &#123;<span class="string">&quot;thread_id&quot;</span>: <span class="string">&quot;thread-1&quot;</span>&#125;&#125;</span><br><span class="line"></span><br><span class="line">r1 = agent.invoke(</span><br><span class="line">    &#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好，我叫小林，最近在学 LangChain。&quot;</span>&#125;]&#125;,</span><br><span class="line">    config,</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r1[<span class="string">&quot;messages&quot;</span>][-<span class="number">1</span>].content)</span><br><span class="line"></span><br><span class="line">r2 = agent.invoke(</span><br><span class="line">    &#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;我叫什么名字？&quot;</span>&#125;]&#125;,</span><br><span class="line">    config,</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r2[<span class="string">&quot;messages&quot;</span>][-<span class="number">1</span>].content)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;消息总条数:&quot;</span>, <span class="built_in">len</span>(r2[<span class="string">&quot;messages&quot;</span>]))</span><br></pre></td></tr></table></figure>
+
+<p>真实输出（长回复做了截断）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[第一轮] 助手: 你好，小林！很高兴认识你</span><br><span class="line">（回复较长，此处省略）</span><br><span class="line"></span><br><span class="line">[第一轮] state 里的消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line"></span><br><span class="line">[第二轮] 助手: 你叫小林</span><br><span class="line">（回复较长，此处省略）</span><br><span class="line">[第二轮] state 里的消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">[第二轮] 消息总条数: 4</span><br></pre></td></tr></table></figure>
+
+<p>第二轮没有重新告诉模型名字，它照样答出来了，因为 <code>thread-1</code> 的 state 里躺着第一轮的 <code>human</code> 和 <code>ai</code> 两条消息。调用 agent 时传入的消息是一个增量更新，LangGraph 把它和 checkpointer 里取出的历史合并，再交给模型。</p>
+<p>注意这里没有”把历史塞进 prompt”的显式步骤。state 在每个步骤开始时被读取，在 agent 被调用或某个步骤（比如工具调用）完成时写回。你看到的 <code>r2[&quot;messages&quot;]</code> 是合并后的完整列表，不是这一轮新产生的两条。</p>
+<p>一次多轮对话里，state 和 checkpointer 的配合大致是这样：</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+    sequenceDiagram
+    participant U as 用户
+    participant A as Agent
+    participant C as Checkpointer
+    U-&gt;&gt;A: 第1轮 invoke(thread_id&#x3D;&quot;thread-1&quot;)
+    A-&gt;&gt;C: 按 thread_id 读取 state
+    C--&gt;&gt;A: 空，没有历史
+    A-&gt;&gt;A: messages 追加 human1，模型回复 ai1
+    A-&gt;&gt;C: 写入 checkpoint [human1, ai1]
+    U-&gt;&gt;A: 第2轮 invoke(thread_id&#x3D;&quot;thread-1&quot;)
+    A-&gt;&gt;C: 按 thread_id 读取 state
+    C--&gt;&gt;A: [human1, ai1]
+    A-&gt;&gt;A: messages 追加 human2，模型看到完整历史
+    A-&gt;&gt;C: 写入 checkpoint [human1, ai1, human2, ai2]
+  </pre></div>
+
+<p>checkpointer 存下来的是一串快照，每份对应图执行的一次 super-step，super-step 可以理解成一次 tick。一次两轮的对话会产生好几份快照，每份都带着当时的完整 state。这个特性后面讲状态膨胀时还要用到。</p>
+<h2 id="thread-id-和-checkpointer"><a href="#thread-id-和-checkpointer" class="headerlink" title="thread_id 和 checkpointer"></a>thread_id 和 checkpointer</h2><p>checkpointer 用 <code>thread_id</code> 作为主键来存取状态。挂了 checkpointer 却不传 <code>thread_id</code>，LangGraph 直接抛异常，不会”默认开一个”。我实测了一下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[有 checkpointer，无 thread_id] ValueError: Checkpointer requires one or more of the following &#x27;configurable&#x27; keys: thread_id, checkpoint_ns, checkpoint_id</span><br></pre></td></tr></table></figure>
+
+<p>这个报错信息挺直白，照着补 <code>thread_id</code> 就行。</p>
+<p>反过来，不挂 checkpointer 的时候，传 <code>thread_id</code> 没有任何作用。同一个 <code>thread_id</code> 连续调两轮，第二轮的状态里只有自己这一轮的消息：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[无 checkpointer] 第二轮 state 消息条数: 2</span><br><span class="line">[无 checkpointer] 第二轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">[无 checkpointer] 助手回答: 我不知道你的名字哦！我们还没有正式介绍过呢。</span><br></pre></td></tr></table></figure>
+
+<p>记忆不在 agent 对象里，而在 checkpointer 里。agent 每次都是无状态的，是 checkpointer 把上一轮的状态递了回来。</p>
+<p>换一个 <code>thread_id</code>，就是换一个会话。下面这个脚本用同一个 agent，先在 <code>thread-A</code> 里告诉它喜欢的颜色，然后去 <code>thread-B</code> 问同一件事：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[thread-A] 用户: 记住：我最喜欢的颜色是蓝色。</span><br><span class="line">[thread-A] 助手: 好的，我记住了！你最喜欢的颜色是蓝色。</span><br><span class="line">[thread-A] 消息条数: 2</span><br><span class="line"></span><br><span class="line">[thread-B] 用户: 我最喜欢什么颜色？</span><br><span class="line">[thread-B] 助手: 哈哈，这个问题可难倒我啦</span><br><span class="line">（回复较长，此处省略）</span><br><span class="line">[thread-B] 消息条数: 2</span><br><span class="line"></span><br><span class="line">[thread-A 再次提问] 用户: 我最喜欢什么颜色？</span><br><span class="line">[thread-A 再次提问] 助手: 你最喜欢蓝色呀！这是你之前告诉我的，我记住啦。</span><br><span class="line">[thread-A 再次提问] 消息条数: 4</span><br></pre></td></tr></table></figure>
+
+<p><code>thread-B</code> 完全不知道蓝色的事，而回到 <code>thread-A</code> 之后记忆还在。消息条数也印证了这一点：<code>thread-B</code> 是 2 条，<code>thread-A</code> 累积到 4 条。</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+    flowchart LR
+    I[agent.invoke] --&gt; C{config 里的 thread_id}
+    C --&gt;|thread-A| S1[&quot;state A: messages + 自定义字段&quot;]
+    C --&gt;|thread-B| S2[&quot;state B: messages + 自定义字段&quot;]
+    S1 --&gt; CP[(Checkpointer)]
+    S2 --&gt; CP
+    CP --&gt; DB[&quot;InMemorySaver &#x2F; SqliteSaver &#x2F; PostgresSaver&quot;]
+  </pre></div>
+
+<p>实际项目里，<code>thread_id</code> 通常按会话生成，不按用户生成。一个用户可能同时开好几个对话，每个对话一个 <code>thread_id</code>，聊天记录才不会串在一起。用户级的东西放长期记忆，会话级的放 thread。</p>
+<p><code>create_agent</code> 返回的是编译好的图，<code>agent.get_state(config)</code> 能直接读当前状态，<code>agent.get_state_history(config)</code> 能拿到这个 thread 的全部快照，调试和回放时很省事。我后面数 checkpoint 用的就是它。</p>
+<p>选哪种 saver，差别比想象中大：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>InMemorySaver</th>
+<th>SqliteSaver &#x2F; PostgresSaver</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据放哪</td>
+<td>进程内存</td>
+<td>SQLite 文件 &#x2F; Postgres 库</td>
+</tr>
+<tr>
+<td>进程重启</td>
+<td>状态全丢</td>
+<td>保留</td>
+</tr>
+<tr>
+<td>多进程或多副本</td>
+<td>各存各的，互相看不见</td>
+<td>共享同一份</td>
+</tr>
+<tr>
+<td>依赖</td>
+<td><code>langgraph-checkpoint</code> 自带</td>
+<td>另装 <code>langgraph-checkpoint-sqlite</code> 或 <code>langgraph-checkpoint-postgres</code></td>
+</tr>
+<tr>
+<td>适合</td>
+<td>本地开发和测试</td>
+<td>生产</td>
+</tr>
+</tbody></table>
+<p>官方把 <code>InMemorySaver</code> 定位成实验用，SQLite 适合本地工作流，Postgres 和 MongoDB 才是生产选项。Postgres 的用法长这样，<code>setup()</code> 会自动建表：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langgraph.checkpoint.postgres <span class="keyword">import</span> PostgresSaver</span><br><span class="line"></span><br><span class="line">DB_URI = <span class="string">&quot;postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable&quot;</span></span><br><span class="line"><span class="keyword">with</span> PostgresSaver.from_conn_string(DB_URI) <span class="keyword">as</span> checkpointer:</span><br><span class="line">    checkpointer.setup()</span><br><span class="line">    agent = create_agent(model=model, tools=[], checkpointer=checkpointer)</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义-state-字段"><a href="#自定义-state-字段" class="headerlink" title="自定义 state 字段"></a>自定义 state 字段</h2><p><code>AgentState</code> 可以继承，加自己需要的字段，然后通过 <code>state_schema</code> 传给 <code>create_agent</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Any</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> AgentState, create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> after_model</span><br><span class="line"><span class="keyword">from</span> langgraph.checkpoint.memory <span class="keyword">import</span> InMemorySaver</span><br><span class="line"><span class="keyword">from</span> langgraph.runtime <span class="keyword">import</span> Runtime</span><br><span class="line"><span class="keyword">from</span> typing_extensions <span class="keyword">import</span> NotRequired</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CustomState</span>(<span class="title class_ inherited__">AgentState</span>):</span><br><span class="line">    user_id: NotRequired[<span class="built_in">str</span>]</span><br><span class="line">    preferences: NotRequired[<span class="built_in">dict</span>]</span><br><span class="line">    model_calls: NotRequired[<span class="built_in">int</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@after_model(<span class="params">state_schema=CustomState</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">count_model_calls</span>(<span class="params">state: CustomState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;model_calls&quot;</span>: state.get(<span class="string">&quot;model_calls&quot;</span>, <span class="number">0</span>) + <span class="number">1</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[],</span><br><span class="line">    state_schema=CustomState,</span><br><span class="line">    middleware=[count_model_calls],</span><br><span class="line">    checkpointer=InMemorySaver(),</span><br><span class="line">)</span><br><span class="line">config = &#123;<span class="string">&quot;configurable&quot;</span>: &#123;<span class="string">&quot;thread_id&quot;</span>: <span class="string">&quot;thread-state&quot;</span>&#125;&#125;</span><br><span class="line"></span><br><span class="line">r1 = agent.invoke(</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好，我是小林。&quot;</span>&#125;],</span><br><span class="line">        <span class="string">&quot;user_id&quot;</span>: <span class="string">&quot;user_123&quot;</span>,</span><br><span class="line">        <span class="string">&quot;preferences&quot;</span>: &#123;<span class="string">&quot;theme&quot;</span>: <span class="string">&quot;dark&quot;</span>, <span class="string">&quot;lang&quot;</span>: <span class="string">&quot;zh&quot;</span>&#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">    config,</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r1.get(<span class="string">&quot;user_id&quot;</span>), r1.get(<span class="string">&quot;preferences&quot;</span>), r1.get(<span class="string">&quot;model_calls&quot;</span>))</span><br><span class="line"></span><br><span class="line">r2 = agent.invoke(</span><br><span class="line">    &#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;帮我记一下，我住在杭州。&quot;</span>&#125;]&#125;,</span><br><span class="line">    config,</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r2.get(<span class="string">&quot;user_id&quot;</span>), r2.get(<span class="string">&quot;preferences&quot;</span>), r2.get(<span class="string">&quot;model_calls&quot;</span>))</span><br><span class="line"></span><br><span class="line">r3 = agent.invoke(</span><br><span class="line">    &#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;我住哪？我的 user_id 是多少？&quot;</span>&#125;]&#125;,</span><br><span class="line">    config,</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r3.get(<span class="string">&quot;user_id&quot;</span>), r3.get(<span class="string">&quot;preferences&quot;</span>), r3.get(<span class="string">&quot;model_calls&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<p>第二轮只传了 <code>messages</code>，不再传 <code>user_id</code> 和 <code>preferences</code>。真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[第一轮] user_id=&#x27;user_123&#x27; preferences=&#123;&#x27;theme&#x27;: &#x27;dark&#x27;, &#x27;lang&#x27;: &#x27;zh&#x27;&#125; model_calls=1</span><br><span class="line"></span><br><span class="line">[第二轮] 只传 messages，不再传 user_id / preferences</span><br><span class="line">[第二轮] user_id=&#x27;user_123&#x27; preferences=&#123;&#x27;theme&#x27;: &#x27;dark&#x27;, &#x27;lang&#x27;: &#x27;zh&#x27;&#125; model_calls=2</span><br><span class="line"></span><br><span class="line">[第三轮] user_id=&#x27;user_123&#x27; preferences=&#123;&#x27;theme&#x27;: &#x27;dark&#x27;, &#x27;lang&#x27;: &#x27;zh&#x27;&#125; model_calls=3</span><br></pre></td></tr></table></figure>
+
+<p>自定义字段和 <code>messages</code> 一样被 checkpointer 保存，所以只需要在第一轮给一次。<code>model_calls</code> 每轮加一，靠的是 <code>after_model</code> 钩子返回的字典，它通过 state 的 reducer 合并回去。</p>
+<p>字段声明用了 <code>NotRequired</code>，因为第一轮 invoke 时你未必会传。它属于类型标注，运行时不会因为少传就拦你：我试过把字段标成必填却不传，invoke 照样跑通，返回的 state 里连这个键都没有，<code>state.get(&quot;user_id&quot;)</code> 拿到的是 None。所以自定义字段要么第一轮就给全，要么在代码里自己兜住缺省值。合并规则按字段走：<code>messages</code> 配的是 <code>add_messages</code>，做追加；普通字段默认是覆盖。</p>
+<p>还有个容易和 state 混在一起的概念是 context。<code>context_schema</code> 定义每次运行传入的只读上下文，比如 user_id、数据库连接、当前请求的元数据，工具里用 <code>runtime.context</code> 读。它不进 checkpoint，也不跨轮累积。要跨轮记住的放 state，只在单次运行里传递的放 context，分清楚能省不少事。</p>
+<p>有个地方容易误会。第三轮我问模型”我的 user_id 是多少”，它答不上来。<code>user_id</code> 存在 state 里，但 state 字段不会自动进入 prompt，模型能看到只有 <code>messages</code>。想让模型知道，得靠中间件把字段拼进 system prompt，或者用工具读 <code>runtime.state</code> 再以工具结果的形式送回对话。</p>
+<h3 id="用中间件定义状态"><a href="#用中间件定义状态" class="headerlink" title="用中间件定义状态"></a>用中间件定义状态</h3><p>上面把 <code>state_schema=CustomState</code> 同时给了 <code>create_agent</code> 和装饰器。如果这个字段只服务于某一个中间件，更干净的做法是只声明在中间件上：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> AgentMiddleware, AgentState</span><br><span class="line"><span class="keyword">from</span> typing_extensions <span class="keyword">import</span> NotRequired</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CustomState</span>(<span class="title class_ inherited__">AgentState</span>):</span><br><span class="line">    model_call_count: NotRequired[<span class="built_in">int</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CallCounterMiddleware</span>(AgentMiddleware[CustomState]):</span><br><span class="line">    state_schema = CustomState</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">before_model</span>(<span class="params">self, state, runtime</span>):</span><br><span class="line">        count = state.get(<span class="string">&quot;model_call_count&quot;</span>, <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">if</span> count &gt; <span class="number">10</span>:</span><br><span class="line">            <span class="keyword">return</span> &#123;<span class="string">&quot;jump_to&quot;</span>: <span class="string">&quot;end&quot;</span>&#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">after_model</span>(<span class="params">self, state, runtime</span>):</span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">&quot;model_call_count&quot;</span>: state.get(<span class="string">&quot;model_call_count&quot;</span>, <span class="number">0</span>) + <span class="number">1</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">agent = create_agent(model=model, tools=[], middleware=[CallCounterMiddleware()])</span><br></pre></td></tr></table></figure>
+
+<p>装饰器写法也支持 <code>@before_model(state_schema=CustomState)</code>。文档里 <code>AgentMiddleware</code> 的三个编译期属性，<code>state_schema</code>、<code>tools</code>、<code>transformers</code>，都是这个思路：能力跟着中间件走，工厂在编译时把它们合并进 agent 的 state。</p>
+<p>我倾向中间件持有自己的字段，原因是可复用。计数器、调用次数、限流标志这类字段是中间件的实现细节，写进 <code>create_agent(state_schema=...)</code> 之后，换个 agent 就得再抄一遍，字段名还可能撞。反过来，<code>user_id</code>、<code>preferences</code> 这种业务层到处要读的字段，放 <code>create_agent</code> 的 <code>state_schema</code> 更合适，因为它属于 agent 本身，不归某个中间件管。</p>
+<h2 id="读和改消息历史"><a href="#读和改消息历史" class="headerlink" title="读和改消息历史"></a>读和改消息历史</h2><p>读有几种入口。调用结束后从返回值的 <code>[&quot;messages&quot;]</code> 里取，中间件里从 <code>state[&quot;messages&quot;]</code> 取，工具里通过 <code>ToolRuntime</code> 取：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.tools <span class="keyword">import</span> tool, ToolRuntime</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_user_info</span>(<span class="params">runtime: ToolRuntime</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Look up user info.&quot;&quot;&quot;</span></span><br><span class="line">    user_id = runtime.state[<span class="string">&quot;user_id&quot;</span>]</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;User is John Smith&quot;</span> <span class="keyword">if</span> user_id == <span class="string">&quot;user_123&quot;</span> <span class="keyword">else</span> <span class="string">&quot;Unknown user&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>runtime</code> 参数对模型不可见，模型看不到它，但工具能拿到完整 state。</p>
+<p>返回值里的 <code>messages</code> 包含 tool 消息，工具调用的中间结果全在里面。只想看最终回答就取最后一条，想检查这一轮到底发生了什么，就顺着 <code>tool_calls</code> 和对应的 <code>ToolMessage</code> 往下看。别把它当成只有人机对话，agent 循环里每次工具往返都会留下痕迹。</p>
+<p>改历史要用 <code>RemoveMessage</code>，而且得让 <code>messages</code> 走 <a target="_blank" rel="noopener" href="https://reference.langchain.com/python/langgraph/graph/message/add_messages"><code>add_messages</code></a> 这个 reducer。<code>AgentState</code> 默认就是，所以直接写就行。删指定几条：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.messages <span class="keyword">import</span> RemoveMessage</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">delete_messages</span>(<span class="params">state</span>):</span><br><span class="line">    messages = state[<span class="string">&quot;messages&quot;</span>]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(messages) &gt; <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [RemoveMessage(<span class="built_in">id</span>=m.<span class="built_in">id</span>) <span class="keyword">for</span> m <span class="keyword">in</span> messages[:<span class="number">2</span>]]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>清空全部用 <code>REMOVE_ALL_MESSAGES</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langgraph.graph.message <span class="keyword">import</span> REMOVE_ALL_MESSAGES</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">clear_messages</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: [RemoveMessage(<span class="built_in">id</span>=REMOVE_ALL_MESSAGES)]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>工具里也能改 state，返回一个 <code>Command</code> 即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langgraph.types <span class="keyword">import</span> Command</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_user_info</span>(<span class="params">runtime: ToolRuntime</span>) -&gt; Command:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Look up and update user info.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> Command(update=&#123;<span class="string">&quot;user_name&quot;</span>: <span class="string">&quot;John Smith&quot;</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>删消息时注意结果历史是否合法。有些 provider 要求历史以 <code>user</code> 消息开头；带 tool call 的 <code>assistant</code> 消息后面必须跟着对应的 <code>tool</code> 结果消息。删中间那段很容易踩这个坑，报错通常来自 provider 而不是 LangChain。</p>
+<p>state 在 agent 一次运行里的读写位置：</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+    flowchart TD
+    S([开始]) --&gt; P[&quot;before_model: 读 state，可返回 dict 更新&quot;]
+    P --&gt; M[&quot;model: 只能看到 messages&quot;]
+    M --&gt; A[&quot;after_model: 读 state，可返回 dict 更新&quot;]
+    A --&gt;|有 tool_call| T[&quot;tool: 通过 runtime.state 读写&quot;]
+    T --&gt; P
+    A --&gt;|无 tool_call| E([结束])
+    E --&gt; CK[(&quot;checkpointer 落 checkpoint&quot;)]
+  </pre></div>
+
+<h2 id="上下文窗口压力"><a href="#上下文窗口压力" class="headerlink" title="上下文窗口压力"></a>上下文窗口压力</h2><p>聊得越久，<code>messages</code> 越长，迟早撞上模型的上下文窗口。就算窗口够大，长历史也会拖慢响应、抬高成本，模型还容易被无关的旧内容带偏。官方给了两类常见做法：修剪和摘要。</p>
+<p>判断该不该动手可以先看用量。<code>AIMessage</code> 上带 <code>usage_metadata</code>，里面有 <code>input_tokens</code> 和 <code>output_tokens</code>，把最近几轮加起来就能估出增长趋势。不过这是事后观察，真正拦在调用前的是中间件。</p>
+<h3 id="修剪"><a href="#修剪" class="headerlink" title="修剪"></a>修剪</h3><p>修剪就是丢消息。写一个 <code>before_model</code> 中间件，在调用模型前把历史砍短：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Any</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> AgentState, create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> before_model</span><br><span class="line"><span class="keyword">from</span> langchain.messages <span class="keyword">import</span> RemoveMessage</span><br><span class="line"><span class="keyword">from</span> langgraph.checkpoint.memory <span class="keyword">import</span> InMemorySaver</span><br><span class="line"><span class="keyword">from</span> langgraph.graph.message <span class="keyword">import</span> REMOVE_ALL_MESSAGES</span><br><span class="line"><span class="keyword">from</span> langgraph.runtime <span class="keyword">import</span> Runtime</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@before_model</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">trim_messages</span>(<span class="params">state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;消息超过 4 条时，只留第一条和最近两条。&quot;&quot;&quot;</span></span><br><span class="line">    messages = state[<span class="string">&quot;messages&quot;</span>]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(messages) &lt;= <span class="number">4</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    first_msg = messages[<span class="number">0</span>]</span><br><span class="line">    recent_messages = messages[-<span class="number">2</span>:]</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&quot;messages&quot;</span>: [</span><br><span class="line">            RemoveMessage(<span class="built_in">id</span>=REMOVE_ALL_MESSAGES),</span><br><span class="line">            first_msg,</span><br><span class="line">            *recent_messages,</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[],</span><br><span class="line">    middleware=[trim_messages],</span><br><span class="line">    checkpointer=InMemorySaver(),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>跑四轮，每轮打印 state 里的消息角色：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">第 1 轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">第 1 轮 state 消息条数: 2</span><br><span class="line"></span><br><span class="line">第 2 轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">第 2 轮 state 消息条数: 4</span><br><span class="line"></span><br><span class="line">第 3 轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">第 3 轮 state 消息条数: 4</span><br><span class="line"></span><br><span class="line">第 4 轮 用户: 我叫什么名字？</span><br><span class="line">第 4 轮 助手: 你叫小林。</span><br><span class="line">第 4 轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">第 4 轮 state 消息条数: 4</span><br></pre></td></tr></table></figure>
+
+<p>从第 3 轮开始条数一直卡在 4，因为中间那两条被丢掉了。第 4 轮还能答出名字，是因为我特意保留了第一条。如果不保留第一条，模型就会失忆。修剪策略的核心是决定留哪条，而不是砍掉多少条。</p>
+<p>修剪全程不需要模型参与，执行快，结果也可预测。代价是丢掉的对话永久消失，哪怕后面用户又提起那个话题，模型也无从查证。要不要保留第一条，取决于你的 system prompt 里有没有把关键信息固化下来。如果关键事实都在 system prompt 里，第一条 human 消息其实也可以丢。</p>
+<h3 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h3><p>摘要用模型把旧消息压成一段文字，再用内置的 <a target="_blank" rel="noopener" href="https://reference.langchain.com/python/langchain/agents/middleware/summarization/SummarizationMiddleware"><code>SummarizationMiddleware</code></a>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> SummarizationMiddleware</span><br><span class="line"><span class="keyword">from</span> langgraph.checkpoint.memory <span class="keyword">import</span> InMemorySaver</span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[],</span><br><span class="line">    middleware=[</span><br><span class="line">        SummarizationMiddleware(</span><br><span class="line">            model=model,</span><br><span class="line">            trigger=(<span class="string">&quot;messages&quot;</span>, <span class="number">6</span>),</span><br><span class="line">            keep=(<span class="string">&quot;messages&quot;</span>, <span class="number">2</span>),</span><br><span class="line">        )</span><br><span class="line">    ],</span><br><span class="line">    checkpointer=InMemorySaver(),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><code>trigger</code> 是触发条件，<code>keep</code> 是摘要之后保留多少最近的消息。两个参数都支持 <code>tokens</code>、<code>messages</code>、<code>fraction</code> 三种单位。<code>trigger</code> 传一个列表就是 OR 逻辑，任意一条满足即触发；传字典是 AND 逻辑，里面所有阈值都要满足。<code>fraction</code> 依赖模型的 profile 数据，拿不到就换成 <code>tokens</code> 或 <code>messages</code>，或者自己给模型配 profile。跑四轮的真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">第 3 轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">第 3 轮 state 消息条数: 6</span><br><span class="line"></span><br><span class="line">第 4 轮 用户: 我叫什么名字？我住哪？</span><br><span class="line">第 4 轮 助手: 你叫小林，住在杭州。</span><br><span class="line">第 4 轮 state 消息角色: [&#x27;human&#x27;, &#x27;ai&#x27;, &#x27;human&#x27;, &#x27;ai&#x27;]</span><br><span class="line">第 4 轮 state 消息条数: 4</span><br><span class="line">第 4 轮 首条消息(human): Here is a summary of the conversation to date:  ## SESSION INTENT  The user (小林, living in Hangzhou) is engaging in a casual ...</span><br></pre></td></tr></table></figure>
+
+<p>第 4 轮进模型前消息到了 7 条，超过阈值，中间那段被替换成一条摘要消息，所以最后 state 只剩 4 条。名字和城市都还在，因为摘要把它们写进去了。</p>
+<p>两种策略的取舍：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>修剪</th>
+<th>摘要</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>做法</td>
+<td>直接丢弃整条消息</td>
+<td>用模型把旧消息压成一段摘要</td>
+</tr>
+<tr>
+<td>代码</td>
+<td>自己写 <code>before_model</code> 中间件</td>
+<td>用 <code>SummarizationMiddleware</code></td>
+</tr>
+<tr>
+<td>额外成本</td>
+<td>没有</td>
+<td>每次触发多一次模型调用</td>
+</tr>
+<tr>
+<td>信息损失</td>
+<td>丢掉的内容永久消失</td>
+<td>语义保留，细节会被压缩</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>高，条数完全由你决定</td>
+<td>偏低，摘要内容取决于模型</td>
+</tr>
+<tr>
+<td>多模态</td>
+<td>原样丢弃</td>
+<td>旧图片和音频只剩文字摘要</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>会话短，旧消息可以不要</td>
+<td>长会话，早期信息后面还要用</td>
+</tr>
+</tbody></table>
+<p>我自己的默认选择是先修剪。它零成本、行为确定，调试起来省心。等发现”早期信息确实还有用”再换摘要。摘要也不是没有边界，官方特别说明它是纯文本压缩，不会压缩图片和音视频载荷，做图像密集的应用要把媒体放到文件系统或对象存储，历史里只传 URL 或文件引用。</p>
+<h2 id="生产环境的几个坑"><a href="#生产环境的几个坑" class="headerlink" title="生产环境的几个坑"></a>生产环境的几个坑</h2><p>内存 saver 只适合开发。<code>InMemorySaver</code> 的数据在进程内存里，重启就没了，多开一个 worker 也拿不到另一个 worker 的会话。上线就换 <code>PostgresSaver</code> 或 <code>MongoDBSaver</code>，别用内存 saver 硬扛。</p>
+<p>并发 thread 之间是隔离的，不同 <code>thread_id</code> 互不影响，这也是它能直接支撑多用户会话的原因。但同一个 <code>thread_id</code> 上的并发请求要小心，checkpointer 以 thread 为主键，同一 thread 上的多次写入会按顺序落到同一条状态链上，交叉的两轮对话可能互相覆盖。一个会话同一时刻只处理一个请求，或者自己加锁。</p>
+<p>状态膨胀值得单独盯。前面提过 checkpointer 在每个 super-step 存一份快照，两轮对话就会留下好几份。我数了一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 沿用前面带 checkpointer 的 agent，thread_id 换成 thread-cp</span></span><br><span class="line">config = &#123;<span class="string">&quot;configurable&quot;</span>: &#123;<span class="string">&quot;thread_id&quot;</span>: <span class="string">&quot;thread-cp&quot;</span>&#125;&#125;</span><br><span class="line"></span><br><span class="line">agent.invoke(&#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好，我叫小林。&quot;</span>&#125;]&#125;, config)</span><br><span class="line">agent.invoke(&#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;我在杭州。&quot;</span>&#125;]&#125;, config)</span><br><span class="line"></span><br><span class="line">snapshot = agent.get_state(config)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;当前消息条数:&quot;</span>, <span class="built_in">len</span>(snapshot.values[<span class="string">&quot;messages&quot;</span>]))</span><br><span class="line"></span><br><span class="line">history = <span class="built_in">list</span>(agent.get_state_history(config))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;checkpoint 总数:&quot;</span>, <span class="built_in">len</span>(history))</span><br><span class="line"><span class="keyword">for</span> snap <span class="keyword">in</span> <span class="built_in">reversed</span>(history):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;step=%s 消息条数=%d&quot;</span> % (snap.metadata.get(<span class="string">&quot;step&quot;</span>), <span class="built_in">len</span>(snap.values[<span class="string">&quot;messages&quot;</span>])))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">get_state 拿到的当前消息条数: 4</span><br><span class="line">下一步要执行的节点: ()</span><br><span class="line"></span><br><span class="line">thread-cp 一共保存了 6 份 checkpoint</span><br><span class="line"></span><br><span class="line">按时间从早到晚，每份 checkpoint 里的消息条数:</span><br><span class="line">  step=-1 消息条数=0</span><br><span class="line">  step=0 消息条数=1</span><br><span class="line">  step=1 消息条数=2</span><br><span class="line">  step=2 消息条数=2</span><br><span class="line">  step=3 消息条数=3</span><br><span class="line">  step=4 消息条数=4</span><br></pre></td></tr></table></figure>
+
+<p>两轮对话，6 份快照，最后 4 条消息被重复存了多次。消息越长、轮次越多，重复得越厉害。上修剪或摘要，给老 thread 设清理周期，自定义字段里别塞大对象。</p>
+<p>还有一点，换 saver 的时候 <code>messages</code> 里存的是完整的消息对象，包含工具调用和元数据。如果你打算跨版本升级 LangChain，先在测试环境验证旧 checkpoint 还能不能反序列化出来。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>短期记忆没有独立模块，它就是 thread 的 state：<code>messages</code> 加自定义字段，由 checkpointer 按 <code>thread_id</code> 存取。</li>
+<li>不挂 checkpointer 就没有记忆，挂了不传 <code>thread_id</code> 会直接抛 ValueError。</li>
+<li>换 <code>thread_id</code> 就是换会话，隔离是默认行为；<code>InMemorySaver</code> 只用于开发，生产换数据库 saver。</li>
+<li>中间件自己的字段就声明在中间件的 <code>state_schema</code> 上，业务层共用的字段放 <code>create_agent</code> 的 <code>state_schema</code>。</li>
+<li>上下文压力优先用修剪，零成本且可控；需要保留早期语义时再上摘要，记得它不压缩多模态内容。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://shanchuann.cn">张念川</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://shanchuann.cn/2025/11/22/LangChain%20%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86/">https://shanchuann.cn/2025/11/22/LangChain%20%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://shanchuann.cn" target="_blank">山川不念旧</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Core-components/">Core components</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/11/21/LangChain%20Tools/" title="LangChain Tools"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">LangChain Tools</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  模型只会生成文字。让它查天气、下单、读数据库的，是你挂在外面的一段 Python。LangChain 把这段 Python 和它的说明书一起打包成 Tool。说明书是一份 JSON Schema，模型看得到；函数体模型看不到。 这个分界决定了日常调试的方向。模型不调工具，问题多半出在描述写得含糊；模型调了但参数填错，问题在 Schema 的类型或约束；函数执行到一半炸了，模型那边只能看到你回给它的那段错误文字，它凭这段文字决定下一步。工具写得好不好，一半在函数里，一半在函数外。 这篇按顺序讲这些：工具的最小结构、@tool 能改的几件事、参数 Schema 的三种写法、校验失败后模型收到什么、ToolRuntime 从哪里取数据、工具怎么读写 agent state、异常怎么变成模型能读的消息、按上下文动态换工具集，最后用 bind_tools 直接看模型吐出来的 tool_calls。文中输出都是在 DeepSeek 上实跑的终端原文。 工具的最小结构官方对工具的定义是两样东西的组合：一份包含名称、描述、参数定义的 Schema，一个用来...</div></div></div></a><a class="pagination-related" href="/2025/11/22/%E8%BD%BB%E9%87%8F%E4%BA%91Meetup%E8%A5%BF%E5%AE%89%E7%AB%99/" title="轻量云Meetup 西安站"><img class="cover" src="https://s2.loli.net/2025/11/22/dZtPVB3whgIqTlb.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">轻量云Meetup 西安站</div></div><div class="info-2"><div class="info-item-1"> 轻云之上，无尽想象 2025年11月22日，恰逢农历十月初三小雪，我们参与了在西安新长安广场C座举办轻量云Meetup西安站，与一众云技术领域的产品、爱好者相聚，在秋日的氛围里，共同开启了一场技术交流与思想碰撞的活动。 破冰互动，以趣味形式拉近距离 活动伊始，现场设置了“你画我猜”的破冰环节，旨在通过轻松的互动快速消除陌生感，为后续的交流奠定良好氛围。 我所在的小组抽取的题目为“裸金属云服务器”，小组成员通过图形化的方式逐步呈现相关元素，从硬件形态延伸至云服务属性，虽最终未成功猜出答案，但过程中的思考与协作，让大家快速建立了默契； 其他小组的题目涵盖“混元大模型”“王者荣耀”“CNB”等内容，不同主题的呈现与互动，既结合了技术相关的专业方向，也融入了大众熟悉的内容，现场在有序的讨论与轻松的笑声中，让原本来自不同领域的参与者迅速熟络，为后续的深度交流做好了铺垫。 干货分享，聚焦云技术的实践与探索在主题分享环节，各位嘉宾与参与者依次带来了精彩的内容：  小杨现场演示了通过腾讯云HAI部署腾讯混元大模型的实操过程，详细讲解了相关技术逻辑与操作要点；  天下结合自身经历，分享了在腾讯云...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/11/19/LangChain%20Agent/" title="LangChain Agents"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-19</div><div class="info-item-2">LangChain Agents</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  代理将语言模型与工具结合，创建能够推理任务、决定使用哪些工具，并迭代地工作以寻求解决方案的系统。create_agent提供了一种生产就绪的代理实现。LLM 代理在循环中运行工具以实现目标。代理会一直运行，直到满足停止条件——即模型发出最终输出或达到迭代限制。  核心组件Model 模型模型是您代理的推理引擎。它可以通过多种方式指定，支持静态和动态模型选择。 Static model 静态模型静态模型在创建代理时配置一次，并在整个执行过程中保持不变。这是最常见和直接的方法。 从模型标识符字符串初始化静态模型： 123456789101112@tooldef get_weather_for_location(city: str) -&gt; str:    &quot;&quot;&quot;Get weather for a given city.&quot;&quot;&quot;    return f&quot;It&#x27;s always sunny in &#123;city&#125;!&quot;model = ChatO...</div></div></div></a><a class="pagination-related" href="/2025/11/20/LangChain%20Messages/" title="LangChain Messages"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-20</div><div class="info-item-2">LangChain Messages</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  模型 API 是无状态的。请求发出去，回复拿回来，服务端不留上下文。你平时看到的”多轮对话”，是客户端每次把完整历史重新贴一遍。LangChain 里被贴的那份历史，是一组消息对象。 工具调用走的是同一条路。模型说”调 get_weather，参数 Paris”，这是一条消息；工具函数执行完返回的 “Sunny, 22C”，是另一条消息；两条消息靠一个 ID 串起来。ID 对不上，整个请求被拒。 消息不只是提示词的包装类，它是模型和工具之间唯一的数据载体。这件事决定了很多日常问题长什么样。请求报 400，多半是消息顺序或配对不合法；模型答非所问，是历史里混进了该清掉的内容；上下文超限，问题变成该裁掉哪几条。你没法直接改 HTTP body，能改的只有这串对象。 这篇讲清四类消息的字段、工具调用的配对规则、content 和 content_blocks 的分工、元数据里能读到什么、怎么存怎么还原，以及长对话怎么裁。下面所有代码都用 DeepSeek 实跑过，输出是终端里的原文，脚本在仓库的 Messages&#x2F; 目录下。 12345...</div></div></div></a><a class="pagination-related" href="/2025/11/26/LangChain%20Middleware/" title="LangChain Middleware"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-26</div><div class="info-item-2">LangChain Middleware</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  中间件这个词已经被用滥了。Web 框架拿它做鉴权，Django 拿它记请求日志。放到 agent 上，意思没变：在不改核心循环的前提下，在固定位置插一段自己的代码。 create_agent 返回的是一张编译好的 LangGraph 图，循环逻辑写死在图里。你想加一句”每次调用模型前打印当前消息数”，有两个选择。自己用 StateGraph 重画一遍循环，或者把这段逻辑做成中间件塞进 middleware=[...]。前者的代价是官方每次调整循环你都得跟着改，后者只多一个参数。 这篇文章把 middleware 这个参数讲清楚。钩子挂在哪些位置，装饰器和类两种写法各适合什么场景，状态怎么在钩子之间传，内置中间件有哪些能直接拿来用，多个中间件叠在一起时谁先谁后。最后有两个完整例子：按对话长度动态换模型，以及工具抛异常之后怎么让 agent 活下来。 所有代码都在 DeepSeek 上跑过，输出是从终端直接复制的，脚本放在 Middleware&#x2F;。 中间件挂在循环的哪一步先看循环本身。模型读一遍消息，决定要不要调工具。要调就执行工具，...</div></div></div></a><a class="pagination-related" href="/2025/11/24/LangChain%20Streaming/" title="LangChain Streaming"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-24</div><div class="info-item-2">LangChain Streaming</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  agent.invoke() 慢是个问题，比慢更难受的是沉默。一个带工具的 agent，一次提问背后至少两次模型调用和一次工具执行。DeepSeek 上这两次调用各要一两秒，工具再花点时间，用户盯着空白界面等五秒，然后一段完整回答突然出现。中间那五秒里 agent 其实一直在干活，只是没人告诉外面。 流式要解决的就是这五秒。它把过程中的事件提前暴露出来：模型开始吐第一个 token 了，它决定调哪个工具、参数是什么，工具返回了什么，第二次模型调用又开始了。这些事件本身就是产品体验的一部分，聊天界面里的”正在调用 get_weather”就是这么来的。 这篇讲清楚 LangChain 里流式的两层 API，以及它们各自适合放在哪。底层是 agent.stream() 和它的 stream_mode，你拿到的是按 mode 切分的事件；上层是 agent.stream_events(version=&quot;v3&quot;)，同一个运行被投影成几条独立的、带类型的流。读完你应该能判断该用哪一层，以及为什么自己的流式代码会重复打印同一段文字。...</div></div></div></a><a class="pagination-related" href="/2025/11/25/LangChain%20Structured%20Output/" title="LangChain Structured Output"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-25</div><div class="info-item-2">LangChain Structured Output</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  让模型输出一段文字，再用正则从里面抠字段，这活干一次就够了。字段多一个、模型换个说法、多写一句解释，正则就得重写。结构化输出解决的就是这件事：给模型一份 schema，等它跑完，你从 state 里取一个 Python 对象，sr.email 直接可用。 LangChain Agents 那篇里提过 ToolStrategy 和 ProviderStrategy，只有几句对比。这一篇换个角度，只看三件事：策略怎么选、失败时长什么样、拿不到结果时从哪儿查。代码在 DeepSeek、Ollama 云端的 OpenAI 兼容端点和原生端点上真实跑过，最后补上 Google Gemini，原生结构化输出总算跑出了正向结果。环境是 langchain 1.4.3、langchain-openai 1.6.7、langchain-ollama 1.1.0、langchain-google-genai 4.4.0、pydantic 2.13.5，脚本在仓库的 StructuredOutput&#x2F; 目录下。 一、structured_respons...</div></div></div></a><a class="pagination-related" href="/2025/11/21/LangChain%20Tools/" title="LangChain Tools"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-21</div><div class="info-item-2">LangChain Tools</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  模型只会生成文字。让它查天气、下单、读数据库的，是你挂在外面的一段 Python。LangChain 把这段 Python 和它的说明书一起打包成 Tool。说明书是一份 JSON Schema，模型看得到；函数体模型看不到。 这个分界决定了日常调试的方向。模型不调工具，问题多半出在描述写得含糊；模型调了但参数填错，问题在 Schema 的类型或约束；函数执行到一半炸了，模型那边只能看到你回给它的那段错误文字，它凭这段文字决定下一步。工具写得好不好，一半在函数里，一半在函数外。 这篇按顺序讲这些：工具的最小结构、@tool 能改的几件事、参数 Schema 的三种写法、校验失败后模型收到什么、ToolRuntime 从哪里取数据、工具怎么读写 agent state、异常怎么变成模型能读的消息、按上下文动态换工具集，最后用 bind_tools 直接看模型吐出来的 tool_calls。文中输出都是在 DeepSeek 上实跑的终端原文。 工具的最小结构官方对工具的定义是两样东西的组合：一份包含名称、描述、参数定义的 Schema，一个用来...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">张念川</div><div class="author-info-description">玉袍长剑堪风流，山川不念旧</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">98</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/shanchuann"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">由于极为严重的失误，个人网站代码包括内容完全丢失，正在重建中。另外《C语言圣经》编写工作正在稳步进行。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86%E5%B0%B1%E6%98%AF-state"><span class="toc-number">1.</span> <span class="toc-text">短期记忆就是 state</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#thread-id-%E5%92%8C-checkpointer"><span class="toc-number">2.</span> <span class="toc-text">thread_id 和 checkpointer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-state-%E5%AD%97%E6%AE%B5"><span class="toc-number">3.</span> <span class="toc-text">自定义 state 字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6%E5%AE%9A%E4%B9%89%E7%8A%B6%E6%80%81"><span class="toc-number">3.1.</span> <span class="toc-text">用中间件定义状态</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%92%8C%E6%94%B9%E6%B6%88%E6%81%AF%E5%8E%86%E5%8F%B2"><span class="toc-number">4.</span> <span class="toc-text">读和改消息历史</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%E5%8E%8B%E5%8A%9B"><span class="toc-number">5.</span> <span class="toc-text">上下文窗口压力</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%89%AA"><span class="toc-number">5.1.</span> <span class="toc-text">修剪</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">5.2.</span> <span class="toc-text">摘要</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9D%91"><span class="toc-number">6.</span> <span class="toc-text">生产环境的几个坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">小结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/09/21/%E7%AE%97%E6%B3%953/" title="最长连续序列"><img src="https://files.seeusercontent.com/2026/03/19/Mwb8/769e7ca.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="最长连续序列"/></a><div class="content"><a class="title" href="/2026/09/21/%E7%AE%97%E6%B3%953/" title="最长连续序列">最长连续序列</a><time datetime="2026-09-21T14:47:43.000Z" title="发表于 2026-09-21 22:47:43">2026-09-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/21/%E7%AE%97%E6%B3%952/" title="字母异位词分组"><img src="https://files.seeusercontent.com/2026/03/19/Mwb8/769e7ca.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="字母异位词分组"/></a><div class="content"><a class="title" href="/2026/09/21/%E7%AE%97%E6%B3%952/" title="字母异位词分组">字母异位词分组</a><time datetime="2026-09-21T13:18:55.000Z" title="发表于 2026-09-21 21:18:55">2026-09-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/05/30/Vibe%20Coding%20%E4%BA%A7%E5%93%81%E7%A0%94%E7%A9%B6/" title="Vibe Coding 产品研究"><img src="/images/20260530-192716-%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202026-05-18%20205914.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Vibe Coding 产品研究"/></a><div class="content"><a class="title" href="/2026/05/30/Vibe%20Coding%20%E4%BA%A7%E5%93%81%E7%A0%94%E7%A9%B6/" title="Vibe Coding 产品研究">Vibe Coding 产品研究</a><time datetime="2026-05-30T11:26:05.000Z" title="发表于 2026-05-30 19:26:05">2026-05-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/04/02/%E6%A8%A1%E6%9D%BF%E5%85%83/" title="模板元编程"><img src="https://s2.loli.net/2025/09/25/Tp7aOx8ltrmcLwY.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="模板元编程"/></a><div class="content"><a class="title" href="/2026/04/02/%E6%A8%A1%E6%9D%BF%E5%85%83/" title="模板元编程">模板元编程</a><time datetime="2026-04-02T11:21:22.000Z" title="发表于 2026-04-02 19:21:22">2026-04-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/04/01/%E6%A8%A1%E6%9D%BF%E6%8A%98%E5%8F%A0%E4%B8%8ESFINAE/" title="模板折叠与SFINAE模板替换"><img src="https://s2.loli.net/2025/09/25/Tp7aOx8ltrmcLwY.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="模板折叠与SFINAE模板替换"/></a><div class="content"><a class="title" href="/2026/04/01/%E6%A8%A1%E6%9D%BF%E6%8A%98%E5%8F%A0%E4%B8%8ESFINAE/" title="模板折叠与SFINAE模板替换">模板折叠与SFINAE模板替换</a><time datetime="2026-04-01T10:54:12.000Z" title="发表于 2026-04-01 18:54:12">2026-04-01</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By 张念川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.0.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div><div class="footer_custom_text">满堂花醉三千客，一剑霜寒十四州</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="聊天" style="display:none"><i class="fas fa-message"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '1kGP51o4WjaiJX72Yfdy5T6k-gzGzoHsz',
+      appKey: 'OeiTKeZqnH8VrxSF1s69kyOf',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script src="/js/parallax.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="255,0178,102" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script>(() => {
+  window.$crisp = ['safe', true]
+  window.CRISP_WEBSITE_ID = "2f8661da-b522-4dfb-a0f3-ce177151f169"
+
+  btf.getScript('https://client.crisp.chat/l.js').then(() => {
+    const isChatBtn = true
+    const isChatHideShow = false
+
+    if (isChatBtn) {
+      const open = () => {
+        $crisp.push(["do", "chat:show"])
+        $crisp.push(["do", "chat:open"])
+      }
+
+      const close = () => $crisp.push(["do", "chat:hide"])
+
+      close()
+
+      $crisp.push(["on", "chat:closed", close])
+
+      window.chatBtnFn = () => $crisp.is("chat:visible") ? close() : open()
+
+      document.getElementById('chat-btn').style.display = 'block'
+    } else if (isChatHideShow) {
+      window.chatBtn = {
+        hide: () => $crisp.push(["do", "chat:hide"]),
+        show: () => $crisp.push(["do", "chat:show"])
+      }
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div id="algolia-search-input"><div class="ais-SearchBox"><form class="ais-SearchBox-form" action="" role="search" novalidate=""><input class="ais-SearchBox-input" type="search" placeholder="搜索文章" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="512" aria-label="Search"/><button class="ais-SearchBox-submit" type="submit" title="Submit the search query" style="display:none;"><svg class="ais-SearchBox-submitIcon" width="10" height="10" viewBox="0 0 40 40" aria-hidden="true"><path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"></path></svg></button></form></div><hr/><div id="algolia-search-results"><div id="algolia-hits"><div id="algolia-hits-empty" style="display:none;"></div><div class="ais-Hits" style="display:none;"><ol class="ais-Hits-list"></ol></div></div><div class="ais-Pagination" id="algolia-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="algolia-info"><span class="ais-Stats-text"></span><a class="algolia-poweredBy" href="https://www.algolia.com/?utm_source=algoliasearch.js&amp;utm_medium=website&amp;utm_content=localhost&amp;utm_campaign=poweredby" target="_blank" aria-label="Search by Algolia" rel="noopener noreferrer"><svg class="ais-PoweredBy-logo" height="1.2em" viewBox="0 0 572 64" style="width: auto;"><path fill="#36395A" d="M16 48.3c-3.4 0-6.3-.6-8.7-1.7A12.4 12.4 0 0 1 1.9 42C.6 40 0 38 0 35.4h6.5a6.7 6.7 0 0 0 3.9 6c1.4.7 3.3 1.1 5.6 1.1 2.2 0 4-.3 5.4-1a7 7 0 0 0 3-2.4 6 6 0 0 0 1-3.4c0-1.5-.6-2.8-1.9-3.7-1.3-1-3.3-1.6-5.9-1.8l-4-.4c-3.7-.3-6.6-1.4-8.8-3.4a10 10 0 0 1-3.3-7.9c0-2.4.6-4.6 1.8-6.4a12 12 0 0 1 5-4.3c2.2-1 4.7-1.6 7.5-1.6s5.5.5 7.6 1.6a12 12 0 0 1 5 4.4c1.2 1.8 1.8 4 1.8 6.7h-6.5a6.4 6.4 0 0 0-3.5-5.9c-1-.6-2.6-1-4.4-1s-3.2.3-4.4 1c-1.1.6-2 1.4-2.6 2.4-.5 1-.8 2-.8 3.1a5 5 0 0 0 1.5 3.6c1 1 2.6 1.7 4.7 1.9l4 .3c2.8.2 5.2.8 7.2 1.8 2.1 1 3.7 2.2 4.9 3.8a9.7 9.7 0 0 1 1.7 5.8c0 2.5-.7 4.7-2 6.6a13 13 0 0 1-5.6 4.4c-2.4 1-5.2 1.6-8.4 1.6Zm35.6 0c-2.6 0-4.8-.4-6.7-1.3a13 13 0 0 1-4.7-3.5 17.1 17.1 0 0 1-3.6-10.4v-1c0-2 .3-3.8 1-5.6a13 13 0 0 1 7.3-8.3 15 15 0 0 1 6.3-1.4A13.2 13.2 0 0 1 64 24.3c1 2.2 1.6 4.6 1.6 7.2V34H39.4v-4.3h21.8l-1.8 2.2c0-2-.3-3.7-.9-5.1a7.3 7.3 0 0 0-2.7-3.4c-1.2-.7-2.7-1.1-4.6-1.1s-3.4.4-4.7 1.3a8 8 0 0 0-2.9 3.6c-.6 1.5-.9 3.3-.9 5.4 0 2 .3 3.7 1 5.3a7.9 7.9 0 0 0 2.8 3.7c1.3.8 3 1.3 5 1.3s3.8-.5 5.1-1.3c1.3-1 2.1-2 2.4-3.2h6a11.8 11.8 0 0 1-7 8.7 16 16 0 0 1-6.4 1.2ZM80 48c-2.2 0-4-.3-5.7-1a8.4 8.4 0 0 1-3.7-3.3 9.7 9.7 0 0 1-1.3-5.2c0-2 .5-3.8 1.5-5.2a9 9 0 0 1 4.3-3.1c1.8-.7 4-1 6.7-1H89v4.1h-7.5c-2 0-3.4.5-4.4 1.4-1 1-1.6 2.1-1.6 3.6s.5 2.7 1.6 3.6c1 1 2.5 1.4 4.4 1.4 1.1 0 2.2-.2 3.2-.7 1-.4 1.9-1 2.6-2 .6-1 1-2.4 1-4.2l1.7 2.1c-.2 2-.7 3.8-1.5 5.2a9 9 0 0 1-3.4 3.3 12 12 0 0 1-5.3 1Zm9.5-.7v-8.8h-1v-10c0-1.8-.5-3.2-1.4-4.1-1-1-2.4-1.4-4.2-1.4a142.9 142.9 0 0 0-10.2.4v-5.6a74.8 74.8 0 0 1 8.6-.4c3 0 5.5.4 7.5 1.2s3.4 2 4.4 3.6c1 1.7 1.4 4 1.4 6.7v18.4h-5Zm12.9 0V17.8h5v12.3h-.2c0-4.2 1-7.4 2.8-9.5a11 11 0 0 1 8.3-3.1h1v5.6h-2a9 9 0 0 0-6.3 2.2c-1.5 1.5-2.2 3.6-2.2 6.4v15.6h-6.4Zm34.4 1a15 15 0 0 1-6.6-1.3c-1.9-.9-3.4-2-4.7-3.5a15.5 15.5 0 0 1-2.7-5c-.6-1.7-1-3.6-1-5.4v-1c0-2 .4-3.8 1-5.6a15 15 0 0 1 2.8-4.9c1.3-1.5 2.8-2.6 4.6-3.5a16.4 16.4 0 0 1 13.3.2c2 1 3.5 2.3 4.8 4a12 12 0 0 1 2 6H144c-.2-1.6-1-3-2.2-4.1a7.5 7.5 0 0 0-5.2-1.7 8 8 0 0 0-4.7 1.3 8 8 0 0 0-2.8 3.6 13.8 13.8 0 0 0 0 10.3c.6 1.5 1.5 2.7 2.8 3.6s2.8 1.3 4.8 1.3c1.5 0 2.7-.2 3.8-.8a7 7 0 0 0 2.6-2c.7-1 1-2 1.2-3.2h6.2a11 11 0 0 1-2 6.2 15.1 15.1 0 0 1-11.8 5.5Zm19.7-1v-40h6.4V31h-1.3c0-3 .4-5.5 1.1-7.6a9.7 9.7 0 0 1 3.5-4.8A9.9 9.9 0 0 1 172 17h.3c3.5 0 6 1.1 7.9 3.5 1.7 2.3 2.6 5.7 2.6 10v16.8h-6.4V29.6c0-2.1-.6-3.8-1.8-5a6.4 6.4 0 0 0-4.8-1.8c-2 0-3.7.7-5 2a7.8 7.8 0 0 0-1.9 5.5v17h-6.4Zm63.8 1a12.2 12.2 0 0 1-10.9-6.2 19 19 0 0 1-1.8-7.3h1.4v12.5h-5.1v-40h6.4v19.8l-2 3.5c.2-3.1.8-5.7 1.9-7.7a11 11 0 0 1 4.4-4.5c1.8-1 3.9-1.5 6.1-1.5a13.4 13.4 0 0 1 12.8 9.1c.7 1.9 1 3.8 1 6v1c0 2.2-.3 4.1-1 6a13.6 13.6 0 0 1-13.2 9.4Zm-1.2-5.5a8.4 8.4 0 0 0 7.9-5c.7-1.5 1.1-3.3 1.1-5.3s-.4-3.8-1.1-5.3a8.7 8.7 0 0 0-3.2-3.6 9.6 9.6 0 0 0-9.2-.2 8.5 8.5 0 0 0-3.3 3.2c-.8 1.4-1.3 3-1.3 5v2.3a9 9 0 0 0 1.3 4.8 9 9 0 0 0 3.4 3c1.4.7 2.8 1 4.4 1Zm27.3 3.9-10-28.9h6.5l9.5 28.9h-6Zm-7.5 12.2v-5.7h4.9c1 0 2-.1 2.9-.4a4 4 0 0 0 2-1.4c.4-.7.9-1.6 1.2-2.7l8.6-30.9h6.2l-9.3 32.4a14 14 0 0 1-2.5 5 8.9 8.9 0 0 1-4 2.8c-1.5.6-3.4.9-5.6.9h-4.4Zm9-12.2v-5.2h6.4v5.2H248Z"></path><path fill="#003DFF" d="M534.4 9.1H528a.8.8 0 0 1-.7-.7V1.8c0-.4.2-.7.6-.8l6.5-1c.4 0 .8.2.9.6v7.8c0 .4-.4.7-.8.7zM428 35.2V.8c0-.5-.3-.8-.7-.8h-.2l-6.4 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.5 0 .8-.4.8-.8V43c0-.4-.3-.7-.6-.8-4.5-.5-4.5-6-4.5-7zm106.5-21.8H528c-.4 0-.7.4-.7.8v34c0 .4.3.8.7.8h6.5c.4 0 .8-.4.8-.8v-34c0-.5-.4-.8-.8-.8zm-17.7 21.8V.8c0-.5-.3-.8-.8-.8l-6.5 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.4 0 .8-.4.8-.8V43c0-.4-.3-.7-.7-.8-4.4-.5-4.4-6-4.4-7zm-22.2-20.6a16.5 16.5 0 0 1 8.6 9.3c.8 2.2 1.3 4.8 1.3 7.5a19.4 19.4 0 0 1-4.6 12.6 14.8 14.8 0 0 1-5.2 3.6c-2 .9-5.2 1.4-6.8 1.4a21 21 0 0 1-6.7-1.4 15.4 15.4 0 0 1-8.6-9.3 21.3 21.3 0 0 1 0-14.4 15.2 15.2 0 0 1 8.6-9.3c2-.8 4.3-1.2 6.7-1.2s4.6.4 6.7 1.2zm-6.7 27.6c2.7 0 4.7-1 6.2-3s2.2-4.3 2.2-7.8-.7-6.3-2.2-8.3-3.5-3-6.2-3-4.7 1-6.1 3c-1.5 2-2.2 4.8-2.2 8.3s.7 5.8 2.2 7.8 3.5 3 6.2 3zm-88.8-28.8c-6.2 0-11.7 3.3-14.8 8.2a18.6 18.6 0 0 0 4.8 25.2c1.8 1.2 4 1.8 6.2 1.7s.1 0 .1 0h.9c4.2-.7 8-4 9.1-8.1v7.4c0 .4.3.7.8.7h6.4a.7.7 0 0 0 .7-.7V14.2c0-.5-.3-.8-.7-.8h-13.5zm6.3 26.5a9.8 9.8 0 0 1-5.7 2h-.5a10 10 0 0 1-9.2-14c1.4-3.7 5-6.3 9-6.3h6.4v18.3zm152.3-26.5h13.5c.5 0 .8.3.8.7v33.7c0 .4-.3.7-.8.7h-6.4a.7.7 0 0 1-.8-.7v-7.4c-1.2 4-4.8 7.4-9 8h-.1a4.2 4.2 0 0 1-.5.1h-.9a10.3 10.3 0 0 1-7-2.6c-4-3.3-6.5-8.4-6.5-14.2 0-3.7 1-7.2 3-10 3-5 8.5-8.3 14.7-8.3zm.6 28.4c2.2-.1 4.2-.6 5.7-2V21.7h-6.3a9.8 9.8 0 0 0-9 6.4 10.2 10.2 0 0 0 9.1 13.9h.5zM452.8 13.4c-6.2 0-11.7 3.3-14.8 8.2a18.5 18.5 0 0 0 3.6 24.3 10.4 10.4 0 0 0 13 .6c2.2-1.5 3.8-3.7 4.5-6.1v7.8c0 2.8-.8 5-2.2 6.3-1.5 1.5-4 2.2-7.5 2.2l-6-.3c-.3 0-.7.2-.8.5l-1.6 5.5c-.1.4.1.8.5 1h.1c2.8.4 5.5.6 7 .6 6.3 0 11-1.4 14-4.1 2.7-2.5 4.2-6.3 4.5-11.4V14.2c0-.5-.4-.8-.8-.8h-13.5zm6.3 8.2v18.3a9.6 9.6 0 0 1-5.6 2h-1a10.3 10.3 0 0 1-8.8-14c1.4-3.7 5-6.3 9-6.3h6.4zM291 31.5A32 32 0 0 1 322.8 0h30.8c.6 0 1.2.5 1.2 1.2v61.5c0 1.1-1.3 1.7-2.2 1l-19.2-17a18 18 0 0 1-11 3.4 18.1 18.1 0 1 1 18.2-14.8c-.1.4-.5.7-.9.6-.1 0-.3 0-.4-.2l-3.8-3.4c-.4-.3-.6-.8-.7-1.4a12 12 0 1 0-2.4 8.3c.4-.4 1-.5 1.6-.2l14.7 13.1v-46H323a26 26 0 1 0 10 49.7c.8-.4 1.6-.2 2.3.3l3 2.7c.3.2.3.7 0 1l-.2.2a32 32 0 0 1-47.2-28.6z"></path></svg></a></div></div></div></div><div id="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/algoliasearch/dist/lite/builds/browser.umd.min.js"></script><script src="/js/search/algolia.js"></script></div></div></body></html>
