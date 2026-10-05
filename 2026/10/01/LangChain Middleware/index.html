@@ -1,0 +1,648 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>LangChain Middleware | 山川不念旧</title><meta name="author" content="张念川"><meta name="copyright" content="张念川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0b131b"><meta name="description" content="代码仓库ChainReaction  中间件这个词已经被用滥了。Web 框架拿它做鉴权，Django 拿它记请求日志。放到 agent 上，意思没变：在不改核心循环的前提下，在固定位置插一段自己的代码。 create_agent 返回的是一张编译好的 LangGraph 图，循环逻辑写死在图里。你想加一句”每次调用模型前打印当前消息数”，有两个选择。自己用 StateGraph 重画一遍循环，或">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LangChain Middleware">
+<meta property="og:url" content="https://shanchuann.cn/2026/10/01/LangChain%20Middleware/index.html">
+<meta property="og:site_name" content="山川不念旧">
+<meta property="og:description" content="代码仓库ChainReaction  中间件这个词已经被用滥了。Web 框架拿它做鉴权，Django 拿它记请求日志。放到 agent 上，意思没变：在不改核心循环的前提下，在固定位置插一段自己的代码。 create_agent 返回的是一张编译好的 LangGraph 图，循环逻辑写死在图里。你想加一句”每次调用模型前打印当前消息数”，有两个选择。自己用 StateGraph 重画一遍循环，或">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png">
+<meta property="article:published_time" content="2026-10-01T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-05T05:38:04.594Z">
+<meta property="article:author" content="张念川">
+<meta property="article:tag" content="Core components">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LangChain Middleware",
+  "url": "https://shanchuann.cn/2026/10/01/LangChain%20Middleware/",
+  "image": "https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png",
+  "datePublished": "2026-10-01T12:00:00.000Z",
+  "dateModified": "2026-10-05T05:38:04.594Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "张念川",
+      "url": "https://shanchuann.cn"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2025/09/25/NAM3XhUgxbjpVrJ.png"><link rel="canonical" href="https://shanchuann.cn/2026/10/01/LangChain%20Middleware/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0b131b')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#eef2f6')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: {"appId":"L7P2ELNLTD","apiKey":"d6168abb683b7c70b4ef9bbee1fa469a","indexName":"Shanchuan","hitsPerPage":6,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，耗时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#9a4d1a","bgDark":"#16242f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LangChain Middleware',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start --><link rel="preload" as="image" href="/images/sensoji-dusk.jpg"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.0.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background-image: url(/images/sensoji-dusk.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">98</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" href="/html/Trip/index.html"><i class="fa-fw fas fa-code"></i><span> 携程前端</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">山川不念旧</span></a><a class="nav-page-title" href="/"><span class="site-name">LangChain Middleware</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" href="/html/Trip/index.html"><i class="fa-fw fas fa-code"></i><span> 携程前端</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">LangChain Middleware</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-01T12:00:00.000Z" title="发表于 2026-10-01 20:00:00">2026-10-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-05T05:38:04.594Z" title="更新于 2026-10-05 13:38:04">2026-10-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LangChain/">LangChain</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>代码仓库<a target="_blank" rel="noopener" href="https://github.com/shanchuann/ChainReaction">ChainReaction</a></p>
+</blockquote>
+<p>中间件这个词已经被用滥了。Web 框架拿它做鉴权，Django 拿它记请求日志。放到 agent 上，意思没变：在不改核心循环的前提下，在固定位置插一段自己的代码。</p>
+<p><code>create_agent</code> 返回的是一张编译好的 LangGraph 图，循环逻辑写死在图里。你想加一句”每次调用模型前打印当前消息数”，有两个选择。自己用 StateGraph 重画一遍循环，或者把这段逻辑做成中间件塞进 <code>middleware=[...]</code>。前者的代价是官方每次调整循环你都得跟着改，后者只多一个参数。</p>
+<p>这篇文章把 <code>middleware</code> 这个参数讲清楚。钩子挂在哪些位置，装饰器和类两种写法各适合什么场景，状态怎么在钩子之间传，内置中间件有哪些能直接拿来用，多个中间件叠在一起时谁先谁后。最后有两个完整例子：按对话长度动态换模型，以及工具抛异常之后怎么让 agent 活下来。</p>
+<p>所有代码都在 DeepSeek 上跑过，输出是从终端直接复制的，脚本放在 <a target="_blank" rel="noopener" href="https://github.com/shanchuann/ChainReaction/tree/main/Middleware">Middleware&#x2F;</a>。</p>
+<h2 id="中间件挂在循环的哪一步"><a href="#中间件挂在循环的哪一步" class="headerlink" title="中间件挂在循环的哪一步"></a>中间件挂在循环的哪一步</h2><p>先看循环本身。模型读一遍消息，决定要不要调工具。要调就执行工具，把结果作为 ToolMessage 塞回消息列表，再问一次模型。直到某次回复里没有 tool_calls，循环结束。</p>
+<p>中间件做的事，是在这个循环的每个转折点放一个钩子。</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+    flowchart TD
+    A([agent.invoke]) --&gt; B[before_agent 每次调用执行一次]
+    B --&gt; C[before_model 每个模型调用前]
+    C --&gt; D[wrap_model_call 进入]
+    D --&gt; E[模型生成回复]
+    E --&gt; F[wrap_model_call 返回]
+    F --&gt; G[after_model 每个模型回复后]
+    G --&gt; H{回复里有 tool_calls 吗}
+    H -- 有 --&gt; I[wrap_tool_call 进入]
+    I --&gt; J[执行工具]
+    J --&gt; K[wrap_tool_call 返回]
+    K --&gt; C
+    H -- 没有 --&gt; L[after_agent 每次调用执行一次]
+    L --&gt; M([返回最终状态])
+  </pre></div>
+
+<p>六个钩子里，四个是节点式的，位置固定，按顺序执行。两个是包裹式的，包住一次模型调用或一次工具调用。</p>
+<p>有件事容易忽略：中间件不是独立的运行时。钩子就跑在 <code>create_agent</code> 编译出来的那张图里。你可以把整个 agent 当成节点或子图塞进更大的 StateGraph，HITL 中断、摘要、PII 脱敏、重试这些行为会跟着 agent 一起走，不用重新配。</p>
+<p>最小用法就是往 <code>middleware</code> 里塞实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> SummarizationMiddleware</span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[search],</span><br><span class="line">    middleware=[</span><br><span class="line">        SummarizationMiddleware(model=model, trigger=(<span class="string">&quot;tokens&quot;</span>, <span class="number">4000</span>), keep=(<span class="string">&quot;messages&quot;</span>, <span class="number">20</span>)),</span><br><span class="line">    ],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>中间件能插手的地方，官方文档列了四类：追踪 agent 行为（日志、埋点、调试），改写提示词和工具选择，加重试、降级和提前终止，加限流、护栏和 PII 检测。前两类是看和改，后两类是控。</p>
+<h2 id="六个钩子，两种脾气"><a href="#六个钩子，两种脾气" class="headerlink" title="六个钩子，两种脾气"></a>六个钩子，两种脾气</h2><table>
+<thead>
+<tr>
+<th>钩子</th>
+<th>类型</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>before_agent</code></td>
+<td>节点式</td>
+<td>agent 开始前，一次调用执行一次</td>
+</tr>
+<tr>
+<td><code>before_model</code></td>
+<td>节点式</td>
+<td>每次模型调用前</td>
+</tr>
+<tr>
+<td><code>after_model</code></td>
+<td>节点式</td>
+<td>每次模型回复后</td>
+</tr>
+<tr>
+<td><code>after_agent</code></td>
+<td>节点式</td>
+<td>agent 结束后，一次调用执行一次</td>
+</tr>
+<tr>
+<td><code>wrap_model_call</code></td>
+<td>包裹式</td>
+<td>包住每次模型调用</td>
+</tr>
+<tr>
+<td><code>wrap_tool_call</code></td>
+<td>包裹式</td>
+<td>包住每次工具调用</td>
+</tr>
+</tbody></table>
+<p>节点式钩子的签名是 <code>(state, runtime)</code>，返回一个 dict 或 None。包裹式钩子的签名是 <code>(request, handler)</code>，拿到请求，自己决定 handler 什么时候调、调几次。</p>
+<p>差别就落在”调几次”上。节点式钩子拦不住模型调用，想提前退出只能返回 <code>jump_to</code>，这一点后面单独说。<code>wrap_model_call</code> 可以一次都不调 handler，直接返回一个自己造的 ModelResponse；也可以循环调三次，这就是重试中间件的实现方式。</p>
+<p>钩子签名里的 <code>runtime</code> 是本次调用的运行时对象，<code>runtime.context</code> 里放着通过 <code>context_schema</code> 声明的每轮数据，比如 user_id、feature flag。包裹式钩子从 <code>request.runtime</code> 拿到的是同一个对象。要做”按用户等级决定能不能调这个工具”这类逻辑，读它就够了。</p>
+<p>状态更新的路径也不一样：</p>
+<ul>
+<li>节点式钩子返回 dict，dict 按图的 reducer 合并进 state</li>
+<li><code>wrap_model_call</code> 要注入状态，得返回 <code>ExtendedModelResponse(model_response=..., command=Command(update=&#123;...&#125;))</code></li>
+<li><code>wrap_tool_call</code> 直接返回 <code>Command</code></li>
+</ul>
+<p>多个中间件都返回 <code>ExtendedModelResponse</code> 时，command 会依次应用。非 reducer 字段是内层先写、外层后写，键冲突时外层赢。外层如果做了重试、handler 被调了多次，前面几次的 command 会被丢掉，不会污染最终状态。</p>
+<h2 id="装饰器还是类"><a href="#装饰器还是类" class="headerlink" title="装饰器还是类"></a>装饰器还是类</h2><p>两种写法，先各来一份。</p>
+<p>装饰器式，一个函数就是一个钩子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Any</span></span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> AgentState, before_model, after_model</span><br><span class="line"><span class="keyword">from</span> langgraph.runtime <span class="keyword">import</span> Runtime</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@before_model</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">log_before_model</span>(<span class="params">state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;即将调用模型，当前消息数 <span class="subst">&#123;<span class="built_in">len</span>(state[<span class="string">&#x27;messages&#x27;</span>])&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@after_model</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">log_after_model</span>(<span class="params">state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;模型返回：<span class="subst">&#123;state[<span class="string">&#x27;messages&#x27;</span>][-<span class="number">1</span>].content&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>类式，一个类可以挂多个钩子，还能带构造参数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Any</span></span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> (</span><br><span class="line">    AgentMiddleware, AgentState, ModelRequest, ModelResponse,</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> langgraph.runtime <span class="keyword">import</span> Runtime</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LoggingMiddleware</span>(<span class="title class_ inherited__">AgentMiddleware</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">before_model</span>(<span class="params">self, state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;即将调用模型，当前消息数 <span class="subst">&#123;<span class="built_in">len</span>(state[<span class="string">&#x27;messages&#x27;</span>])&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">after_model</span>(<span class="params">self, state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;模型返回：<span class="subst">&#123;state[<span class="string">&#x27;messages&#x27;</span>][-<span class="number">1</span>].content&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">abefore_model</span>(<span class="params">self, state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>装饰器式</th>
+<th>类式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>适合</td>
+<td>单个钩子、逻辑十行以内、原型阶段</td>
+<td>多个钩子、需要构造参数、同步异步都要</td>
+</tr>
+<tr>
+<td>写法</td>
+<td><code>@before_model</code> 修饰函数</td>
+<td>继承 <code>AgentMiddleware</code>，覆盖方法</td>
+</tr>
+<tr>
+<td>声明状态</td>
+<td><code>@before_model(state_schema=MyState)</code></td>
+<td><code>class MyMW(AgentMiddleware[MyState]): state_schema = MyState</code></td>
+</tr>
+<tr>
+<td>声明可跳转</td>
+<td><code>@before_model(can_jump_to=[&quot;end&quot;])</code></td>
+<td>方法上加 <code>@hook_config(can_jump_to=[&quot;end&quot;])</code></td>
+</tr>
+<tr>
+<td>附带工具</td>
+<td>装饰器传 <code>tools=[...]</code></td>
+<td>类属性 <code>tools = [...]</code></td>
+</tr>
+</tbody></table>
+<p><code>AgentMiddleware</code> 子类还能声明三个类属性，工厂在编译期会读：<code>state_schema</code> 扩展状态字段，<code>tools</code> 注册随中间件一起提供的工具，<code>transformers</code> 注册流式转换器。<code>TodoListMiddleware</code> 给 agent 加的 <code>write_todos</code> 工具就是通过 <code>tools</code> 注册的。</p>
+<p>选哪个没有硬规则。我的习惯是：一个钩子、逻辑短，用装饰器；出现第二个钩子，或者需要构造函数传阈值、传模型，就换类。需要在 <code>invoke</code> 和 <code>ainvoke</code> 两条路径上都跑，也只能用类，因为装饰器生成的中间件没有独立的异步实现。</p>
+<h2 id="自定义状态"><a href="#自定义状态" class="headerlink" title="自定义状态"></a>自定义状态</h2><p>钩子之间要传数据，靠扩展 agent 的 state。用 <code>state_schema</code> 声明新字段，字段用 <code>NotRequired</code> 包一层，钩子返回 dict 时键名对得上就自动合并。</p>
+<p>下面这个脚本给状态加了一个 <code>model_call_count</code>，四个钩子各打印一行，看看计数在什么时候变。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys, os</span><br><span class="line">sys.stdout.reconfigure(encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Any</span></span><br><span class="line"><span class="keyword">from</span> typing_extensions <span class="keyword">import</span> NotRequired</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> (</span><br><span class="line">    AgentState, before_agent, before_model, after_model, after_agent,</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> langchain.messages <span class="keyword">import</span> HumanMessage</span><br><span class="line"><span class="keyword">from</span> langchain.tools <span class="keyword">import</span> tool</span><br><span class="line"><span class="keyword">from</span> langgraph.runtime <span class="keyword">import</span> Runtime</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CustomState</span>(<span class="title class_ inherited__">AgentState</span>):</span><br><span class="line">    model_call_count: NotRequired[<span class="built_in">int</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events: <span class="built_in">list</span>[<span class="built_in">str</span>] = []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@before_agent(<span class="params">state_schema=CustomState</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">on_start</span>(<span class="params">state: CustomState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    events.append(<span class="string">&quot;before_agent   -&gt; 初始化 model_call_count=0&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;model_call_count&quot;</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@before_model(<span class="params">state_schema=CustomState</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">before</span>(<span class="params">state: CustomState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    n = state.get(<span class="string">&quot;model_call_count&quot;</span>, <span class="number">0</span>)</span><br><span class="line">    events.append(<span class="string">f&quot;before_model   -&gt; 第 <span class="subst">&#123;n + <span class="number">1</span>&#125;</span> 次模型调用前，当前消息数 <span class="subst">&#123;<span class="built_in">len</span>(state[<span class="string">&#x27;messages&#x27;</span>])&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@after_model(<span class="params">state_schema=CustomState</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">after</span>(<span class="params">state: CustomState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    n = state.get(<span class="string">&quot;model_call_count&quot;</span>, <span class="number">0</span>)</span><br><span class="line">    last = state[<span class="string">&quot;messages&quot;</span>][-<span class="number">1</span>]</span><br><span class="line">    events.append(<span class="string">f&quot;after_model    -&gt; 计数 <span class="subst">&#123;n&#125;</span> -&gt; <span class="subst">&#123;n + <span class="number">1</span>&#125;</span>，最后一条是 <span class="subst">&#123;<span class="built_in">type</span>(last).__name__&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;model_call_count&quot;</span>: n + <span class="number">1</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@after_agent(<span class="params">state_schema=CustomState</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">on_end</span>(<span class="params">state: CustomState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    events.append(<span class="string">f&quot;after_agent    -&gt; 本轮共调用模型 <span class="subst">&#123;state.get(<span class="string">&#x27;model_call_count&#x27;</span>, <span class="number">0</span>)&#125;</span> 次&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两个整数之和。&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = ChatOpenAI(</span><br><span class="line">    api_key=os.getenv(<span class="string">&quot;DEEPSEEK_API_KEY&quot;</span>),</span><br><span class="line">    base_url=<span class="string">&quot;https://api.deepseek.com/v1&quot;</span>,</span><br><span class="line">    model=<span class="string">&quot;deepseek-chat&quot;</span>,</span><br><span class="line">    temperature=<span class="number">0.1</span>,</span><br><span class="line">    max_tokens=<span class="number">1000</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">agent = create_agent(model=model, tools=[add], middleware=[on_start, before, after, on_end])</span><br><span class="line"></span><br><span class="line">result = agent.invoke(</span><br><span class="line">    &#123;<span class="string">&quot;messages&quot;</span>: [HumanMessage(<span class="string">&quot;请调用 add 工具计算 17 + 25，然后告诉我结果。&quot;</span>)],</span><br><span class="line">     <span class="string">&quot;model_call_count&quot;</span>: <span class="number">0</span>&#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">=== 钩子执行轨迹 ===</span><br><span class="line">before_agent   -&gt; 初始化 model_call_count=0</span><br><span class="line">before_model   -&gt; 第 1 次模型调用前，当前消息数 1</span><br><span class="line">after_model    -&gt; 计数 0 -&gt; 1，最后一条是 AIMessage</span><br><span class="line">before_model   -&gt; 第 2 次模型调用前，当前消息数 3</span><br><span class="line">after_model    -&gt; 计数 1 -&gt; 2，最后一条是 AIMessage</span><br><span class="line">after_agent    -&gt; 本轮共调用模型 2 次</span><br><span class="line"></span><br><span class="line">=== 最终状态 ===</span><br><span class="line">model_call_count = 2</span><br><span class="line">messages 条数 = 4</span><br><span class="line">  [HumanMessage] 请调用 add 工具计算 17 + 25，然后告诉我结果。</span><br><span class="line">  [AIMessage] I&#x27;ll calculate that for you.</span><br><span class="line">  [ToolMessage] 42</span><br><span class="line">  [AIMessage] 17 + 25 = **42**</span><br></pre></td></tr></table></figure>
+
+<p>几个细节。<code>after_model</code> 返回 <code>&#123;&quot;model_call_count&quot;: n + 1&#125;</code>，下一次 <code>before_model</code> 读到的就是新值，中间不用自己维护外部变量。第一次模型调用前消息数是 1，第二次变成 3，多出来的两条是模型回复和工具结果。计数器停在 2，说明这轮对话模型被调了两次：第一次决定调工具，第二次读着工具结果给出答案。最后 <code>after_agent</code> 拿到的还是完整状态。</p>
+<p>状态字段的初始化是可选的。这里传了 <code>model_call_count: 0</code>，不传也行，因为钩子里用的是 <code>state.get(..., 0)</code>。</p>
+<h2 id="内置中间件清单"><a href="#内置中间件清单" class="headerlink" title="内置中间件清单"></a>内置中间件清单</h2><p>官方预置了一批，都是 provider 无关的，DeepSeek 也能用。下面这张表按用途分类。</p>
+<table>
+<thead>
+<tr>
+<th>名字</th>
+<th>解决什么问题</th>
+<th>关键参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SummarizationMiddleware</code></td>
+<td>对话快撑爆上下文时把旧消息压成摘要</td>
+<td><code>model</code>、<code>trigger</code>、<code>keep</code>、<code>token_counter</code>、<code>summary_prompt</code>、<code>trim_tokens_to_summarize</code></td>
+</tr>
+<tr>
+<td><code>HumanInTheLoopMiddleware</code></td>
+<td>工具执行前暂停，等人审批、修改或拒绝</td>
+<td><code>interrupt_on=&#123;工具名: True&#125;</code> 或 <code>&#123;工具名: &#123;&quot;allowed_decisions&quot;: [...]&#125;&#125;</code>，需要 checkpointer</td>
+</tr>
+<tr>
+<td><code>PIIMiddleware</code></td>
+<td>检测并处理邮箱、卡号、IP 等敏感信息</td>
+<td><code>pii_type</code>、<code>strategy</code>（<code>block</code>&#x2F;<code>redact</code>&#x2F;<code>mask</code>&#x2F;<code>hash</code>）、<code>detector</code>、<code>apply_to_input</code>、<code>apply_to_output</code>、<code>apply_to_tool_results</code></td>
+</tr>
+<tr>
+<td><code>ModelRetryMiddleware</code></td>
+<td>模型调用失败时按指数退避重试</td>
+<td><code>max_retries</code>、<code>retry_on</code>、<code>on_failure</code>、<code>backoff_factor</code>、<code>initial_delay</code>、<code>max_delay</code>、<code>jitter</code></td>
+</tr>
+<tr>
+<td><code>ToolRetryMiddleware</code></td>
+<td>工具调用失败时按指数退避重试</td>
+<td>同上，多一个 <code>tools</code> 限定生效范围</td>
+</tr>
+<tr>
+<td><code>ToolErrorMiddleware</code></td>
+<td>把工具异常转成 error ToolMessage，让模型自己纠正</td>
+<td><code>on_error(exc, request)</code>、<code>aon_error</code>、<code>tools</code></td>
+</tr>
+<tr>
+<td><code>ModelFallbackMiddleware</code></td>
+<td>主模型挂了就按顺序换备用模型</td>
+<td>位置参数依次是备用模型，字符串或模型实例都行</td>
+</tr>
+<tr>
+<td><code>ModelCallLimitMiddleware</code></td>
+<td>限制模型调用次数，防死循环和账单</td>
+<td><code>thread_limit</code>、<code>run_limit</code>、<code>exit_behavior</code></td>
+</tr>
+<tr>
+<td><code>ToolCallLimitMiddleware</code></td>
+<td>限制某个工具或全部工具的调用次数</td>
+<td><code>tool_name</code>、<code>thread_limit</code>、<code>run_limit</code>、<code>exit_behavior</code></td>
+</tr>
+<tr>
+<td><code>TodoListMiddleware</code></td>
+<td>给 agent 一个 <code>write_todos</code> 工具做任务规划</td>
+<td><code>system_prompt</code>、<code>tool_description</code></td>
+</tr>
+<tr>
+<td><code>LLMToolSelectorMiddleware</code></td>
+<td>工具太多时先让模型挑出相关的几个</td>
+<td><code>model</code>、<code>max_tools</code>、<code>always_include</code></td>
+</tr>
+<tr>
+<td><code>ContextEditingMiddleware</code></td>
+<td>上下文超限时清掉旧的工具输出</td>
+<td><code>edits=[ClearToolUsesEdit(trigger=100000, keep=3)]</code></td>
+</tr>
+<tr>
+<td><code>@dynamic_prompt</code></td>
+<td>每次调用模型前重新生成系统提示</td>
+<td>函数返回 str 或 SystemMessage，可读 <code>request.messages</code>、<code>request.runtime.context</code></td>
+</tr>
+<tr>
+<td><code>@wrap_model_call</code> 换模型</td>
+<td>按消息长度、用户等级等条件切换模型</td>
+<td><code>request.override(model=...)</code></td>
+</tr>
+</tbody></table>
+<p><code>SummarizationMiddleware</code> 的触发条件写法值得单独看一眼。单个元组 <code>(&quot;tokens&quot;, 4000)</code> 表示达到阈值就触发；传列表 <code>[(&quot;tokens&quot;, 3000), (&quot;messages&quot;, 6)]</code> 是或的关系；传字典 <code>&#123;&quot;tokens&quot;: 4000, &quot;messages&quot;: 10&#125;</code> 是与的关系。<code>keep</code> 指定摘要后保留多少上下文，<code>(&quot;messages&quot;, 20)</code> 是保留最近 20 条。<code>trigger</code> 不传就不会自动触发。</p>
+<p>HITL 那个中间件必须配 checkpointer，不然中断之后状态没地方存。</p>
+<p>PII 的用法看一眼就明白：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[],</span><br><span class="line">    middleware=[</span><br><span class="line">        PIIMiddleware(<span class="string">&quot;email&quot;</span>, strategy=<span class="string">&quot;redact&quot;</span>, apply_to_input=<span class="literal">True</span>),</span><br><span class="line">        PIIMiddleware(<span class="string">&quot;credit_card&quot;</span>, strategy=<span class="string">&quot;mask&quot;</span>, apply_to_input=<span class="literal">True</span>),</span><br><span class="line">    ],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>内置类型有 email、credit_card、ip、mac_address、url。要检测自家系统的 API key，传 <code>detector=r&quot;sk-[a-zA-Z0-9]&#123;32&#125;&quot;</code> 或者一个返回 PIIMatch 列表的函数就行。</p>
+<p>上面这张表里有一个我到目前都没跑通：<code>LLMToolSelectorMiddleware</code>。加上 Gemini 之后，一共在四条通路上试过，错法分成两类。它内部调的是 <code>selection_request.model.with_structured_output(schema)</code>，method 用 provider 的默认值，也就是 json_schema。前三条通路（middleware_selector_native.py）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">=== 1. 中间件内部走的是哪条路 ===</span><br><span class="line">    schema = type_adapter.json_schema()</span><br><span class="line">    structured_model = selection_request.model.with_structured_output(schema)</span><br><span class="line"></span><br><span class="line">=== 2. LLMToolSelectorMiddleware 在三条通路上的表现 ===</span><br><span class="line">--- DeepSeek deepseek-chat ---</span><br><span class="line">  OpenAIInvalidRequestError: Error code: 400 - &#123;&#x27;error&#x27;: &#123;&#x27;message&#x27;: &#x27;This response_format type is unavailable now (request_id: 91c07733-...)&#x27;&#125;&#125;</span><br><span class="line">  结果: 失败</span><br><span class="line"></span><br><span class="line">--- Ollama 云端 OpenAI 兼容端点 gpt-oss:120b ---</span><br><span class="line">  OutputParserException: Invalid json output: weather For troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/OUTPUT_PARSING_FAILURE</span><br><span class="line">  结果: 失败</span><br><span class="line"></span><br><span class="line">--- Ollama 云端原生端点 gpt-oss:120b（temperature=0） ---</span><br><span class="line">  OutputParserException: Invalid json output: weather For troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/OUTPUT_PARSING_FAILURE</span><br><span class="line">  结果: 失败</span><br><span class="line"></span><br><span class="line">--- Ollama 云端原生端点 gpt-oss:120b（默认温度） ---</span><br><span class="line">  OutputParserException: Invalid json output: browse For troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/OUTPUT_PARSING_FAILURE</span><br><span class="line">  结果: 失败</span><br></pre></td></tr></table></figure>
+
+<p>DeepSeek 死得最早，400 里明说这个 response_format 类型现在不给用。两条 Ollama 通路都是请求发得出去，模型回一个词就完事，JsonOutputParser 拿到非 JSON 直接抛。回的那个词每次还不一样，weather、browse 都见过。这三条属于 provider 层面不支持结构化输出，跟结构化输出那篇的结论对得上。</p>
+<p>Gemini 是第二类，也是这篇文章要改口的地方。同一个 key 上，<code>create_agent</code> 加 <code>ProviderStrategy</code> 已经能拿回对象，但塞进这个中间件照样失败，报错换成了一个更具体的东西（gemini_provider_strategy.py）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">=== 2. Middleware 篇：LLMToolSelectorMiddleware ===</span><br><span class="line">  候选工具名: [&#x27;get_weather&#x27;, &#x27;get_stock&#x27;, &#x27;send_email&#x27;, &#x27;book_flight&#x27;]</span><br><span class="line">  --- 2a. 直接看选择器模型的原始输出 ---</span><br><span class="line">  原始输出: &#123;&#x27;tools&#x27;: [&#x27;get_weather&#x27;]&#125;</span><br><span class="line">  --- 2b. 中间件实际行为 ---</span><br><span class="line">  第1次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">  第2次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p><code>Get weather for a city.</code> 是 <code>get_weather</code> 这个工具的 description。模型没把 schema 里的 <code>Literal[&quot;get_weather&quot;]</code> 当约束，把 description 当值吐了出来，LangChain 对不上工具名就抛 ValueError。这跟 provider 支不支持结构化输出已经没关系，Gemini 的结构化输出本身是好的。</p>
+<p>换 system_prompt 能不能把它掰回来。我试了四种，每种跑两次（gemini_selector_schema_probe.py）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">=== 1. 四种 system_prompt，各跑 2 次 ===</span><br><span class="line">  --- 默认 system_prompt ---</span><br><span class="line">      第1次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">      第2次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">  --- 只返回工具名 ---</span><br><span class="line">      system_prompt = 从候选工具里挑出与用户问题最相关的一个，只返回工具名。</span><br><span class="line">      第1次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">      第2次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">  --- 只返回工具名 + 不要描述 ---</span><br><span class="line">      system_prompt = 从候选工具里挑出与用户问题最相关的一个。只返回工具名，不要返回工具描述，不要解释。</span><br><span class="line">      第1次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">      第2次: 失败 ValueError: Model selected invalid tools: [&#x27;Get weather for a city.&#x27;]</span><br><span class="line">  --- 只返回工具名 + 举例 get_weather ---</span><br><span class="line">      system_prompt = 从候选工具里挑出与用户问题最相关的一个。只返回工具名本身（例如 get_weather），不要返回工具描述，不要解释。</span><br><span class="line">      第1次: 失败 GoogleRateLimitError: Error calling model &#x27;gemini-3.6-flash&#x27; (RESOURCE_EXHAUSTED): 429 ...</span><br><span class="line">      第2次: OK 调用工具=[&#x27;get_weather&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p>前三种都失败，明写着”不要返回工具描述”也没用。唯一通过的那版，prompt 里直接写了 <code>例如 get_weather</code>，等于把答案喂给了模型，换个查询就不成立。所以”换 system_prompt 修不好”这个结论保留，只是原因从 provider 不支持换成了 schema 形状不友好。</p>
+<p>原因在源码里，三行就能看明白：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tool_selection.py:85  Annotated[Literal[tool.name], Field(description=tool.description)] for tool in tools</span><br><span class="line">tool_selection.py:94  tools: Annotated[list[selected_tool_type], Field(description=description)]  # type: ignore[valid-type]</span><br><span class="line">tool_selection.py:336  msg = f&quot;Model selected invalid tools: &#123;invalid_tool_selections&#125;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>第 85 行给每个工具造一个 <code>Literal[&quot;工具名&quot;]</code>，但 <code>Field(description=...)</code> 填的是工具描述。第 94 行把这些 Literal 组成 Union 再塞进一个 list。生成的 JSON Schema 长这样：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">schema.tools.items = &#123;&quot;anyOf&quot;: [&#123;&quot;const&quot;: &quot;get_weather&quot;, &quot;description&quot;: &quot;Get weather for a city.&quot;, &quot;type&quot;: &quot;string&quot;&#125;, ...]&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>const</code> 是工具名，<code>description</code> 是描述。Gemini 在这个形状下把 description 当成了候选值。约束写在 schema 里，不在提示词里，换 system_prompt 补不上这一刀。第 336 行就是最后对不上名字时抛错的地方。</p>
+<p>模型本身有能力做这件事。同一份工具清单，不走中间件的 schema，直接问它，回答是对的（同一份脚本）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">=== 2. 对照实验：问题出在 schema 形状 ===</span><br><span class="line">  --- 2a. 不走中间件的 schema，自由问答，明确只要工具名 ---</span><br><span class="line">      模型回答: &#x27;get_weather&#x27;</span><br><span class="line">  --- 2b. 用中间件自己那份 schema（with_structured_output）直接问 ---</span><br><span class="line">      模型返回: &#123;&#x27;tools&#x27;: [&#x27;Get weather for a city.&#x27;]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2a 和 2b 用同一个模型、同一份工具清单、同一个问题，差别只有 schema。自由问答回工具名，套上中间件那份 schema 就回描述。问题在 schema 形状，不在模型。</p>
+<p>实验条件补一句。gemini-3.5-flash 的免费额度是每天 20 次，写这篇时已经用完，四种 system_prompt 那组是在同代的 gemini-3.6-flash 上跑的，默认 prompt 的失败在 3.5-flash 上单独复现过两次。上面第三组里那条 429 是并发太快撞了分钟级限流，重跑一次就过了。</p>
+<p>替代品不难写。<code>ModelRequest</code> 里有 <code>tools</code> 字段，<code>request.override(tools=...)</code> 是官方的替换入口。让模型用普通对话挑一个工具名，自己对一遍名字，对不上就全部保留：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections.abc <span class="keyword">import</span> <span class="type">Callable</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> wrap_model_call, ModelRequest, ModelResponse</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@wrap_model_call</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">select_tools</span>(<span class="params"></span></span><br><span class="line"><span class="params">    request: ModelRequest,</span></span><br><span class="line"><span class="params">    handler: <span class="type">Callable</span>[[ModelRequest], ModelResponse],</span></span><br><span class="line"><span class="params"></span>) -&gt; ModelResponse:</span><br><span class="line">    names = [t.name <span class="keyword">for</span> t <span class="keyword">in</span> request.tools]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(names) &lt;= <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">return</span> handler(request)</span><br><span class="line">    catalog = <span class="string">&quot;\n&quot;</span>.join(<span class="string">f&quot;- <span class="subst">&#123;t.name&#125;</span>: <span class="subst">&#123;t.description&#125;</span>&quot;</span> <span class="keyword">for</span> t <span class="keyword">in</span> request.tools)</span><br><span class="line">    picked = request.model.invoke([</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;从下面这些工具里挑出与用户问题最相关的一个，只回工具名，不要解释。\n<span class="subst">&#123;catalog&#125;</span>&quot;</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="built_in">str</span>(request.messages[-<span class="number">1</span>].content)&#125;,</span><br><span class="line">    ]).content.strip().strip(<span class="string">&quot;。.&quot;</span>)</span><br><span class="line">    selected = [t <span class="keyword">for</span> t <span class="keyword">in</span> request.tools <span class="keyword">if</span> t.name == picked]</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> selected:</span><br><span class="line">        <span class="keyword">return</span> handler(request)</span><br><span class="line">    <span class="keyword">return</span> handler(request.override(tools=selected))</span><br></pre></td></tr></table></figure>
+
+<p>真实输出（middleware_tool_selector_probe.py）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">=== 2. 替代方案：@wrap_model_call 自己筛工具，跑在 DeepSeek 上 ===</span><br><span class="line">  [select] 候选 [&#x27;get_weather&#x27;, &#x27;get_stock&#x27;, &#x27;send_email&#x27;, &#x27;book_flight&#x27;] -&gt; 选中 [&#x27;get_weather&#x27;]</span><br><span class="line">  [select] 候选 [&#x27;get_weather&#x27;, &#x27;get_stock&#x27;, &#x27;send_email&#x27;, &#x27;book_flight&#x27;] -&gt; 选中 [&#x27;get_weather&#x27;]</span><br><span class="line"></span><br><span class="line">消息序列:</span><br><span class="line">  HumanMessage: tools=[] content=&#x27;帮我查一下西安的天气&#x27;</span><br><span class="line">  AIMessage: tools=[&#x27;get_weather&#x27;] content=&#x27;&#x27;</span><br><span class="line">  ToolMessage: tools=[] content=&#x27;西安 今天晴，24 度。&#x27;</span><br><span class="line">  AIMessage: tools=[] content=&#x27;西安今天天气晴朗，气温 24 度，挺舒适的，适合外出活动。&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>四个工具进，一个工具出，模型调对了工具。日志打了两遍，是因为这一轮 agent 调了两次模型，筛选钩子每次模型调用都会跑一次。代价是每轮多一次模型调用，挑得准不准全看那段 prompt，没有 schema 兜底。工具筛选本来就是启发式，能接受。其余几个（摘要、重试、动态模型）都正常。</p>
+<h2 id="中间件顺序"><a href="#中间件顺序" class="headerlink" title="中间件顺序"></a>中间件顺序</h2><p>多个中间件叠在一起时的规则，文档写得很清楚：</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+    flowchart TD
+    subgraph BEFORE[before 钩子 按列表顺序]
+      direction LR
+      b1[M1.before_model] --&gt; b2[M2.before_model] --&gt; b3[M3.before_model]
+    end
+    subgraph WRAP[wrap 钩子 逐层嵌套]
+      direction TB
+      w1[M1 进入] --&gt; w2[M2 进入] --&gt; w3[M3 进入] --&gt; mm[模型] --&gt; w3r[M3 返回] --&gt; w2r[M2 返回] --&gt; w1r[M1 返回]
+    end
+    subgraph AFTER[after 钩子 反向]
+      direction LR
+      a3[M3.after_model] --&gt; a2[M2.after_model] --&gt; a1[M1.after_model]
+    end
+    BEFORE --&gt; WRAP --&gt; AFTER
+  </pre></div>
+
+<p>三条规则：before 正序，after 倒序，wrap 嵌套（第一个中间件包住所有后面的）。</p>
+<p>我写了一个三类中间件的脚本验证，每个钩子打印自己的名字，wrap 钩子用缩进表示嵌套深度：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Named</span>(<span class="title class_ inherited__">AgentMiddleware</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">before_model</span>(<span class="params">self, state, runtime</span>):</span><br><span class="line">        log(<span class="string">f&quot;<span class="subst">&#123;self.name&#125;</span>.before_model&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">after_model</span>(<span class="params">self, state, runtime</span>):</span><br><span class="line">        log(<span class="string">f&quot;<span class="subst">&#123;self.name&#125;</span>.after_model&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">wrap_model_call</span>(<span class="params">self, request, handler</span>):</span><br><span class="line">        log(<span class="string">f&quot;<span class="subst">&#123;self.name&#125;</span>.wrap_model_call 进入&quot;</span>)</span><br><span class="line">        depth[<span class="string">&quot;n&quot;</span>] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> handler(request)</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            depth[<span class="string">&quot;n&quot;</span>] -= <span class="number">1</span></span><br><span class="line">            log(<span class="string">f&quot;<span class="subst">&#123;self.name&#125;</span>.wrap_model_call 返回&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">M1</span>(<span class="title class_ inherited__">Named</span>): <span class="keyword">pass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">M2</span>(<span class="title class_ inherited__">Named</span>): <span class="keyword">pass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">M3</span>(<span class="title class_ inherited__">Named</span>): <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">agent = create_agent(model=model, tools=[add], middleware=[M1(), M2(), M3()])</span><br></pre></td></tr></table></figure>
+
+<p>真实输出（省略了后半段重复的循环）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">=== middleware=[M1, M2, M3] 的实际执行顺序 ===</span><br><span class="line">M1.before_agent</span><br><span class="line">M2.before_agent</span><br><span class="line">M3.before_agent</span><br><span class="line">M1.before_model</span><br><span class="line">M2.before_model</span><br><span class="line">M3.before_model</span><br><span class="line">M1.wrap_model_call 进入</span><br><span class="line">  M2.wrap_model_call 进入</span><br><span class="line">    M3.wrap_model_call 进入</span><br><span class="line">    M3.wrap_model_call 返回</span><br><span class="line">  M2.wrap_model_call 返回</span><br><span class="line">M1.wrap_model_call 返回</span><br><span class="line">M3.after_model</span><br><span class="line">M2.after_model</span><br><span class="line">M1.after_model</span><br><span class="line">M1.wrap_tool_call 进入 (add)</span><br><span class="line">  M2.wrap_tool_call 进入 (add)</span><br><span class="line">    M3.wrap_tool_call 进入 (add)</span><br><span class="line">    M3.wrap_tool_call 返回</span><br><span class="line">  M2.wrap_tool_call 返回</span><br><span class="line">M1.wrap_tool_call 返回</span><br></pre></td></tr></table></figure>
+
+<p>这里有个坑，我第一次运行直接报错：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AssertionError: Please remove duplicate middleware instances.</span><br></pre></td></tr></table></figure>
+
+<p>原因是我写了三个 <code>Named()</code> 实例，而 <code>create_agent</code> 里有一句校验 <code>len(&#123;m.name for m in middleware&#125;) != len(middleware)</code> 就抛异常。<code>name</code> 默认取类名，三个实例的类名都是 <code>Named</code>，于是撞名。改成三个子类就过了。给装饰器传 <code>name=&quot;...&quot;</code> 也能绕开。</p>
+<p>排序的经验，按重要性排：</p>
+<ul>
+<li>会短路、做校验的放前面。后面的钩子直接不跑，省掉无谓开销。</li>
+<li>日志类的放前面，能看到最原始的入参。放在后面看到的是被别的中间件改过的版本。</li>
+<li>重试类的放里面。官方文档里 ToolErrorMiddleware 和 ToolRetryMiddleware 的组合就是 error 在外、retry 在内，而且 retry 要配 <code>on_failure=&quot;error&quot;</code>，让重试次数用尽后的异常冒到外层去兜。</li>
+</ul>
+<h2 id="短路"><a href="#短路" class="headerlink" title="短路"></a>短路</h2><p>想提前结束，返回的 dict 里带 <code>jump_to</code>。三个目标：</p>
+<ul>
+<li><code>&#39;end&#39;</code>：跳到 agent 结束，或者第一个 <code>after_agent</code> 钩子</li>
+<li><code>&#39;tools&#39;</code>：跳到工具节点</li>
+<li><code>&#39;model&#39;</code>：跳到模型节点，或者第一个 <code>before_model</code> 钩子</li>
+</ul>
+<p>返回 <code>jump_to</code> 的钩子必须声明 <code>can_jump_to</code>。装饰器写法是在参数里写 <code>@before_model(can_jump_to=[&quot;end&quot;])</code>，类写法是在方法上加 <code>@hook_config(can_jump_to=[&quot;end&quot;])</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">model_calls = &#123;<span class="string">&quot;n&quot;</span>: <span class="number">0</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@before_model(<span class="params">can_jump_to=[<span class="string">&quot;end&quot;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">block_secret</span>(<span class="params">state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    text = state[<span class="string">&quot;messages&quot;</span>][-<span class="number">1</span>].content</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;内部代号&quot;</span> <span class="keyword">in</span> text:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;  [guard] 命中敏感词，返回 jump_to=end，本次不调用模型&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="string">&quot;messages&quot;</span>: [AIMessage(<span class="string">&quot;这个信息我不能提供。&quot;</span>)],</span><br><span class="line">            <span class="string">&quot;jump_to&quot;</span>: <span class="string">&quot;end&quot;</span>,</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@after_model</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">count_calls</span>(<span class="params">state: AgentState, runtime: Runtime</span>) -&gt; <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>] | <span class="literal">None</span>:</span><br><span class="line">    model_calls[<span class="string">&quot;n&quot;</span>] += <span class="number">1</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;  [count] 模型实际被调用了 <span class="subst">&#123;model_calls[<span class="string">&#x27;n&#x27;</span>]&#125;</span> 次&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p>真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">### A. 普通问题</span><br><span class="line">  [count] 模型实际被调用了 1 次</span><br><span class="line">回答：Agent 是一个能感知环境、自主决策并采取行动以达成目标的智能实体。</span><br><span class="line">模型调用次数：1</span><br><span class="line"></span><br><span class="line">### B. 触发短路的问题</span><br><span class="line">  [guard] 命中敏感词，返回 jump_to=end，本次不调用模型</span><br><span class="line">回答：这个信息我不能提供。</span><br><span class="line">模型调用次数：1（与 A 相同，说明这次没有走模型）</span><br></pre></td></tr></table></figure>
+
+<p>B 这次没有走模型，回复直接由钩子给出。注意返回的 AIMessage 会真的进入消息历史，模型下一轮能看到它，所以别把中间状态塞进去。</p>
+<p><code>&#39;model&#39;</code> 这个目标用得少一些。一个场景是在 <code>after_model</code> 里发现回复格式不对，把最后一条替换成新的 AIMessage，再跳回模型节点让它重说一遍。</p>
+<h2 id="例子一：按对话长度切换模型"><a href="#例子一：按对话长度切换模型" class="headerlink" title="例子一：按对话长度切换模型"></a>例子一：按对话长度切换模型</h2><p>Agent 那篇里带过一句”可以动态选模型”，这里给完整版本。规则很简单：消息少于 4 条用 <code>deepseek-chat</code>，超过就换 <code>deepseek-reasoner</code>。同时加一个 <code>@dynamic_prompt</code> 生成系统提示，再用一个包裹式钩子把模型实际收到的提示打印出来，验证提示真的换掉了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys, os</span><br><span class="line">sys.stdout.reconfigure(encoding=<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> collections.abc <span class="keyword">import</span> <span class="type">Callable</span></span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> create_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> (</span><br><span class="line">    wrap_model_call, dynamic_prompt, ModelRequest, ModelResponse,</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> langchain.messages <span class="keyword">import</span> HumanMessage, AIMessage</span><br><span class="line"></span><br><span class="line">simple_model = ChatOpenAI(</span><br><span class="line">    api_key=os.getenv(<span class="string">&quot;DEEPSEEK_API_KEY&quot;</span>),</span><br><span class="line">    base_url=<span class="string">&quot;https://api.deepseek.com/v1&quot;</span>,</span><br><span class="line">    model=<span class="string">&quot;deepseek-chat&quot;</span>,</span><br><span class="line">    temperature=<span class="number">0.1</span>,</span><br><span class="line">    max_tokens=<span class="number">300</span>,</span><br><span class="line">)</span><br><span class="line">complex_model = ChatOpenAI(</span><br><span class="line">    api_key=os.getenv(<span class="string">&quot;DEEPSEEK_API_KEY&quot;</span>),</span><br><span class="line">    base_url=<span class="string">&quot;https://api.deepseek.com/v1&quot;</span>,</span><br><span class="line">    model=<span class="string">&quot;deepseek-reasoner&quot;</span>,</span><br><span class="line">    temperature=<span class="number">0.1</span>,</span><br><span class="line">    max_tokens=<span class="number">300</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">picked: <span class="built_in">list</span>[<span class="built_in">str</span>] = []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@wrap_model_call</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">dynamic_model</span>(<span class="params"></span></span><br><span class="line"><span class="params">    request: ModelRequest,</span></span><br><span class="line"><span class="params">    handler: <span class="type">Callable</span>[[ModelRequest], ModelResponse],</span></span><br><span class="line"><span class="params"></span>) -&gt; ModelResponse:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(request.messages) &gt; <span class="number">3</span>:</span><br><span class="line">        model, name = complex_model, <span class="string">&quot;deepseek-reasoner&quot;</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        model, name = simple_model, <span class="string">&quot;deepseek-chat&quot;</span></span><br><span class="line">    picked.append(name)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;  [router] 消息数=<span class="subst">&#123;<span class="built_in">len</span>(request.messages)&#125;</span> -&gt; 选择 <span class="subst">&#123;name&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> handler(request.override(model=model))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@dynamic_prompt</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">state_aware_prompt</span>(<span class="params">request: ModelRequest</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    base = <span class="string">&quot;你是一个简洁的助手，回答不超过一句话。&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(request.messages) &gt; <span class="number">3</span>:</span><br><span class="line">        base += <span class="string">&quot; 这是一段很长的对话，请比平时更简短。&quot;</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;  [prompt] 生成系统提示，长度 <span class="subst">&#123;<span class="built_in">len</span>(base)&#125;</span> 字符&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> base</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@wrap_model_call</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">log_prompt</span>(<span class="params"></span></span><br><span class="line"><span class="params">    request: ModelRequest,</span></span><br><span class="line"><span class="params">    handler: <span class="type">Callable</span>[[ModelRequest], ModelResponse],</span></span><br><span class="line"><span class="params"></span>) -&gt; ModelResponse:</span><br><span class="line">    text = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">        b.get(<span class="string">&quot;text&quot;</span>, <span class="string">&quot;&quot;</span>) <span class="keyword">for</span> b <span class="keyword">in</span> request.system_message.content_blocks</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">isinstance</span>(b, <span class="built_in">dict</span>)</span><br><span class="line">    )</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;  [inspect] 模型实际收到的系统提示：<span class="subst">&#123;text&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> handler(request)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=simple_model,</span><br><span class="line">    tools=[],</span><br><span class="line">    middleware=[dynamic_model, state_aware_prompt, log_prompt],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  [router] 消息数=1 -&gt; 选择 deepseek-chat</span><br><span class="line">  [prompt] 生成系统提示，长度 19 字符</span><br><span class="line">  [inspect] 模型实际收到的系统提示：你是一个简洁的助手，回答不超过一句话。</span><br><span class="line">  [router] 消息数=5 -&gt; 选择 deepseek-reasoner</span><br><span class="line">  [prompt] 生成系统提示，长度 38 字符</span><br><span class="line">  [inspect] 模型实际收到的系统提示：你是一个简洁的助手，回答不超过一句话。 这是一段很长的对话，请比平时更简短。</span><br><span class="line"></span><br><span class="line">### A. 短对话：走 deepseek-chat</span><br><span class="line">实际使用的模型：deepseek-chat</span><br><span class="line">回答：中间件是位于操作系统和应用软件之间的软件层，用于协调不同系统或组件之间的通信与数据管理。</span><br><span class="line"></span><br><span class="line">### B. 长对话：自动切到 deepseek-reasoner</span><br><span class="line">实际使用的模型：deepseek-reasoner</span><br><span class="line">回答：中间件是夹在请求与核心处理逻辑之间、用于统一拦截并处理日志、鉴权、限流等横切关注点的可复用组件。</span><br><span class="line">响应里的 reasoning_tokens：190</span><br></pre></td></tr></table></figure>
+
+<p>几个实际踩到的点。</p>
+<p><code>request.override(model=...)</code> 返回一个新的 request，不要原地改属性。<code>ModelRequest</code> 是 dataclass，字段有 <code>model</code>、<code>messages</code>、<code>system_message</code>、<code>tools</code>、<code>tool_choice</code>、<code>response_format</code>、<code>state</code>、<code>runtime</code>、<code>model_settings</code>，<code>override</code> 是官方的修改入口。</p>
+<p>判断条件可以读 <code>request.messages</code>（就是 <code>request.state[&quot;messages&quot;]</code> 的快捷方式），也可以读 <code>request.runtime.context</code> 里的用户信息。路由到哪个模型完全由你决定，中间件本身不关心。</p>
+<p>验证路由别信 <code>response_metadata[&quot;model_name&quot;]</code>。DeepSeek 对 <code>deepseek-chat</code> 和 <code>deepseek-reasoner</code> 都返回 <code>deepseek-flash</code>，我一开始就被这个字段骗了。能区分的是 <code>completion_tokens_details.reasoning_tokens</code>：走 reasoner 时非空（上面是 190），走 chat 时是 None。</p>
+<p><code>@dynamic_prompt</code> 和 <code>wrap_model_call</code> 都是包裹式钩子，谁在里面谁先看到请求。我把 <code>log_prompt</code> 放在列表最后，它就在最内层，看到的是 <code>@dynamic_prompt</code> 改过之后的系统提示。顺序反过来，打印出来的就是原始提示。</p>
+<h2 id="例子二：工具抛异常之后"><a href="#例子二：工具抛异常之后" class="headerlink" title="例子二：工具抛异常之后"></a>例子二：工具抛异常之后</h2><p>工具函数抛异常，默认行为是整个 agent run 直接崩掉。用户看到的是一个 traceback，而不是一句”这个查询失败了”。<code>wrap_tool_call</code> 可以在异常冒到图之前截住它，把它转成一条 <code>status=&quot;error&quot;</code> 的 ToolMessage 塞回消息历史，模型读到之后有机会换个参数重试，或者换个工具。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections.abc <span class="keyword">import</span> <span class="type">Callable</span></span><br><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> wrap_tool_call</span><br><span class="line"><span class="keyword">from</span> langchain.messages <span class="keyword">import</span> ToolMessage</span><br><span class="line"><span class="keyword">from</span> langchain.tools.tool_node <span class="keyword">import</span> ToolCallRequest</span><br><span class="line"><span class="keyword">from</span> langgraph.types <span class="keyword">import</span> Command</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">divide</span>(<span class="params">a: <span class="built_in">float</span>, b: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算 a 除以 b。&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> b == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;除数不能为 0&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> a / b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@wrap_tool_call</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">catch_tool_error</span>(<span class="params"></span></span><br><span class="line"><span class="params">    request: ToolCallRequest,</span></span><br><span class="line"><span class="params">    handler: <span class="type">Callable</span>[[ToolCallRequest], ToolMessage | Command],</span></span><br><span class="line"><span class="params"></span>) -&gt; ToolMessage | Command:</span><br><span class="line">    name = request.tool_call[<span class="string">&quot;name&quot;</span>]</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;  -&gt; 拦截到工具调用 <span class="subst">&#123;name&#125;</span>，参数 <span class="subst">&#123;request.tool_call[<span class="string">&#x27;args&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        result = handler(request)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  &lt;- <span class="subst">&#123;name&#125;</span> 正常返回&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  !! <span class="subst">&#123;name&#125;</span> 抛出 <span class="subst">&#123;<span class="built_in">type</span>(e).__name__&#125;</span>: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> ToolMessage(</span><br><span class="line">            content=<span class="string">f&quot;工具 <span class="subst">&#123;name&#125;</span> 执行失败（<span class="subst">&#123;<span class="built_in">type</span>(e).__name__&#125;</span>），请检查参数后重试。&quot;</span>,</span><br><span class="line">            tool_call_id=request.tool_call[<span class="string">&quot;id&quot;</span>],</span><br><span class="line">            name=name,</span><br><span class="line">            status=<span class="string">&quot;error&quot;</span>,</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+
+<p>给 agent 的指令是”先用 divide 算 10 除以 0，失败就改用 add 算 10 + 0”。真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">  -&gt; 拦截到工具调用 divide，参数 &#123;&#x27;a&#x27;: 10, &#x27;b&#x27;: 0&#125;</span><br><span class="line">  !! divide 抛出 ValueError: 除数不能为 0</span><br><span class="line">  -&gt; 拦截到工具调用 add，参数 &#123;&#x27;a&#x27;: 10, &#x27;b&#x27;: 0&#125;</span><br><span class="line">  &lt;- add 正常返回</span><br><span class="line"></span><br><span class="line">### A. 自定义 wrap_tool_call 兜住异常</span><br><span class="line">[HumanMessage] 请用 divide 工具计算 10 除以 0。如果这个工具失败了，就改用 add 工具计算 10 + 0，然后告诉我最终数字。</span><br><span class="line">[AIMessage] I&#x27;ll try the divide tool first as requested.</span><br><span class="line">[ToolMessage(status=error)] 工具 divide 执行失败（ValueError），请检查参数后重试。</span><br><span class="line">[AIMessage] The divide tool failed as expected (division by zero). Falling back to the add t</span><br><span class="line">[ToolMessage(status=success)] 10</span><br><span class="line">[AIMessage] 结果如下：</span><br><span class="line">1. **divide 工具**：计算 10 ÷ 0 失败，报错 `ValueError`（除数为零，无法计算）。</span><br><span class="line">2. **add 工具**（备...</span><br></pre></td></tr></table></figure>
+
+<p>模型看到 error 之后自己换了工具，run 没断。</p>
+<p>同样的事，内置的 <code>ToolErrorMiddleware</code> 一行配置就够，不用自己写 handler：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.agents.middleware <span class="keyword">import</span> ToolErrorMiddleware</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">on_error</span>(<span class="params">exc: Exception, request: ToolCallRequest</span>) -&gt; <span class="built_in">str</span> | <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(exc, ValueError):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;工具 <span class="subst">&#123;request.tool_call[<span class="string">&#x27;name&#x27;</span>]&#125;</span> 参数不合法，请修正后重试。&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">agent = create_agent(</span><br><span class="line">    model=model,</span><br><span class="line">    tools=[divide, add],</span><br><span class="line">    middleware=[ToolErrorMiddleware(on_error=on_error)],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><code>on_error</code> 的返回值控制信息披露。返回字符串，异常就变成 error ToolMessage；返回 <code>None</code> 或干脆不 return，异常继续上抛，run 会终止。文档建议返回异常类型而不是原始异常消息，因为原始消息里可能带着内部细节，比如数据库连接串。<code>ToolErrorMiddleware</code> 需要 <code>langchain&gt;=1.3.14</code>，本地的 1.4.3 没问题。</p>
+<p>再补一个重试的实测。<code>ToolRetryMiddleware</code> 包住工具调用，失败后按 <code>initial_delay * backoff_factor ** retry_number</code> 等待再试。我造了一个前两次必失败、第三次成功的工具：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">retry = ToolRetryMiddleware(</span><br><span class="line">    max_retries=<span class="number">3</span>,</span><br><span class="line">    retry_on=(ConnectionError,),</span><br><span class="line">    initial_delay=<span class="number">0.5</span>,</span><br><span class="line">    backoff_factor=<span class="number">2.0</span>,</span><br><span class="line">    jitter=<span class="literal">False</span>,</span><br><span class="line">    on_failure=<span class="string">&quot;continue&quot;</span>,</span><br><span class="line">)</span><br><span class="line">agent = create_agent(model=model, tools=[flaky], middleware=[retry])</span><br></pre></td></tr></table></figure>
+
+<p>真实输出：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  [flaky] 第 1 次调用，距上次 1.03s</span><br><span class="line">  [flaky] 第 2 次调用，距上次 0.50s</span><br><span class="line">  [flaky] 第 3 次调用，距上次 1.00s</span><br><span class="line"></span><br><span class="line">### A. 前两次失败、第三次成功的工具</span><br><span class="line">总耗时 3.43s，flaky 实际被调用 3 次</span><br><span class="line">[ToolMessage(status=success)] 查询成功：middleware 的结果是 42</span><br><span class="line">[AIMessage] 调用成功。结果如下：</span><br><span class="line">- **查询内容**：middleware</span><br><span class="line">- **返回结果**：42</span><br><span class="line"></span><br><span class="line">### B. 重试耗尽后交给模型处理</span><br><span class="line">dead 实际被调用 3 次（1 次初始 + 2 次重试）</span><br><span class="line">[AIMessage]</span><br><span class="line">[ToolMessage(status=error)] Tool &#x27;dead&#x27; failed after 3 attempts with ConnectionError: 服务彻底不可用. Please try again.</span><br><span class="line">[AIMessage] 调用失败了。</span><br><span class="line">- 工具：`dead`</span><br><span class="line">- 结果：重试 3 次后仍失败，报错 `ConnectionError: 服务彻底不可用`</span><br></pre></td></tr></table></figure>
+
+<p>间隔 0.50s 和 1.00s 正好是 0.5 乘 2 的等比。<code>jitter</code> 默认开着，会加正负 25% 的随机抖动，我为了看清楚数字关掉了；生产环境建议留着，避免一堆请求同时重试。</p>
+<p>B 组把 <code>max_retries=2</code> 用尽，<code>on_failure=&quot;continue&quot;</code> 让中间件返回一条 error ToolMessage，内容是 <code>Tool &#39;dead&#39; failed after 3 attempts with ConnectionError</code>，模型读到之后直接告诉用户失败。如果把 <code>on_failure</code> 改成 <code>&quot;error&quot;</code>，异常会重新抛出，run 立刻结束。</p>
+<p><code>SummarizationMiddleware</code> 的效果也顺手验了，<code>trigger=(&quot;messages&quot;, 6)</code>、<code>keep=(&quot;messages&quot;, 2)</code>，送进去 11 条消息：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">### 送入前：11 条消息</span><br><span class="line">### 返回后：4 条消息</span><br><span class="line">[HumanMessage] Here is a summary of the conversation to date:</span><br><span class="line">## SESSION INTENT</span><br><span class="line">用户正在学习 LangChain 的中间件（middleware），并逐轮要求记住一系列要点...</span><br><span class="line">[AIMessage] 收到，要点 5 已记下。</span><br><span class="line">[HumanMessage] 把前面几轮的要点合并成一句话告诉我。</span><br><span class="line">[AIMessage] 目前记录到的要点 1 至要点 5 都只是编号...</span><br></pre></td></tr></table></figure>
+
+<p>11 条压成 4 条：一条摘要 HumanMessage，加上 <code>keep</code> 保留的最近两条，再加本次新回复。摘要本身是一次额外的模型调用，所以 <code>model</code> 参数通常配个便宜的小模型。</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+    stateDiagram-v2
+    [*] --&gt; 累积消息
+    累积消息 --&gt; 累积消息: 消息数 低于 trigger
+    累积消息 --&gt; 触发摘要: 消息数 达到 trigger
+    触发摘要 --&gt; 累积消息: 摘要 + 最近 keep 条替换历史
+  </pre></div>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>中间件是挂在 agent 循环固定位置的钩子。节点式钩子管顺序和状态，包裹式钩子管 handler 被调几次。</li>
+<li>执行顺序是 before 正序、after 倒序、wrap 嵌套。同名中间件会触发 <code>AssertionError</code>，用子类或 <code>name=</code> 区分。</li>
+<li>自定义状态用 <code>state_schema</code> 加 <code>NotRequired</code> 字段，钩子返回的 dict 自动合并，计数、标记、审计信息都能挂在上面。</li>
+<li>内置中间件覆盖了重试、兜错、摘要、HITL、PII、限流、任务规划。动态提示用 <code>@dynamic_prompt</code>，动态模型用 <code>@wrap_model_call</code> 加 <code>request.override(model=...)</code>。</li>
+<li><code>LLMToolSelectorMiddleware</code> 四条通路都跑不通，但原因分两类。DeepSeek 报 400，Ollama 云端无论兼容端点还是原生端点都是解析器拿到非 JSON 后抛 <code>OutputParserException</code>，这是 provider 不支持结构化输出。Gemini 上 provider 支持了，中间件却因为选择 schema 把工具描述写进了 <code>Literal</code> 的 <code>description</code>，模型把描述当值返回，抛 <code>ValueError: Model selected invalid tools</code>。换 system_prompt 补不上，因为约束在 schema 里。工具筛选用 <code>@wrap_model_call</code> 加 <code>request.override(tools=...)</code> 自己写，实测可行。摘要、重试、动态模型、工具兜错都正常。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://shanchuann.cn">张念川</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://shanchuann.cn/2026/10/01/LangChain%20Middleware/">https://shanchuann.cn/2026/10/01/LangChain%20Middleware/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://shanchuann.cn" target="_blank">山川不念旧</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Core-components/">Core components</a></div><div class="post-share"><div class="social-share" data-image="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/09/29/LangChain%20Runtime%20%E4%B8%8E%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B/" title="LangChain Runtime 与上下文工程"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">LangChain Runtime 与上下文工程</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  写了几个 agent 之后，让人卡住的通常不是工具调用怎么写。麻烦的是”这次运行该拿到什么数据”：用户 ID 从哪来，上一轮对话的偏好存在哪，工具返回的 8000 字文档要不要整个塞回模型。这些问题在 create_agent 的入门示例里看不到，因为示例里只有一个 messages。 LangChain 把答案拆成了三块：state、context、store。名字都短，含义却经常被混着用。我见过把 user_id 塞进 state 的写法，也见过每次 invoke 都把数据库连接写进 messages 的写法。 这篇先把这三块拆开，再看 context_schema 和 runtime.context 怎么用，然后把 runtime 上剩下的字段挨个跑一遍。剩下的一节讲上下文工程：窗口怎么被填满，又该怎么打扫。 文中的输出都是在 Python 3.12 上跑 DeepSeek 得到的真实终端结果，脚本放在 Runtime&#x2F;。 三个数据源官方文档在 context engineering 页面给了一张表，按作用域把三者分开了。我...</div></div></div></a><a class="pagination-related" href="/2026/10/02/LangChain%20%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86/" title="LangChain 长期记忆"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">LangChain 长期记忆</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  上一篇文章里我们给 agent 挂了 checkpointer，同一个 thread_id 下它能记住用户叫什么。把 thread_id 一换，它就失忆了。这个行为对单次会话来说是对的，做成产品就错了。用户在客服窗口里说过”我不用信用卡”，三天后他打开另一个窗口，这句话不该消失。 LangChain 里管这件事的组件叫 store。它和 checkpointer 是两套独立的东西，一个存 thread 内的消息，一个存跨 thread 的 JSON 文档。这篇把 store 这一层拆开：namespace 怎么设计、写入和召回有哪几条路、语义检索怎么接、什么时候该忘掉、噪声怎么挡在门外。 文里的代码都在 langchain 1.4.3 + langgraph 1.2.12 上跑过，输出是从终端粘出来的。对话模型统一用 DeepSeek，向量用本地跑的 BAAI&#x2F;bge-small-zh-v1.5，原因在语义检索那一节。 短期记忆和长期记忆的边界短期记忆就是 agent 的 state。默认的 AgentState 里有一个 mes...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/11/19/LangChain%20Agent/" title="LangChain Agents"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-19</div><div class="info-item-2">LangChain Agents</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  代理将语言模型与工具结合，创建能够推理任务、决定使用哪些工具，并迭代地工作以寻求解决方案的系统。create_agent提供了一种生产就绪的代理实现。LLM 代理在循环中运行工具以实现目标。代理会一直运行，直到满足停止条件——即模型发出最终输出或达到迭代限制。  核心组件Model 模型模型是您代理的推理引擎。它可以通过多种方式指定，支持静态和动态模型选择。 Static model 静态模型静态模型在创建代理时配置一次，并在整个执行过程中保持不变。这是最常见和直接的方法。 从模型标识符字符串初始化静态模型： 123456789101112@tooldef get_weather_for_location(city: str) -&gt; str:    &quot;&quot;&quot;Get weather for a given city.&quot;&quot;&quot;    return f&quot;It&#x27;s always sunny in &#123;city&#125;!&quot;model = ChatO...</div></div></div></a><a class="pagination-related" href="/2026/09/23/LangChain%20Messages/" title="LangChain Messages"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-23</div><div class="info-item-2">LangChain Messages</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  模型 API 是无状态的。请求发出去，回复拿回来，服务端不留上下文。你平时看到的”多轮对话”，是客户端每次把完整历史重新贴一遍。LangChain 里被贴的那份历史，是一组消息对象。 工具调用走的是同一条路。模型说”调 get_weather，参数 Paris”，这是一条消息；工具函数执行完返回的 “Sunny, 22C”，是另一条消息；两条消息靠一个 ID 串起来。ID 对不上，整个请求被拒。 消息不只是提示词的包装类，它是模型和工具之间唯一的数据载体。这件事决定了很多日常问题长什么样。请求报 400，多半是消息顺序或配对不合法；模型答非所问，是历史里混进了该清掉的内容；上下文超限，问题变成该裁掉哪几条。你没法直接改 HTTP body，能改的只有这串对象。 这篇讲清四类消息的字段、工具调用的配对规则、content 和 content_blocks 的分工、元数据里能读到什么、怎么存怎么还原，以及长对话怎么裁。下面所有代码都用 DeepSeek 实跑过，输出是终端里的原文，脚本在仓库的 Messages&#x2F; 目录下。 12345...</div></div></div></a><a class="pagination-related" href="/2026/09/24/LangChain%20Streaming/" title="LangChain Streaming"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-24</div><div class="info-item-2">LangChain Streaming</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  agent.invoke() 慢是个问题，比慢更难受的是沉默。一个带工具的 agent，一次提问背后至少两次模型调用和一次工具执行。DeepSeek 上这两次调用各要一两秒，工具再花点时间，用户盯着空白界面等五秒，然后一段完整回答突然出现。中间那五秒里 agent 其实一直在干活，只是没人告诉外面。 流式要解决的就是这五秒。它把过程中的事件提前暴露出来：模型开始吐第一个 token 了，它决定调哪个工具、参数是什么，工具返回了什么，第二次模型调用又开始了。这些事件本身就是产品体验的一部分，聊天界面里的”正在调用 get_weather”就是这么来的。 这篇讲清楚 LangChain 里流式的两层 API，以及它们各自适合放在哪。底层是 agent.stream() 和它的 stream_mode，你拿到的是按 mode 切分的事件；上层是 agent.stream_events(version=&quot;v3&quot;)，同一个运行被投影成几条独立的、带类型的流。读完你应该能判断该用哪一层，以及为什么自己的流式代码会重复打印同一段文字。...</div></div></div></a><a class="pagination-related" href="/2026/09/28/LangChain%20Structured%20Output/" title="LangChain Structured Output"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-28</div><div class="info-item-2">LangChain Structured Output</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  让模型输出一段文字，再用正则从里面抠字段，这活干一次就够了。字段多一个、模型换个说法、多写一句解释，正则就得重写。结构化输出解决的就是这件事：给模型一份 schema，等它跑完，你从 state 里取一个 Python 对象，sr.email 直接可用。 LangChain Agents 那篇里提过 ToolStrategy 和 ProviderStrategy，只有几句对比。这一篇换个角度，只看三件事：策略怎么选、失败时长什么样、拿不到结果时从哪儿查。代码在 DeepSeek、Ollama 云端的 OpenAI 兼容端点和原生端点上真实跑过，最后补上 Google Gemini，原生结构化输出总算跑出了正向结果。环境是 langchain 1.4.3、langchain-openai 1.6.7、langchain-ollama 1.1.0、langchain-google-genai 4.4.0、pydantic 2.13.5，脚本在仓库的 StructuredOutput&#x2F; 目录下。 一、structured_respons...</div></div></div></a><a class="pagination-related" href="/2026/10/02/LangChain%20Tools/" title="LangChain Tools"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-02</div><div class="info-item-2">LangChain Tools</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  模型只会生成文字。让它查天气、下单、读数据库的，是你挂在外面的一段 Python。LangChain 把这段 Python 和它的说明书一起打包成 Tool。说明书是一份 JSON Schema，模型看得到；函数体模型看不到。 这个分界决定了日常调试的方向。模型不调工具，问题多半出在描述写得含糊；模型调了但参数填错，问题在 Schema 的类型或约束；函数执行到一半炸了，模型那边只能看到你回给它的那段错误文字，它凭这段文字决定下一步。工具写得好不好，一半在函数里，一半在函数外。 这篇按顺序讲这些：工具的最小结构、@tool 能改的几件事、参数 Schema 的三种写法、校验失败后模型收到什么、ToolRuntime 从哪里取数据、工具怎么读写 agent state、异常怎么变成模型能读的消息、按上下文动态换工具集，最后用 bind_tools 直接看模型吐出来的 tool_calls。文中输出都是在 DeepSeek 上实跑的终端原文。 工具的最小结构官方对工具的定义是两样东西的组合：一份包含名称、描述、参数定义的 Schema，一个用来...</div></div></div></a><a class="pagination-related" href="/2026/09/25/LangChain%20%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86/" title="LangChain 短期记忆"><img class="cover" src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-25</div><div class="info-item-2">LangChain 短期记忆</div></div><div class="info-2"><div class="info-item-1"> 代码仓库ChainReaction  找 LangChain 的记忆功能时，很多人会先去翻有没有一个叫 Memory 的类。v1 里没有这个东西。短期记忆就是 agent state 里的一份消息历史，加上你自己挂上去的字段，再交给 checkpointer 按 thread 存下来。把这三件事的分工弄清楚，后面大部分问题都能自己判断。 这篇先用最小例子跑通两轮对话，证明第二轮真的记得第一轮；然后解释 thread_id 和 checkpointer 的关系，以及换 thread 之后会发生什么；接着扩展自定义 state 字段，最后处理消息历史把上下文窗口撑爆的情况。文里的终端输出都是在 Windows 上连 DeepSeek 真跑出来的，脚本放在仓库的 ShortTermMemory&#x2F; 目录下。 顺带划一下短期和长期的分界。短期记忆活在一个 thread 里，thread 结束或者你换掉 thread_id，它就够不着了。跨会话记住用户偏好、历史结论，那是 long-term memory 的活，用的是另一套 Store 机制。这篇只谈 thread 内的部分。 ...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">张念川</div><div class="author-info-description">玉袍长剑堪风流，山川不念旧</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">98</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/shanchuann"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">由于极为严重的失误，个人网站代码包括内容完全丢失，正在重建中。另外《C语言圣经》编写工作正在稳步进行。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%8C%82%E5%9C%A8%E5%BE%AA%E7%8E%AF%E7%9A%84%E5%93%AA%E4%B8%80%E6%AD%A5"><span class="toc-number">1.</span> <span class="toc-text">中间件挂在循环的哪一步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E4%B8%AA%E9%92%A9%E5%AD%90%EF%BC%8C%E4%B8%A4%E7%A7%8D%E8%84%BE%E6%B0%94"><span class="toc-number">2.</span> <span class="toc-text">六个钩子，两种脾气</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A3%85%E9%A5%B0%E5%99%A8%E8%BF%98%E6%98%AF%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">装饰器还是类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%8A%B6%E6%80%81"><span class="toc-number">4.</span> <span class="toc-text">自定义状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E7%BD%AE%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%B8%85%E5%8D%95"><span class="toc-number">5.</span> <span class="toc-text">内置中间件清单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%B6%E9%A1%BA%E5%BA%8F"><span class="toc-number">6.</span> <span class="toc-text">中间件顺序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%AD%E8%B7%AF"><span class="toc-number">7.</span> <span class="toc-text">短路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90%E4%B8%80%EF%BC%9A%E6%8C%89%E5%AF%B9%E8%AF%9D%E9%95%BF%E5%BA%A6%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B"><span class="toc-number">8.</span> <span class="toc-text">例子一：按对话长度切换模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90%E4%BA%8C%EF%BC%9A%E5%B7%A5%E5%85%B7%E6%8A%9B%E5%BC%82%E5%B8%B8%E4%B9%8B%E5%90%8E"><span class="toc-number">9.</span> <span class="toc-text">例子二：工具抛异常之后</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">10.</span> <span class="toc-text">小结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/05/LangChain%20%E6%B5%8B%E8%AF%95%E4%B8%8E%20LangSmith%20%E8%A7%82%E6%B5%8B/" title="LangChain 测试与 LangSmith 观测"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain 测试与 LangSmith 观测"/></a><div class="content"><a class="title" href="/2026/10/05/LangChain%20%E6%B5%8B%E8%AF%95%E4%B8%8E%20LangSmith%20%E8%A7%82%E6%B5%8B/" title="LangChain 测试与 LangSmith 观测">LangChain 测试与 LangSmith 观测</a><time datetime="2026-10-05T05:50:34.000Z" title="发表于 2026-10-05 13:50:34">2026-10-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/05/LangChain%20MCP/" title="LangChain MCP"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain MCP"/></a><div class="content"><a class="title" href="/2026/10/05/LangChain%20MCP/" title="LangChain MCP">LangChain MCP</a><time datetime="2026-10-05T05:21:42.000Z" title="发表于 2026-10-05 13:21:42">2026-10-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/04/LangChain%20Multi-agent/" title="LangChain Multi-agent"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain Multi-agent"/></a><div class="content"><a class="title" href="/2026/10/04/LangChain%20Multi-agent/" title="LangChain Multi-agent">LangChain Multi-agent</a><time datetime="2026-10-04T15:35:23.000Z" title="发表于 2026-10-04 23:35:23">2026-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/04/LangChain%20Guardrails/" title="LangChain Guardrails"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain Guardrails"/></a><div class="content"><a class="title" href="/2026/10/04/LangChain%20Guardrails/" title="LangChain Guardrails">LangChain Guardrails</a><time datetime="2026-10-04T12:00:00.000Z" title="发表于 2026-10-04 20:00:00">2026-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/03/LangChain%20Human-in-the-Loop/" title="LangChain Human-in-the-Loop"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain Human-in-the-Loop"/></a><div class="content"><a class="title" href="/2026/10/03/LangChain%20Human-in-the-Loop/" title="LangChain Human-in-the-Loop">LangChain Human-in-the-Loop</a><time datetime="2026-10-03T12:00:00.000Z" title="发表于 2026-10-03 20:00:00">2026-10-03</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By 张念川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.0.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div><div class="footer_custom_text">满堂花醉三千客，一剑霜寒十四州</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="聊天" style="display:none"><i class="fas fa-message"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '1kGP51o4WjaiJX72Yfdy5T6k-gzGzoHsz',
+      appKey: 'OeiTKeZqnH8VrxSF1s69kyOf',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script src="/js/parallax.js"></script><script src="/js/dsh-pet.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="255,0178,102" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script>(() => {
+  window.$crisp = ['safe', true]
+  window.CRISP_WEBSITE_ID = "2f8661da-b522-4dfb-a0f3-ce177151f169"
+
+  btf.getScript('https://client.crisp.chat/l.js').then(() => {
+    const isChatBtn = true
+    const isChatHideShow = false
+
+    if (isChatBtn) {
+      const open = () => {
+        $crisp.push(["do", "chat:show"])
+        $crisp.push(["do", "chat:open"])
+      }
+
+      const close = () => $crisp.push(["do", "chat:hide"])
+
+      close()
+
+      $crisp.push(["on", "chat:closed", close])
+
+      window.chatBtnFn = () => $crisp.is("chat:visible") ? close() : open()
+
+      document.getElementById('chat-btn').style.display = 'block'
+    } else if (isChatHideShow) {
+      window.chatBtn = {
+        hide: () => $crisp.push(["do", "chat:hide"]),
+        show: () => $crisp.push(["do", "chat:show"])
+      }
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div id="algolia-search-input"><div class="ais-SearchBox"><form class="ais-SearchBox-form" action="" role="search" novalidate=""><input class="ais-SearchBox-input" type="search" placeholder="搜索文章" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="512" aria-label="Search"/><button class="ais-SearchBox-submit" type="submit" title="Submit the search query" style="display:none;"><svg class="ais-SearchBox-submitIcon" width="10" height="10" viewBox="0 0 40 40" aria-hidden="true"><path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"></path></svg></button></form></div><hr/><div id="algolia-search-results"><div id="algolia-hits"><div id="algolia-hits-empty" style="display:none;"></div><div class="ais-Hits" style="display:none;"><ol class="ais-Hits-list"></ol></div></div><div class="ais-Pagination" id="algolia-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="algolia-info"><span class="ais-Stats-text"></span><a class="algolia-poweredBy" href="https://www.algolia.com/?utm_source=algoliasearch.js&amp;utm_medium=website&amp;utm_content=localhost&amp;utm_campaign=poweredby" target="_blank" aria-label="Search by Algolia" rel="noopener noreferrer"><svg class="ais-PoweredBy-logo" height="1.2em" viewBox="0 0 572 64" style="width: auto;"><path fill="#36395A" d="M16 48.3c-3.4 0-6.3-.6-8.7-1.7A12.4 12.4 0 0 1 1.9 42C.6 40 0 38 0 35.4h6.5a6.7 6.7 0 0 0 3.9 6c1.4.7 3.3 1.1 5.6 1.1 2.2 0 4-.3 5.4-1a7 7 0 0 0 3-2.4 6 6 0 0 0 1-3.4c0-1.5-.6-2.8-1.9-3.7-1.3-1-3.3-1.6-5.9-1.8l-4-.4c-3.7-.3-6.6-1.4-8.8-3.4a10 10 0 0 1-3.3-7.9c0-2.4.6-4.6 1.8-6.4a12 12 0 0 1 5-4.3c2.2-1 4.7-1.6 7.5-1.6s5.5.5 7.6 1.6a12 12 0 0 1 5 4.4c1.2 1.8 1.8 4 1.8 6.7h-6.5a6.4 6.4 0 0 0-3.5-5.9c-1-.6-2.6-1-4.4-1s-3.2.3-4.4 1c-1.1.6-2 1.4-2.6 2.4-.5 1-.8 2-.8 3.1a5 5 0 0 0 1.5 3.6c1 1 2.6 1.7 4.7 1.9l4 .3c2.8.2 5.2.8 7.2 1.8 2.1 1 3.7 2.2 4.9 3.8a9.7 9.7 0 0 1 1.7 5.8c0 2.5-.7 4.7-2 6.6a13 13 0 0 1-5.6 4.4c-2.4 1-5.2 1.6-8.4 1.6Zm35.6 0c-2.6 0-4.8-.4-6.7-1.3a13 13 0 0 1-4.7-3.5 17.1 17.1 0 0 1-3.6-10.4v-1c0-2 .3-3.8 1-5.6a13 13 0 0 1 7.3-8.3 15 15 0 0 1 6.3-1.4A13.2 13.2 0 0 1 64 24.3c1 2.2 1.6 4.6 1.6 7.2V34H39.4v-4.3h21.8l-1.8 2.2c0-2-.3-3.7-.9-5.1a7.3 7.3 0 0 0-2.7-3.4c-1.2-.7-2.7-1.1-4.6-1.1s-3.4.4-4.7 1.3a8 8 0 0 0-2.9 3.6c-.6 1.5-.9 3.3-.9 5.4 0 2 .3 3.7 1 5.3a7.9 7.9 0 0 0 2.8 3.7c1.3.8 3 1.3 5 1.3s3.8-.5 5.1-1.3c1.3-1 2.1-2 2.4-3.2h6a11.8 11.8 0 0 1-7 8.7 16 16 0 0 1-6.4 1.2ZM80 48c-2.2 0-4-.3-5.7-1a8.4 8.4 0 0 1-3.7-3.3 9.7 9.7 0 0 1-1.3-5.2c0-2 .5-3.8 1.5-5.2a9 9 0 0 1 4.3-3.1c1.8-.7 4-1 6.7-1H89v4.1h-7.5c-2 0-3.4.5-4.4 1.4-1 1-1.6 2.1-1.6 3.6s.5 2.7 1.6 3.6c1 1 2.5 1.4 4.4 1.4 1.1 0 2.2-.2 3.2-.7 1-.4 1.9-1 2.6-2 .6-1 1-2.4 1-4.2l1.7 2.1c-.2 2-.7 3.8-1.5 5.2a9 9 0 0 1-3.4 3.3 12 12 0 0 1-5.3 1Zm9.5-.7v-8.8h-1v-10c0-1.8-.5-3.2-1.4-4.1-1-1-2.4-1.4-4.2-1.4a142.9 142.9 0 0 0-10.2.4v-5.6a74.8 74.8 0 0 1 8.6-.4c3 0 5.5.4 7.5 1.2s3.4 2 4.4 3.6c1 1.7 1.4 4 1.4 6.7v18.4h-5Zm12.9 0V17.8h5v12.3h-.2c0-4.2 1-7.4 2.8-9.5a11 11 0 0 1 8.3-3.1h1v5.6h-2a9 9 0 0 0-6.3 2.2c-1.5 1.5-2.2 3.6-2.2 6.4v15.6h-6.4Zm34.4 1a15 15 0 0 1-6.6-1.3c-1.9-.9-3.4-2-4.7-3.5a15.5 15.5 0 0 1-2.7-5c-.6-1.7-1-3.6-1-5.4v-1c0-2 .4-3.8 1-5.6a15 15 0 0 1 2.8-4.9c1.3-1.5 2.8-2.6 4.6-3.5a16.4 16.4 0 0 1 13.3.2c2 1 3.5 2.3 4.8 4a12 12 0 0 1 2 6H144c-.2-1.6-1-3-2.2-4.1a7.5 7.5 0 0 0-5.2-1.7 8 8 0 0 0-4.7 1.3 8 8 0 0 0-2.8 3.6 13.8 13.8 0 0 0 0 10.3c.6 1.5 1.5 2.7 2.8 3.6s2.8 1.3 4.8 1.3c1.5 0 2.7-.2 3.8-.8a7 7 0 0 0 2.6-2c.7-1 1-2 1.2-3.2h6.2a11 11 0 0 1-2 6.2 15.1 15.1 0 0 1-11.8 5.5Zm19.7-1v-40h6.4V31h-1.3c0-3 .4-5.5 1.1-7.6a9.7 9.7 0 0 1 3.5-4.8A9.9 9.9 0 0 1 172 17h.3c3.5 0 6 1.1 7.9 3.5 1.7 2.3 2.6 5.7 2.6 10v16.8h-6.4V29.6c0-2.1-.6-3.8-1.8-5a6.4 6.4 0 0 0-4.8-1.8c-2 0-3.7.7-5 2a7.8 7.8 0 0 0-1.9 5.5v17h-6.4Zm63.8 1a12.2 12.2 0 0 1-10.9-6.2 19 19 0 0 1-1.8-7.3h1.4v12.5h-5.1v-40h6.4v19.8l-2 3.5c.2-3.1.8-5.7 1.9-7.7a11 11 0 0 1 4.4-4.5c1.8-1 3.9-1.5 6.1-1.5a13.4 13.4 0 0 1 12.8 9.1c.7 1.9 1 3.8 1 6v1c0 2.2-.3 4.1-1 6a13.6 13.6 0 0 1-13.2 9.4Zm-1.2-5.5a8.4 8.4 0 0 0 7.9-5c.7-1.5 1.1-3.3 1.1-5.3s-.4-3.8-1.1-5.3a8.7 8.7 0 0 0-3.2-3.6 9.6 9.6 0 0 0-9.2-.2 8.5 8.5 0 0 0-3.3 3.2c-.8 1.4-1.3 3-1.3 5v2.3a9 9 0 0 0 1.3 4.8 9 9 0 0 0 3.4 3c1.4.7 2.8 1 4.4 1Zm27.3 3.9-10-28.9h6.5l9.5 28.9h-6Zm-7.5 12.2v-5.7h4.9c1 0 2-.1 2.9-.4a4 4 0 0 0 2-1.4c.4-.7.9-1.6 1.2-2.7l8.6-30.9h6.2l-9.3 32.4a14 14 0 0 1-2.5 5 8.9 8.9 0 0 1-4 2.8c-1.5.6-3.4.9-5.6.9h-4.4Zm9-12.2v-5.2h6.4v5.2H248Z"></path><path fill="#003DFF" d="M534.4 9.1H528a.8.8 0 0 1-.7-.7V1.8c0-.4.2-.7.6-.8l6.5-1c.4 0 .8.2.9.6v7.8c0 .4-.4.7-.8.7zM428 35.2V.8c0-.5-.3-.8-.7-.8h-.2l-6.4 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.5 0 .8-.4.8-.8V43c0-.4-.3-.7-.6-.8-4.5-.5-4.5-6-4.5-7zm106.5-21.8H528c-.4 0-.7.4-.7.8v34c0 .4.3.8.7.8h6.5c.4 0 .8-.4.8-.8v-34c0-.5-.4-.8-.8-.8zm-17.7 21.8V.8c0-.5-.3-.8-.8-.8l-6.5 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.4 0 .8-.4.8-.8V43c0-.4-.3-.7-.7-.8-4.4-.5-4.4-6-4.4-7zm-22.2-20.6a16.5 16.5 0 0 1 8.6 9.3c.8 2.2 1.3 4.8 1.3 7.5a19.4 19.4 0 0 1-4.6 12.6 14.8 14.8 0 0 1-5.2 3.6c-2 .9-5.2 1.4-6.8 1.4a21 21 0 0 1-6.7-1.4 15.4 15.4 0 0 1-8.6-9.3 21.3 21.3 0 0 1 0-14.4 15.2 15.2 0 0 1 8.6-9.3c2-.8 4.3-1.2 6.7-1.2s4.6.4 6.7 1.2zm-6.7 27.6c2.7 0 4.7-1 6.2-3s2.2-4.3 2.2-7.8-.7-6.3-2.2-8.3-3.5-3-6.2-3-4.7 1-6.1 3c-1.5 2-2.2 4.8-2.2 8.3s.7 5.8 2.2 7.8 3.5 3 6.2 3zm-88.8-28.8c-6.2 0-11.7 3.3-14.8 8.2a18.6 18.6 0 0 0 4.8 25.2c1.8 1.2 4 1.8 6.2 1.7s.1 0 .1 0h.9c4.2-.7 8-4 9.1-8.1v7.4c0 .4.3.7.8.7h6.4a.7.7 0 0 0 .7-.7V14.2c0-.5-.3-.8-.7-.8h-13.5zm6.3 26.5a9.8 9.8 0 0 1-5.7 2h-.5a10 10 0 0 1-9.2-14c1.4-3.7 5-6.3 9-6.3h6.4v18.3zm152.3-26.5h13.5c.5 0 .8.3.8.7v33.7c0 .4-.3.7-.8.7h-6.4a.7.7 0 0 1-.8-.7v-7.4c-1.2 4-4.8 7.4-9 8h-.1a4.2 4.2 0 0 1-.5.1h-.9a10.3 10.3 0 0 1-7-2.6c-4-3.3-6.5-8.4-6.5-14.2 0-3.7 1-7.2 3-10 3-5 8.5-8.3 14.7-8.3zm.6 28.4c2.2-.1 4.2-.6 5.7-2V21.7h-6.3a9.8 9.8 0 0 0-9 6.4 10.2 10.2 0 0 0 9.1 13.9h.5zM452.8 13.4c-6.2 0-11.7 3.3-14.8 8.2a18.5 18.5 0 0 0 3.6 24.3 10.4 10.4 0 0 0 13 .6c2.2-1.5 3.8-3.7 4.5-6.1v7.8c0 2.8-.8 5-2.2 6.3-1.5 1.5-4 2.2-7.5 2.2l-6-.3c-.3 0-.7.2-.8.5l-1.6 5.5c-.1.4.1.8.5 1h.1c2.8.4 5.5.6 7 .6 6.3 0 11-1.4 14-4.1 2.7-2.5 4.2-6.3 4.5-11.4V14.2c0-.5-.4-.8-.8-.8h-13.5zm6.3 8.2v18.3a9.6 9.6 0 0 1-5.6 2h-1a10.3 10.3 0 0 1-8.8-14c1.4-3.7 5-6.3 9-6.3h6.4zM291 31.5A32 32 0 0 1 322.8 0h30.8c.6 0 1.2.5 1.2 1.2v61.5c0 1.1-1.3 1.7-2.2 1l-19.2-17a18 18 0 0 1-11 3.4 18.1 18.1 0 1 1 18.2-14.8c-.1.4-.5.7-.9.6-.1 0-.3 0-.4-.2l-3.8-3.4c-.4-.3-.6-.8-.7-1.4a12 12 0 1 0-2.4 8.3c.4-.4 1-.5 1.6-.2l14.7 13.1v-46H323a26 26 0 1 0 10 49.7c.8-.4 1.6-.2 2.3.3l3 2.7c.3.2.3.7 0 1l-.2.2a32 32 0 0 1-47.2-28.6z"></path></svg></a></div></div></div></div><div id="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/algoliasearch/dist/lite/builds/browser.umd.min.js"></script><script src="/js/search/algolia.js"></script></div></div></body></html>
