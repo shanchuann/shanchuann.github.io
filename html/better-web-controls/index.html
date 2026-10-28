@@ -1,0 +1,1686 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>山川不念旧 | 山川不念旧</title><meta name="author" content="张念川"><meta name="copyright" content="张念川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0b131b"><meta name="description" content="Better Web Controls：给 AI 的网页控件词典   document.documentElement.classList.add(&quot;js&quot;);           &#x2F;* &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; tokens &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; *&#x2F; :root{   --bg:#141414;   --surface:#1c1c1c;   --surface-3:#242424">
+<meta property="og:type" content="website">
+<meta property="og:title" content="山川不念旧">
+<meta property="og:url" content="https://shanchuann.cn/html/better-web-controls/index.html">
+<meta property="og:site_name" content="山川不念旧">
+<meta property="og:description" content="Better Web Controls：给 AI 的网页控件词典   document.documentElement.classList.add(&quot;js&quot;);           &#x2F;* &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; tokens &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; *&#x2F; :root{   --bg:#141414;   --surface:#1c1c1c;   --surface-3:#242424">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg">
+<meta property="article:published_time" content="2026-10-28T06:05:59.269Z">
+<meta property="article:modified_time" content="2026-10-28T06:05:59.269Z">
+<meta property="article:author" content="张念川">
+<meta property="article:tag" content="学习">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="见闻">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg"><script type="application/ld+json"></script><link rel="shortcut icon" href="https://s2.loli.net/2025/09/25/NAM3XhUgxbjpVrJ.png"><link rel="canonical" href="https://shanchuann.cn/html/better-web-controls/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0b131b')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#eef2f6')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: {"appId":"L7P2ELNLTD","apiKey":"d6168abb683b7c70b4ef9bbee1fa469a","indexName":"Shanchuan","hitsPerPage":6,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，耗时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#9a4d1a","bgDark":"#16242f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '山川不念旧',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'page'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start --><link rel="preload" as="image" href="/images/sensoji-dusk.jpg"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.0.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background-image: url(/images/sensoji-dusk.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">99</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://dietary-planning.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 饮食计划</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://green-seed-two.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 青禾招聘</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://lingo-quest-green.vercel.app/"><i class="fa-fw fas fa-code"></i><span> LingoQuest</span></a></li><li><a class="site-page child" href="/html/better-web-controls/"><i class="fa-fw fas fa-code"></i><span> Better Web Controls</span></a></li></ul></div></div></div></div><div class="page" id="body-wrap"><header class="not-home-page" id="page-header" style="background-image: url(/images/tokyo-night-top.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">山川不念旧</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://dietary-planning.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 饮食计划</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://green-seed-two.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 青禾招聘</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://lingo-quest-green.vercel.app/"><i class="fa-fw fas fa-code"></i><span> LingoQuest</span></a></li><li><a class="site-page child" href="/html/better-web-controls/"><i class="fa-fw fas fa-code"></i><span> Better Web Controls</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="page-site-info"><h1 id="site-title"></h1></div></header><main class="layout" id="content-inner"><div id="page"><div class="container" id="article-container"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Better Web Controls：给 AI 的网页控件词典</title>
+<meta name="description" content="把做个下拉、加个按钮这类说法，翻译成控件名称、形式与操作规则。规格写清楚，AI 的产出才可验收。">
+<meta name="theme-color" content="#141414">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Better Web Controls：给 AI 的网页控件词典">
+<meta property="og:description" content="把模糊的控件需求，翻译成 AI 一次做对的规格。">
+<meta property="og:locale" content="zh_CN">
+<link rel="preconnect" href="https://fonts.loli.net">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+/* ============ tokens ============ */
+:root{
+  --bg:#141414;
+  --surface:#1c1c1c;
+  --surface-3:#242424;
+  --surface-4:#2d2d2d;
+  --ink:#dedede;
+  --ink-11:#c2c2c2;
+  --ink-10:#a6a6a6;
+  --ink-9:#8a8a8a;
+  --ink-7:#5a5a5a;
+  --violet:#c2a8ff;
+  --violet-2:#d4c2ff;
+  --violet-3:#e2d6ff;
+  --violet-ink:#110b1e;
+  --violet-deep:#2b1561;
+  --yellow:#ffef93;
+  --yellow-2:#fff3ad;
+  --yellow-ink:#181501;
+  --yellow-deep:#7a6800;
+  --blue:#aee0ff;
+  --line:rgba(222,222,222,.11);
+  --line-2:rgba(222,222,222,.18);
+  --font:"Plus Jakarta Sans","Noto Sans SC",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono","SF Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-strong:cubic-bezier(.76,0,.24,1);
+  --r-lg:20px;
+  --r-md:12px;
+  --r-full:9999px;
+  --pad:clamp(20px,3.6vw,52px);
+  --max:1280px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--font);
+  font-size:16px;line-height:1.7;font-weight:400;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  overflow-x:clip;
+}
+::selection{background:var(--ink);color:var(--bg)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#101010}
+::-webkit-scrollbar-thumb{background:#2d2d2d;border-radius:99px;border:2px solid #101010}
+::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img,canvas{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--yellow);outline-offset:3px;border-radius:4px}
+.path.yel :focus-visible{outline-color:var(--yellow-ink)}
+.path.vio :focus-visible{outline-color:var(--violet-ink)}
+.container{width:100%;max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:fixed;left:16px;top:-80px;z-index:9999;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:var(--r-full);font-size:14px;font-weight:600;transition:top .2s var(--ease)}
+.skip:focus{top:16px}
+
+/* ============ grain ============ */
+.grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;--grain-a:none;--grain-b:none}
+.grain::before,.grain::after{content:"";position:absolute;inset:0;background-repeat:repeat;background-size:180px 180px}
+.grain::before{background-image:var(--grain-a);animation:grainA .44s steps(1) infinite}
+.grain::after{background-image:var(--grain-b);animation:grainB .44s steps(1) infinite}
+@keyframes grainA{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes grainB{0%,49%{opacity:0}50%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.grain::after{display:none}.grain::before{animation:none}}
+
+/* ============ nav ============ */
+.nav{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;
+  width:min(1010px,calc(100% - 40px));min-width:0;
+  border:1px solid transparent;border-radius:var(--r-full);
+  transition:width .5s var(--ease),background .5s var(--ease),border-color .5s var(--ease),box-shadow .5s var(--ease),backdrop-filter .5s var(--ease);
+}
+.nav.scrolled{width:min(880px,calc(100% - 40px));background:rgba(28,28,28,.72);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-color:var(--line-2);box-shadow:0 2px 20px rgba(0,0,0,.35)}
+.nav-main{display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 12px 0 16px}
+.nav-brand{display:inline-flex;align-items:center;gap:9px;height:44px;flex:none;margin-right:16px}
+.nav-brand .mark{width:26px;height:26px;flex:none;display:grid;place-items:center}
+.nav-brand .mark svg{width:26px;height:26px;display:block}
+.nav-name{font-weight:600;font-size:14.5px;letter-spacing:.01em;white-space:nowrap}
+.nav-menu{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px}
+.nav-menu a{display:inline-block;height:44px;line-height:44px;padding:0 14px;font-size:15px;font-weight:500;border-radius:var(--r-full);overflow:hidden;color:var(--ink)}
+.nav-menu a .slot{display:block;transition:transform .3s var(--ease-strong)}
+.nav-menu a .slot span{display:block;height:44px;line-height:44px;white-space:nowrap}
+.nav-menu a:hover .slot{transform:translateY(-44px)}
+.nav-menu a[aria-current="true"]{color:var(--yellow)}
+.nav-actions{display:flex;align-items:center;gap:6px;flex:none}
+.nav-toggle{display:none;width:44px;height:44px;align-items:center;justify-content:center;border-radius:var(--r-full);color:var(--ink-10)}
+.nav-toggle svg{width:18px;height:18px}
+
+/* ============ buttons ============ */
+.btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  gap:9px;height:48px;padding:0 28px;border-radius:var(--r-full);
+  font-size:15px;font-weight:500;letter-spacing:.01em;overflow:hidden;isolation:isolate;
+  transition:color .3s var(--ease),border-color .3s var(--ease),background .3s var(--ease),opacity .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn .btn-in{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn .blob{
+  position:absolute;left:0;top:0;width:0;height:0;border-radius:50%;z-index:0;
+  background:var(--violet);transform:translate(-50%,-50%) scale(0);
+  transition:transform .5s var(--ease);pointer-events:none;
+}
+.btn:hover .blob,.btn:focus-visible .blob{transform:translate(-50%,-50%) scale(1)}
+.btn-solid{background:var(--ink);color:#141414;font-weight:600}
+.btn-ghost{border:1px solid var(--line-2);color:var(--ink)}
+.btn-ghost .blob{background:rgba(222,222,222,.12)}
+.btn-ghost:hover{border-color:var(--ink-10)}
+.btn-sm{height:40px;padding:0 20px;font-size:14px}
+
+/* ============ hero ============ */
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:clamp(120px,20vh,240px) 0 clamp(64px,9vw,110px)}
+.hero .container{max-width:1240px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.2em;color:var(--ink-9);margin-bottom:clamp(28px,3.4vw,40px);display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.eyebrow .v{color:var(--violet)}
+.eyebrow .y{color:var(--yellow)}
+.eyebrow .sep{display:inline-block;width:1px;height:12px;background:var(--line-2);vertical-align:middle}
+.hero-title{
+  font-size:clamp(42px,6.2vw,86px);font-weight:500;line-height:1.08;
+  letter-spacing:-.02em;margin-bottom:clamp(28px,3.4vw,40px);color:var(--ink);
+  text-wrap:balance;
+}
+.hero-title .line{display:block}
+.hero-title .ch{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.16em;margin-bottom:-.16em}
+.hero-title .ch > span{display:inline-block;transform:translateY(112%)}
+.hero-title.split .ch > span{animation:charUp 1s var(--ease) forwards;animation-delay:var(--d)}
+.hero-title .pword{position:relative;display:inline-block;color:var(--ink)}
+.hero-title.split .pword > .pword-src{opacity:0}
+.hero-title .pword-src{display:inline-block;transition:opacity .3s linear}
+.hero-title .pword-canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+@keyframes charUp{to{transform:translateY(0)}}
+.hero-sub{
+  font-size:clamp(17px,1.55vw,23px);line-height:1.7;font-weight:400;
+  max-width:30em;color:var(--ink);margin-bottom:clamp(32px,3.6vw,44px);
+}
+.hero-br{display:none}
+@media (min-width:821px){.hero-br{display:block}}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.hero-note{margin-top:22px;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--ink-9)}
+.hero-note b{color:var(--ink-10);font-weight:500}
+
+/* ============ ticker ============ */
+.ticker{
+  padding:20px 0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0 90px,#000 200px calc(100% - 200px),transparent calc(100% - 90px) 100%);
+  mask-image:linear-gradient(90deg,transparent 0 90px,#000 200px calc(100% - 200px),transparent calc(100% - 90px) 100%);
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.ticker-track{display:flex;width:max-content;animation:tickerMove 55s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker{position:relative}
+.ticker-pause{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:2;
+  font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--ink-10);
+  background:rgba(20,20,20,.9);border:1px solid var(--line-2);border-radius:var(--r-full);
+  display:inline-flex;align-items:center;min-height:44px;padding:0 14px;
+  opacity:0;transition:opacity .2s ease,color .2s ease;
+}
+.ticker:hover .ticker-pause,.ticker:focus-within .ticker-pause{opacity:1}
+.ticker-pause:focus-visible{opacity:1;color:var(--ink)}
+.ticker.paused .ticker-track{animation-play-state:paused}
+.ticker.paused .ticker-pause{opacity:1;color:var(--ink)}
+@media (hover:none){.ticker-pause{opacity:1}}
+@media (prefers-reduced-motion:reduce){.ticker-pause{display:none}}
+.ticker-item{
+  display:inline-flex;align-items:center;padding:0 clamp(24px,3vw,48px);
+  font-size:14px;font-weight:500;color:var(--ink-10);white-space:nowrap;
+  border-right:1px solid var(--surface-4);
+}
+/* ============ sections ============ */
+.section{position:relative;padding:clamp(100px,12vw,190px) 0 clamp(64px,7vw,105px)}
+.label{
+  font-size:12.5px;font-weight:700;letter-spacing:.2em;color:var(--ink-9);
+  text-transform:uppercase;margin-bottom:clamp(36px,5.5vw,80px);
+}
+@keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* reveal (only when JS is running, so no-JS keeps content visible) */
+.js [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js [data-reveal].in{opacity:1;transform:none}
+
+/* ============ translate ============ */
+.section-translate{padding-bottom:clamp(40px,5vw,80px)}
+#work{padding-top:clamp(56px,6vw,96px)}
+.translate{display:grid;grid-template-columns:1fr 1px 1fr;gap:clamp(24px,4vw,56px);align-items:stretch}
+.tr-col{display:flex;flex-direction:column;gap:16px}
+.tr-tag{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;color:var(--ink-9);text-transform:uppercase}
+.tr-said{font-size:clamp(19px,1.9vw,24px);line-height:1.6;letter-spacing:-.01em;color:var(--ink-10);font-weight:400}
+.tr-col.after .tr-said{color:var(--ink)}
+.tr-res{font-size:14px;line-height:1.75;color:var(--ink-9);max-width:30em}
+.tr-mid{width:1px;min-height:160px;background:var(--line-2);align-self:stretch}
+
+/* ============ work ============ */
+.work-list{display:flex;flex-direction:column;gap:clamp(44px,5vw,56px)}
+.work{position:relative}
+.work-media{display:block;position:relative;overflow:hidden;border-radius:var(--r-md);background:var(--surface);cursor:pointer;aspect-ratio:16/9;transition:transform .5s var(--ease)}
+.work-media img{width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .9s var(--ease)}
+@media (hover:hover) and (pointer:fine){
+  .work-media:hover{transform:translateY(-2px)}
+  .work-media:hover img{transform:scale(1.05)}
+}
+.work-body{padding:24px 0 4px}
+.work-tags{font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--ink-9);margin-bottom:8px;text-transform:uppercase}
+.work-tags span + span::before{content:"";display:inline-block;width:14px;height:1px;background:currentColor;opacity:.45;vertical-align:middle;margin:0 .55em;position:relative;top:-1px}
+.work-title{font-size:clamp(18px,1.7vw,24px);font-weight:500;letter-spacing:-.01em;line-height:1.5;color:var(--ink)}
+.work-suffix{display:inline-block;height:1.5em;overflow:hidden;vertical-align:bottom;max-width:100%}
+.work-suffix > span{display:block;transform:translateY(100%);transition:transform .4s var(--ease-strong);color:var(--yellow)}
+.work:nth-child(3n+2) .work-suffix > span{color:var(--violet)}
+.work:nth-child(3n) .work-suffix > span{color:var(--blue)}
+.work-media:hover ~ .work-body .work-suffix > span,.work:hover .work-suffix > span{transform:translateY(0)}
+@media (hover:none){.work-suffix{display:none}}
+
+/* cursor pill */
+.cursor-pill{
+  position:fixed;left:0;top:0;z-index:9000;pointer-events:none;
+  background:var(--yellow);color:var(--yellow-deep);
+  font-size:12px;font-weight:700;letter-spacing:.08em;
+  padding:8px 16px;border-radius:var(--r-full);white-space:nowrap;
+  opacity:0;transform:translate(-50%,-50%) scale(.9);will-change:left,top,opacity;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.cursor-pill.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+@media (hover:none){.cursor-pill{display:none}}
+
+/* ============ stack ============ */
+.stack-wrap{position:relative}
+.stack-label{margin-bottom:clamp(40px,5vw,64px)}
+.stack{list-style:none}
+.step{
+  position:sticky;top:calc(32vh - 25px);
+  min-height:46vh;padding-top:8px;background:var(--bg);
+  transform-origin:top center;will-change:transform;
+}
+.step .num{display:block;font-size:22px;font-weight:700;letter-spacing:.16em;color:var(--blue);margin-bottom:clamp(16px,2vw,26px)}
+.step h3{
+  font-size:clamp(30px,3.6vw,52px);font-weight:400;letter-spacing:-.02em;line-height:1.16;
+  color:var(--ink);max-width:24ch;margin-bottom:clamp(18px,2vw,28px);
+}
+.step p{
+  font-size:clamp(19px,2.35vw,36px);line-height:1.4;font-weight:400;
+  color:var(--ink-9);max-width:32ch;letter-spacing:-.01em;
+}
+.stack-end{height:6vh}
+
+/* ============ eval ============ */
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,64px);padding-bottom:clamp(24px,3vw,40px)}
+.score{}
+.score .who{display:block;font-size:12.5px;font-weight:700;letter-spacing:.18em;color:var(--ink-9);margin-bottom:18px}
+.score .big{display:block;font-size:clamp(56px,7vw,96px);font-weight:400;letter-spacing:-.03em;line-height:1;margin-bottom:14px}
+.score.strong .big{color:var(--yellow)}
+.score .frac{font-size:14px;color:var(--ink-10);letter-spacing:.01em}
+.score-note{margin-top:18px;font-size:14px;color:var(--ink-9);max-width:34em;line-height:1.7}
+.delta{display:flex;align-items:baseline;gap:14px;padding:28px 0 0;border-top:1px solid var(--line);margin-top:clamp(8px,1.4vw,16px)}
+.delta b{font-size:clamp(24px,2.6vw,34px);font-weight:500;color:var(--ink);letter-spacing:-.02em}
+.delta span{font-size:14px;color:var(--ink-9)}
+.eval-table{width:100%;border-collapse:collapse;margin-top:clamp(40px,5vw,64px);font-size:14.5px}
+.eval-table th{
+  text-align:left;font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--ink-9);
+  padding:0 16px 14px 0;border-bottom:1px solid var(--line-2);text-transform:uppercase;
+}
+.eval-table td{padding:16px 16px 16px 0;border-bottom:1px solid var(--line);color:var(--ink-10);vertical-align:top}
+.eval-table td:first-child{color:var(--ink-9);font-family:var(--mono);font-size:12.5px;width:48px}
+.eval-table td.sc{color:var(--ink);white-space:nowrap}
+.eval-table td.ok{color:var(--ink);font-family:var(--mono);font-size:13px}
+.eval-table td.miss{color:var(--ink-9);font-family:var(--mono);font-size:13px}
+.eval-table tr:hover td{background:rgba(222,222,222,.025)}
+.eval-table td:last-child{color:var(--ink-9);font-size:13.5px}
+.m-fail{display:none}
+.findings{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,64px);margin-top:clamp(40px,5vw,64px)}
+.finding h3{font-size:16px;font-weight:600;margin-bottom:10px;letter-spacing:.01em}
+.finding p{font-size:14.5px;line-height:1.75;color:var(--ink-10)}
+
+/* ============ refs ============ */
+.refs{list-style:none}
+.ref:first-child{border-top:1px solid var(--line)}
+.ref{
+  display:grid;grid-template-columns:200px 1fr;gap:clamp(16px,3vw,48px);
+  padding:clamp(22px,2.4vw,30px) 0;border-bottom:1px solid var(--line);
+  transition:background .3s var(--ease);
+}
+.ref:hover{background:rgba(222,222,222,.02)}
+.ref-file{font-family:var(--mono);font-size:13.5px;color:var(--ink-9);transition:color .3s var(--ease);letter-spacing:.01em}
+.ref:hover .ref-file{color:var(--yellow)}
+.ref-body{display:flex;flex-direction:column;gap:6px}
+.ref-name{font-size:17px;font-weight:500;color:var(--ink)}
+.ref-desc{font-size:14px;line-height:1.75;color:var(--ink-9);max-width:78ch}
+
+/* ============ install ============ */
+.install{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,4vw,56px);align-items:start}
+.term{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.term-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.term-bar span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-9)}
+.copy{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-10);border:1px solid var(--line-2);border-radius:var(--r-full);padding:6px 14px;transition:color .2s,border-color .2s,background .2s}
+.copy:hover{color:var(--ink);border-color:var(--ink-7)}
+.copy svg{width:13px;height:13px}
+.term-body{padding:20px 20px 24px;font-family:var(--mono);font-size:13px;line-height:1.9;overflow-x:auto}
+.term-line{white-space:pre-wrap;overflow-wrap:anywhere}
+.term-line .cm{color:var(--ink-9)}
+.term-line .pr{color:var(--ink-9);margin-right:8px}
+.term-line .cmd{color:var(--ink)}
+.term-line .cmd b{color:var(--yellow);font-weight:500}
+.env-notes{list-style:none}
+.env-note{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:20px 0;border-bottom:1px solid var(--line)}
+.env-note:first-child{border-top:1px solid var(--line)}
+.env-note > span:first-child{font-family:var(--mono);font-size:12px;color:var(--ink-9);padding-top:3px}
+.env-note > span:last-child{font-size:14.5px;line-height:1.7;color:var(--ink-10)}
+.env-note b{color:var(--ink);font-weight:500}
+.env-note code{font-family:var(--mono);font-size:13px;color:var(--ink-11)}
+
+/* ============ paths ============ */
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:clamp(20px,3vw,32px)}
+.path{
+  position:relative;display:flex;flex-direction:column;min-height:420px;
+  padding:clamp(28px,3.4vw,40px);border-radius:var(--r-lg);isolation:isolate;overflow:hidden;
+  color:var(--violet-ink);
+  transition:transform .5s var(--ease);
+}
+.path.vio{background:var(--violet)}
+.path.yel{background:var(--yellow);color:var(--yellow-ink)}
+.path::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;opacity:0;
+  background:radial-gradient(ellipse 90% 90% at var(--bx,50%) var(--by,50%),rgba(255,255,255,.35),transparent 70%);
+  transition:opacity .4s var(--ease);
+}
+.path:hover::before{opacity:1}
+.path-label{font-size:12px;font-weight:700;letter-spacing:.18em;opacity:.82;margin-bottom:clamp(24px,4vw,44px)}
+.path h3{font-size:clamp(24px,2.2vw,30px);font-weight:400;line-height:1.25;letter-spacing:-.01em;margin-bottom:18px;max-width:16ch}
+.path p{font-size:16px;line-height:1.75;max-width:30ch;opacity:.72;margin-bottom:auto}
+.path-pill{
+  align-self:flex-start;margin-top:40px;display:inline-flex;align-items:center;gap:8px;
+  height:44px;padding:0 22px;border-radius:var(--r-full);font-size:14px;font-weight:600;
+  transition:transform .4s var(--ease),background .3s var(--ease);
+}
+.path.vio .path-pill{background:var(--violet-3);color:var(--violet-deep)}
+.path.yel .path-pill{background:var(--yellow-2);color:var(--yellow-deep)}
+.path:hover .path-pill{transform:translateX(4px)}
+.path:hover{transform:translateY(-3px)}
+
+/* ============ final cta ============ */
+.final{padding:clamp(60px,7vw,80px) 0;border-top:1px solid var(--line)}
+.final h2{font-size:clamp(20px,1.9vw,24px);font-weight:500;line-height:1.3;letter-spacing:-.01em;margin-bottom:clamp(24px,3vw,36px);color:var(--ink)}
+.final h2 span{display:block}
+
+/* ============ footer ============ */
+.footer{background:var(--bg);padding:clamp(40px,5vw,60px) 0 clamp(40px,6vw,80px)}
+.foot-name{
+  font-size:clamp(40px,8.2vw,116px);font-weight:500;line-height:.94;letter-spacing:-.04em;
+  color:var(--surface-3);white-space:nowrap;margin-bottom:clamp(28px,3vw,40px);
+  -webkit-user-select:none;user-select:none;
+}
+.foot-tag{font-size:clamp(16px,1.4vw,20px);color:var(--ink);margin-bottom:clamp(24px,3vw,32px)}
+.foot-links{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:clamp(40px,5vw,64px)}
+.foot-links a{
+  display:inline-flex;align-items:center;height:40px;padding:0 18px;border-radius:var(--r-full);
+  background:var(--surface-3);font-size:13.5px;color:var(--ink-11);
+  transition:background .3s var(--ease),color .3s var(--ease);
+}
+.foot-links a:hover{background:var(--ink);color:var(--bg)}
+.foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding-top:24px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-9)}
+.foot-base a{color:var(--ink-9);transition:color .2s}
+.foot-base a:hover{color:var(--ink)}
+
+/* ============ lightbox ============ */
+.lightbox{
+  position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:clamp(20px,5vw,60px);
+  background:rgba(12,12,12,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s;
+}
+.lightbox.open{opacity:1;visibility:visible}
+.lightbox img{max-width:min(1200px,100%);max-height:84vh;width:auto;height:auto;border-radius:var(--r-md);box-shadow:0 40px 100px rgba(0,0,0,.6)}
+.lb-close{
+  position:absolute;top:clamp(14px,2.4vw,28px);right:clamp(14px,2.4vw,28px);
+  width:46px;height:46px;border-radius:var(--r-full);border:1px solid var(--line-2);
+  display:grid;place-items:center;color:var(--ink);background:rgba(28,28,28,.6);
+  transition:background .2s,border-color .2s;
+}
+.lb-close:hover{background:var(--surface-3);border-color:var(--ink-7)}
+.lb-cap{position:absolute;left:0;right:0;bottom:clamp(14px,2.4vw,26px);text-align:center;font-size:13px;color:var(--ink-9)}
+
+/* ============ responsive ============ */
+@media (max-width:1120px){
+  .nav-name{display:none}
+  .nav{width:calc(100% - 32px)}
+  .nav.scrolled{width:calc(100% - 32px)}
+  .nav-menu a{padding:0 10px;font-size:14.5px}
+  .install{grid-template-columns:1fr;gap:36px}
+  .scores,.findings{grid-template-columns:1fr;gap:40px}
+  .ref{grid-template-columns:1fr;gap:8px}
+}
+@media (max-width:820px){
+  .nav-main{height:56px}
+  .nav-menu{display:none}
+  .nav{top:auto;bottom:calc(18px + env(safe-area-inset-bottom));width:min(420px,calc(100% - 32px));background:rgba(28,28,28,.86);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-color:var(--line-2);border-radius:28px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .nav.scrolled{background:rgba(28,28,28,.86);border-color:var(--line-2)}
+  .nav-main{flex-wrap:wrap;padding:0 14px 0 18px;height:auto;min-height:56px}
+  .nav-brand{order:1}
+  .nav-actions{order:2;margin-left:auto}
+  .nav-menu{order:3}
+  .nav-name{display:inline}
+  .nav-name{font-size:14px}
+  .nav-cta{display:none}
+  .nav-toggle{display:inline-flex}
+  .nav.open .nav-menu{display:flex;flex-direction:column;align-items:stretch;position:static;transform:none;width:100%;padding:0 0 14px;gap:0}
+  .nav.open .nav-menu a{height:46px;line-height:46px;padding:0 6px;border-top:1px solid var(--line);border-radius:0;text-align:right}
+  .nav.open .nav-menu a .slot span{height:46px;line-height:46px}
+  .nav.open .nav-menu a:hover .slot{transform:none}
+  .hero{min-height:auto;padding-top:120px}
+  .hero-title{font-size:clamp(34px,10.6vw,58px);line-height:1.12}
+  .hero .container{padding:0 22px}
+  .section{padding:72px 0 48px}
+  .translate{grid-template-columns:1fr;gap:28px}
+  .tr-mid{width:100%;height:1px;min-height:0}
+  .tr-said{font-size:18px}
+  .label{letter-spacing:.16em;margin-bottom:32px}
+  .stack{display:flex;flex-direction:column;gap:56px;margin-top:0}
+  .step{position:static;min-height:0;padding:0}
+  .stack-label{position:static;margin-bottom:36px}
+  .stack-end{display:none}
+  .step h3{font-size:clamp(26px,7vw,36px);margin-bottom:14px}
+  .step p{font-size:clamp(17px,5vw,22px)}
+  .work-media{aspect-ratio:4/3;border-radius:10px}
+  .work-body{padding:18px 0 0}
+  .work-tags{font-size:11px;letter-spacing:.1em}
+  .work-jump{display:none}
+  .eval-table{font-size:13px}
+  .eval-table th{padding-bottom:10px}
+  .eval-table td{padding:12px 8px 12px 0}
+  .eval-table td:nth-child(5){display:none}
+  .eval-table th:nth-child(5){display:none}
+  .m-fail{display:block;font-size:12px;font-weight:400;color:var(--ink-9);margin-top:5px;line-height:1.6}
+  .delta{padding-top:20px}
+  .path{min-height:0}
+  .path p{max-width:100%}
+  .foot-name{white-space:normal;line-height:1.02;letter-spacing:-.03em}
+  .foot-base{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  [data-reveal]{opacity:1;transform:none}
+  .hero-title .ch > span{transform:none}
+  .ticker-track{animation:none;flex-wrap:wrap;width:auto}
+  .ticker{-webkit-mask-image:none;mask-image:none}
+  .work-media:hover img{transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<div class="grain" id="grain" aria-hidden="true"></div>
+
+<nav class="nav" id="nav" aria-label="站内导航">
+  <div class="nav-main">
+    <a class="nav-brand" href="#top" aria-label="Better Web Controls 首页">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <path d="M1023.5 125L1023.5 1023L176 1023.5L167.75 1013.75Q159.5 1004 153 994.5Q146.5 985 141 975.5Q135.5 966 126 945.5Q116.5 925 111.5 910Q106.5 895 103.5 882.5Q100.5 870 98.5 858.5Q96.5 847 95 832Q93.5 817 94 784Q94.5 751 96.5 736.5Q98.5 722 102.5 704Q106.5 686 114.5 663.5Q122.5 641 135.5 616Q148.5 591 152 582.5Q155.5 574 158.5 563.5Q161.5 553 163 544Q164.5 535 164.5 521.5Q164.5 508 161 483Q157.5 458 155.5 432Q153.5 406 153 405.5Q152.5 405 152.5 399Q152.5 393 152 392.5Q151.5 392 151.5 384.5Q151.5 377 151 376.5Q150.5 376 150 331.5Q149.5 287 150.5 281Q151.5 275 154.5 266.5Q157.5 258 163.5 248.5Q169.5 239 177.75 230.75Q186 222.5 193 218Q200 213.5 204.5 211.5Q209 209.5 220.5 206.5Q232 203.5 245 204Q258 204.5 268.5 208Q279 211.5 308.5 224.5Q338 237.5 376 257Q414 276.5 445.5 295Q477 313.5 481 315.5Q485 317.5 491 319Q497 320.5 503 320.5Q509 320.5 536.5 313.5Q564 306.5 591.5 301.5Q619 296.5 650.5 293Q682 289.5 698 289Q714 288.5 719 287Q724 285.5 729 282.5Q734 279.5 756.75 255.25Q779.5 231 797.25 213.25Q815 195.5 835 177Q855 158.5 879 138.5Q903 118.5 909 114.5Q915 110.5 921.5 107.5Q928 104.5 939.25 102.25Q950.5 100 959.25 99.75Q968 99.5 980.5 102.5Q993 105.5 1000 109Q1007 112.5 1015.25 118.75Z" fill="#FFFFFF"/>
+          <path d="M467.5 669L475.25 668.75Q483 668.5 486.5 669.5Q490 670.5 495 673.5Q500 676.5 504.25 681.25Q508.5 686 510.5 690Q512.5 694 515.5 707.5Q518.5 721 519.5 723Q520.5 725 520.5 726.5Q520.5 728 521 728.5Q521.5 729 521.5 730.5Q521.5 732 522 732.5Q522.5 733 522.5 734.5Q522.5 736 526.5 750.5Q530.5 765 530.5 767.5Q530.5 770 531 770.5Q531.5 771 531 776Q530.5 781 530 781.5Q529.5 782 529.5 783.5Q529.5 785 526.5 790.5Q523.5 796 519.75 799.75Q516 803.5 513 805.5Q510 807.5 504 809.5Q498 811.5 492 811.5Q486 811.5 485.5 811Q485 810.5 481.5 810Q478 809.5 472.5 806.5Q467 803.5 463.75 800.25Q460.5 797 458.5 794Q456.5 791 455.5 789Q454.5 787 452 775.5Q449.5 764 447.5 758Q445.5 752 445.5 750Q445.5 748 444.5 746Q443.5 744 443.5 742.5Q443.5 741 439.5 726.5Q435.5 712 436 705Q436.5 698 438 695Q439.5 692 439.5 691Q439.5 690 441.5 687Q443.5 684 449.25 678.75Q455 673.5 461.25 671.25Z" fill="#000000"/>
+          <path d="M854.5 601L860.75 600.75Q867 600.5 872 602Q877 603.5 881 606Q885 608.5 889.75 613.75Q894.5 619 896.5 623.5Q898.5 628 903 647.5Q907.5 667 908.5 669Q909.5 671 909.5 672.5Q909.5 674 913 686.5Q916.5 699 916 707Q915.5 715 912.5 721Q909.5 727 903.25 732.75Q897 738.5 890 741Q883 743.5 877.5 743.5Q872 743.5 871.5 743Q871 742.5 869 742.5Q867 742.5 864 741.5Q861 740.5 857.5 738.5Q854 736.5 848.75 730.75Q843.5 725 841.5 720.5Q839.5 716 839 712.5Q838.5 709 837.5 707Q836.5 705 836.5 703.5Q836.5 702 836 701.5Q835.5 701 835.5 699.5Q835.5 698 835 697.5Q834.5 697 834.5 695.5Q834.5 694 834 693.5Q833.5 693 833.5 691.5Q833.5 690 833 689.5Q832.5 689 832.5 687.5Q832.5 686 832 685.5Q831.5 685 831.5 683.5Q831.5 682 831 681.5Q830.5 681 830.5 679.5Q830.5 678 830 677.5Q829.5 677 829.5 675.5Q829.5 674 825.5 659.5Q821.5 645 822 637.5Q822.5 630 825.5 623.5Q828.5 617 832.75 612.75Q837 608.5 840 606.5Q843 604.5 848.75 602.75Z" fill="#000000"/>
+          <path d="M700.5 771L706.25 770.75Q712 770.5 712.5 771Q713 771.5 717.5 772Q722 772.5 727 774.5Q732 776.5 735.5 779Q739 781.5 741.75 784.75Q744.5 788 746.5 793Q748.5 798 748.5 802.5Q748.5 807 747.5 810.5Q746.5 814 744.5 817.5Q742.5 821 737.75 825.75Q733 830.5 730 832.5Q727 834.5 721.5 837Q716 839.5 714.5 839.5Q713 839.5 711 840.5Q709 841.5 706.5 841.5Q704 841.5 703.5 842Q703 842.5 694.5 842.5Q686 842.5 685.5 842Q685 841.5 683 841.5Q681 841.5 676 840Q671 838.5 667 836Q663 833.5 659.75 830.25Q656.5 827 654.5 823Q652.5 819 652 812.5Q651.5 806 652.5 803Q653.5 800 655.5 796.5Q657.5 793 664.25 786.75Q671 780.5 678.5 777Q686 773.5 693.25 772.25Z" fill="#000000"/>
+        </svg>
+      </span>
+      <span class="nav-name">Better Web Controls</span>
+    </a>
+    <div class="nav-menu" id="navMenu">
+      <a href="#translate"><span class="slot"><span>为什么</span><span aria-hidden="true">为什么</span></span></a>
+      <a href="#work"><span class="slot"><span>效果预览</span><span aria-hidden="true">效果预览</span></span></a>
+      <a href="#workflow"><span class="slot"><span>工作流</span><span aria-hidden="true">工作流</span></span></a>
+      <a href="#eval"><span class="slot"><span>评测</span><span aria-hidden="true">评测</span></span></a>
+      <a href="#refs"><span class="slot"><span>参考文件</span><span aria-hidden="true">参考文件</span></span></a>
+      <a href="#install"><span class="slot"><span>安装</span><span aria-hidden="true">安装</span></span></a>
+    </div>
+    <div class="nav-actions">
+      <a class="btn btn-solid btn-sm nav-cta" href="#install">
+        <span class="btn-in">获取技能</span>
+        <span class="blob" aria-hidden="true"></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu" aria-label="展开导航菜单">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16M4 15h16"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+
+<header class="hero" id="top">
+  <div class="container">
+    <p class="eyebrow">
+      <span class="v">网页控件翻译词典</span><span class="sep" aria-hidden="true"></span><span class="y">面向 Vibe Coding</span>
+    </p>
+    <h1 class="hero-title" id="heroTitle">
+      <span class="line">把模糊需求</span>
+      <span class="line"><span class="pword" data-pword="翻译"><span class="pword-src">翻译</span><canvas class="pword-canvas" aria-hidden="true"></canvas></span>成一次做对的规格。</span>
+    </h1>
+    <p class="hero-sub">Better Web Controls 是一本给 AI 读的控件词典。<br class="hero-br">控件名称、形式与操作规则写明白了，AI 才不会靠猜。</p>
+    <div class="hero-cta">
+      <a class="btn btn-solid" href="#install">
+        <span class="btn-in">安装技能</span>
+        <span class="blob" aria-hidden="true"></span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/shanchuann/better-web-controls" target="_blank" rel="noopener">
+        <span class="btn-in">在 GitHub 查看</span>
+        <span class="blob" aria-hidden="true"></span>
+      </a>
+    </div>
+    <p class="hero-note"><b>npx skills add</b> shanchuann/better-web-controls</p>
+  </div>
+</header>
+
+<div class="ticker" id="ticker">
+  <div class="ticker-track" id="tickerTrack" aria-hidden="true">
+    <span class="ticker-item">5 份参考文件</span>
+    <span class="ticker-item">15 类控件</span>
+    <span class="ticker-item">9 个评测场景</span>
+    <span class="ticker-item">36 条断言</span>
+    <span class="ticker-item">75+ agent</span>
+    <span class="ticker-item">单文件 HTML</span>
+    <span class="ticker-item">MIT 许可</span>
+  </div>
+  <button class="ticker-pause" id="tickerPause" type="button" aria-pressed="false" aria-label="暂停滚动字幕">暂停</button>
+</div>
+
+<section class="section section-translate" id="translate">
+  <div class="container">
+    <h2 class="label" data-reveal>同一个需求</h2>
+    <div class="translate" data-reveal>
+      <div class="tr-col">
+        <span class="tr-tag">原话</span>
+        <p class="tr-said">帮我做个下拉，能选负责人</p>
+        <p class="tr-res">AI 自己猜形式、猜操作规则。猜错一次，返工一次。</p>
+      </div>
+      <div class="tr-mid" aria-hidden="true"></div>
+      <div class="tr-col after">
+        <span class="tr-tag">规格</span>
+        <p class="tr-said">负责人用 Select 单选下拉：选项为团队成员、单选、选中打勾、可清空重选、点外部或 Esc 关闭</p>
+        <p class="tr-res">形式与操作规则一次到位，交付可以复核。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="work">
+  <div class="container">
+    <h2 class="label" data-reveal>效果预览</h2>
+    <div class="work-list">
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/login.png" data-full="screenshots/login.png" data-cap="登录页，左右分屏" aria-label="放大查看登录页示例">
+          <img src="screenshots/login.png" alt="登录页示例：左右分屏，左边讲品牌，右边放表单" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>登录页</span><span>分屏</span><span>表单</span></p>
+          <h3 class="work-title">左右分屏的登录页 <span class="work-suffix"><span>左侧讲品牌，右侧放表单</span></span></h3>
+        </div>
+      </article>
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/chart.png" data-full="screenshots/chart.png" data-cap="月度经营报告，汇总在前" aria-label="放大查看月度经营报告示例">
+          <img src="screenshots/chart.png" alt="月度经营报告示例：先给结论，再给趋势与原因" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>图表</span><span>选型</span><span>汇总</span></p>
+          <h3 class="work-title">从上往下读的经营报告 <span class="work-suffix"><span>先结论，再趋势，最后原因</span></span></h3>
+        </div>
+      </article>
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/dropdown.png" data-full="screenshots/dropdown.png" data-cap="下拉选人，单选" aria-label="放大查看下拉选人示例">
+          <img src="screenshots/dropdown.png" alt="下拉选人示例：单选、选中打勾、可清空重选" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>下拉</span><span>单选</span><span>筛选</span></p>
+          <h3 class="work-title">能选负责人的单选下拉 <span class="work-suffix"><span>选中打勾，可清空重选</span></span></h3>
+        </div>
+      </article>
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/navbar.png" data-full="screenshots/navbar.png" data-cap="导航栏，悬浮吸顶" aria-label="放大查看导航栏示例">
+          <img src="screenshots/navbar.png" alt="导航栏示例：桌面悬浮吸顶，移动端沉底" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>导航</span><span>吸顶</span><span>移动端</span></p>
+          <h3 class="work-title">滚动后收窄的导航栏 <span class="work-suffix"><span>桌面悬浮吸顶，移动端沉底</span></span></h3>
+        </div>
+      </article>
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/carousel.png" data-full="screenshots/carousel.png" data-cap="轮播，拖拽回正" aria-label="放大查看轮播示例">
+          <img src="screenshots/carousel.png" alt="轮播示例：按住拖动查看全角度，松手回正" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>轮播</span><span>拖拽</span><span>回正</span></p>
+          <h3 class="work-title">按住拖动的轮播 <span class="work-suffix"><span>松手回正，键盘也能操作</span></span></h3>
+        </div>
+      </article>
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/confirm.png" data-full="screenshots/confirm.png" data-cap="删除确认，输入文字" aria-label="放大查看删除确认示例">
+          <img src="screenshots/confirm.png" alt="删除确认示例：输入完全一致前按钮不可用" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>二次确认</span><span>输入校验</span></p>
+          <h3 class="work-title">输入文字才能删除 <span class="work-suffix"><span>输入一致之前，按钮不可用</span></span></h3>
+        </div>
+      </article>
+
+      <article class="work" data-reveal>
+        <a class="work-media" href="screenshots/empty.png" data-full="screenshots/empty.png" data-cap="空状态，首次使用" aria-label="放大查看空状态示例">
+          <img src="screenshots/empty.png" alt="空状态示例：首次使用提供创建与导入入口" loading="lazy" decoding="async">
+        </a>
+        <div class="work-body">
+          <p class="work-tags"><span>空状态</span><span>引导</span></p>
+          <h3 class="work-title">首次使用的空页面 <span class="work-suffix"><span>给创建和导入两条路</span></span></h3>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="workflow">
+  <div class="container stack-wrap">
+    <div class="stack-label"><h2 class="label">工作流</h2></div>
+    <ol class="stack">
+      <li class="step">
+        <span class="num">01</span>
+        <h3>识别需求类型</h3>
+        <p>控件、布局、交互规则、修复、图表，先归位，再读对应的参考文件。</p>
+      </li>
+      <li class="step">
+        <span class="num">02</span>
+        <h3>列候选，写理由</h3>
+        <p>下拉 7 种、进度 8 种、导航 9 种，用途各不相同。给出 2 至 3 个候选和适用场景，信息不足就先问。</p>
+      </li>
+      <li class="step">
+        <span class="num">03</span>
+        <h3>留下选型笔记</h3>
+        <p>候选对比、判断依据、升级条件写进 notes.md。过程可复核，交付可验收。</p>
+      </li>
+      <li class="step">
+        <span class="num">04</span>
+        <h3>输出规格</h3>
+        <p>按名称、形式、操作规则的固定顺序给出 Prompt，或直接按规格生成页面。</p>
+      </li>
+    </ol>
+    <div class="stack-end" aria-hidden="true"></div>
+  </div>
+</section>
+
+<section class="section" id="eval">
+  <div class="container">
+    <h2 class="label" data-reveal>评测</h2>
+    <div class="scores" data-reveal>
+      <div class="score strong">
+        <span class="who">带技能</span>
+        <span class="big">100%</span>
+        <span class="frac">36 / 36 条断言通过</span>
+        <p class="score-note">产出里有候选对比、选型理由和升级条件，可以拿去验收。</p>
+      </div>
+      <div class="score">
+        <span class="who">不带技能</span>
+        <span class="big">86.1%</span>
+        <span class="frac">31 / 36 条断言通过</span>
+        <p class="score-note">直接给实现，过程不可复核。这一组运行时禁止读取技能目录。</p>
+      </div>
+    </div>
+    <div class="delta" data-reveal><b>+13.9pp</b><span>同一批场景，只差一本词典</span></div>
+
+    <table class="eval-table" data-reveal>
+      <caption class="sr-only">9 个场景的逐项通过情况</caption>
+      <thead>
+        <tr><th scope="col">#</th><th scope="col">场景</th><th scope="col">带技能</th><th scope="col">不带技能</th><th scope="col">不带技能的失败项</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td class="sc">导航栏<span class="m-fail">没有候选对比与选型理由</span></td><td class="ok">4 / 4</td><td class="miss">3 / 4</td><td>没有候选对比与选型理由</td></tr>
+        <tr><td>1</td><td class="sc">页面修复</td><td class="ok">4 / 4</td><td class="ok">4 / 4</td><td>无</td></tr>
+        <tr><td>2</td><td class="sc">轮播</td><td class="ok">4 / 4</td><td class="ok">4 / 4</td><td>无</td></tr>
+        <tr><td>3</td><td class="sc">下拉选人<span class="m-fail">没有候选对比与选型理由</span></td><td class="ok">4 / 4</td><td class="miss">3 / 4</td><td>没有候选对比与选型理由</td></tr>
+        <tr><td>4</td><td class="sc">删除确认</td><td class="ok">4 / 4</td><td class="ok">4 / 4</td><td>无</td></tr>
+        <tr><td>5</td><td class="sc">保存提示</td><td class="ok">4 / 4</td><td class="ok">4 / 4</td><td>无</td></tr>
+        <tr><td>6</td><td class="sc">经营报告图表<span class="m-fail">没有图表选型理由</span></td><td class="ok">4 / 4</td><td class="miss">3 / 4</td><td>没有图表选型理由</td></tr>
+        <tr><td>7</td><td class="sc">空状态双场景<span class="m-fail">无结果态放了错误的大按钮</span></td><td class="ok">4 / 4</td><td class="miss">3 / 4</td><td>无结果态放了错误的大按钮</td></tr>
+        <tr><td>8</td><td class="sc">登录页<span class="m-fail">没有候选对比与选型理由</span></td><td class="ok">4 / 4</td><td class="miss">3 / 4</td><td>没有候选对比与选型理由</td></tr>
+      </tbody>
+    </table>
+
+    <div class="findings">
+      <div class="finding" data-reveal>
+        <h3>差距落在选型过程</h3>
+        <p>5 个失败项里，4 个是没写候选对比与选型理由。裸跑直接给实现，过程不可复核；带技能的产出把判断依据留在了 notes.md 里。</p>
+      </div>
+      <div class="finding" data-reveal>
+        <h3>隐性规则决定对错</h3>
+        <p>空状态一题，裸跑把搜索无果做成了提示加大按钮，还加了新建客户这个会把用户带向错误动作的入口。带技能按搜索改关键词、筛选改条件的规则处理。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="refs">
+  <div class="container">
+    <h2 class="label" data-reveal>参考文件</h2>
+    <ul class="refs">
+      <li class="ref" data-reveal>
+        <span class="ref-file">controls.md</span>
+        <span class="ref-body">
+          <span class="ref-name">控件图鉴</span>
+          <span class="ref-desc">按钮 6 形态、下拉 7 种、轮播 7 种、Tab 6 种、侧边栏 5 种、弹窗、进度 8 种、上传 5 种、表格 5 种、长列表加载 3 种、步骤条、Tooltip、命令面板、特殊控件 10 种、表单输入控件。</span>
+        </span>
+      </li>
+      <li class="ref" data-reveal>
+        <span class="ref-file">layouts.md</span>
+        <span class="ref-body">
+          <span class="ref-name">布局与结构</span>
+          <span class="ref-desc">网站布局 7 种、AI 产品布局 6 种、登录页 5 种、导航 9 种、首页 10 模块、首屏设计、大屏 5 种布局、工作台实战、风格参考图。</span>
+        </span>
+      </li>
+      <li class="ref" data-reveal>
+        <span class="ref-file">rules.md</span>
+        <span class="ref-body">
+          <span class="ref-name">交互规则</span>
+          <span class="ref-desc">提示 7 级、二次确认 7 种、等待体验 6 种、校验时机、表单 7 检查点、空状态 5 种、对齐 5 种、长页面定位 7 种、分组方式、设计术语 7 词、暗色模式、移动端降级 7 项。</span>
+        </span>
+      </li>
+      <li class="ref" data-reveal>
+        <span class="ref-file">fixes.md</span>
+        <span class="ref-body">
+          <span class="ref-name">细节修复</span>
+          <span class="ref-desc">细节修复 7 句，按症状、病因、指令三段写；常见问题 6 句 Prompt。</span>
+        </span>
+      </li>
+      <li class="ref" data-reveal>
+        <span class="ref-file">charts.md</span>
+        <span class="ref-body">
+          <span class="ref-name">图表选型</span>
+          <span class="ref-desc">10 种图表与场景的对应关系，以及用来定夺的决策问句。</span>
+        </span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="install">
+  <div class="container">
+    <h2 class="label" data-reveal>安装</h2>
+    <div class="install">
+      <div class="term" data-reveal>
+        <div class="term-bar">
+          <span>TERMINAL</span>
+          <button class="copy" id="copyBtn" type="button" aria-label="复制安装命令">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            <span id="copyText">复制</span>
+            <span class="sr-only" role="status" id="copyStatus"></span>
+          </button>
+        </div>
+        <div class="term-body">
+          <div class="term-line"><span class="cm"># 交互式安装，自动识别已装好的 agent</span></div>
+          <div class="term-line"><span class="pr">$</span><span class="cmd">npx skills add <b>shanchuann/better-web-controls</b></span></div>
+          <div class="term-line"><span class="cm"># 只写到 OpenCode</span></div>
+          <div class="term-line"><span class="pr">$</span><span class="cmd">npx skills add <b>shanchuann/better-web-controls</b> -a opencode</span></div>
+          <div class="term-line"><span class="cm"># 全局安装，跨项目可用</span></div>
+          <div class="term-line"><span class="pr">$</span><span class="cmd">npx skills add <b>shanchuann/better-web-controls</b> -g</span></div>
+        </div>
+      </div>
+      <ul class="env-notes" data-reveal>
+        <li class="env-note"><span>01</span><span><b>环境。</b>Node.js 22.20 以上。skills CLI 支持 75 个以上的 agent。</span></li>
+        <li class="env-note"><span>02</span><span><b>落位。</b>安装时写入对应 agent 的技能目录：OpenCode 为 <code>.opencode/skills/</code>，全局为 <code>~/.config/opencode/skills/</code>，不用手动放。</span></li>
+        <li class="env-note"><span>03</span><span><b>更新。</b>技能发版后执行 <code>npx skills update</code> 即可。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="paths">
+  <div class="container">
+    <h2 class="label" data-reveal>两种用法</h2>
+    <div class="paths">
+      <a class="path vio" href="#workflow">
+        <span class="path-label">用法一：翻译</span>
+        <h3>把模糊需求翻成规格</h3>
+        <p>描述你想要的页面或控件，做个下拉、导航好看点都行。agent 给出候选、选型理由和可以直接用的 Prompt。</p>
+        <span class="path-pill">看工作流
+        </span>
+      </a>
+      <a class="path yel" href="#work">
+        <span class="path-label">用法二：生成</span>
+        <h3>按规格直接出页面</h3>
+        <p>规格已经明确时，agent 按名称、形式、操作规则生成单文件 HTML。截图里的七个页面都是这么出来的。</p>
+        <span class="path-pill">看效果
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="container">
+    <h2><span>不确定该用哪种控件？</span><span>先把需求翻译成规格。</span></h2>
+    <a class="btn btn-solid" href="https://github.com/shanchuann/better-web-controls" target="_blank" rel="noopener">
+      <span class="btn-in">在 GitHub 查看仓库</span>
+      <span class="blob" aria-hidden="true"></span>
+    </a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p class="foot-name" aria-hidden="true">Better Web Controls</p>
+    <p class="foot-tag">给 AI 的网页控件词典。MIT 许可，自由使用。</p>
+    <div class="foot-links">
+      <a href="https://github.com/shanchuann/better-web-controls" target="_blank" rel="noopener">GitHub</a>
+      <a href="#install">安装</a>
+      <a href="#eval">评测</a>
+      <a href="https://github.com/shanchuann/better-web-controls/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+    <div class="foot-base">
+      <span>2026 Better Web Controls</span>
+      <span>预览图由 AI 在本技能工作流下生成，取自真实评测场景。</span>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<div class="cursor-pill" id="cursorPill" aria-hidden="true">查看案例</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="示例页面大图" aria-hidden="true">
+  <button class="lb-close" id="lbClose" type="button" aria-label="关闭大图">关闭</button>
+  <img id="lbImg" src="screenshots/login.png" alt="">
+  <p class="lb-cap" id="lbCap"></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  /* ---------- grain ---------- */
+  (function grain(){
+    var el = document.getElementById("grain");
+    if (!el) return;
+    function tile(){
+      var size = 180;
+      var c = document.createElement("canvas");
+      c.width = c.height = size;
+      var g = c.getContext("2d");
+      var img = g.createImageData(size, size);
+      for (var i = 0; i < img.data.length; i += 4){
+        var v = Math.random() * 255;
+        img.data[i] = v; img.data[i+1] = v; img.data[i+2] = v;
+        img.data[i+3] = Math.random() * 70;
+      }
+      g.putImageData(img, 0, 0);
+      return "url(" + c.toDataURL() + ")";
+    }
+    el.style.setProperty("--grain-a", tile());
+    el.style.setProperty("--grain-b", tile());
+  })();
+
+  /* ---------- nav ---------- */
+  var nav = document.getElementById("nav");
+  var navToggle = document.getElementById("navToggle");
+  var navMenu = document.getElementById("navMenu");
+  var lastY = window.scrollY;
+  function onScroll(){
+    var y = window.scrollY;
+    nav.classList.toggle("scrolled", y > 40);
+    lastY = y;
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  if (navToggle){
+    navToggle.addEventListener("click", function(){
+      var open = nav.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+  function closeNav(){
+    nav.classList.remove("open");
+    if (navToggle) navToggle.setAttribute("aria-expanded", "false");
+  }
+  navMenu.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", closeNav);
+  });
+  document.addEventListener("click", function(e){
+    if (!nav.classList.contains("open")) return;
+    if (!nav.contains(e.target)) closeNav();
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && nav.classList.contains("open")){ closeNav(); if (navToggle) navToggle.focus(); }
+  });
+
+  /* scrollspy */
+  var spyLinks = Array.prototype.slice.call(navMenu.querySelectorAll("a"));
+  var sections = spyLinks.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  if ("IntersectionObserver" in window){
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        var id = "#" + en.target.id;
+        spyLinks.forEach(function(a){ a.setAttribute("aria-current", a.getAttribute("href") === id ? "true" : "false"); });
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    sections.forEach(function(s){ spy.observe(s); });
+  }
+
+  /* ---------- reveal ---------- */
+  var revEls = document.querySelectorAll("[data-reveal]");
+  if ("IntersectionObserver" in window && !reduce){
+    var rev = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting){ en.target.classList.add("in"); rev.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    revEls.forEach(function(el, i){
+      el.style.transitionDelay = Math.min((i % 3) * 80, 160) + "ms";
+      rev.observe(el);
+    });
+  } else {
+    revEls.forEach(function(el){ el.classList.add("in"); });
+  }
+
+  /* ---------- ticker: duplicate once for seamless loop ---------- */
+  (function ticker(){
+    var track = document.getElementById("tickerTrack");
+    var box = document.getElementById("ticker");
+    var btn = document.getElementById("tickerPause");
+    if (!track) return;
+    if (!reduce){
+      var items = Array.prototype.slice.call(track.children);
+      items.forEach(function(it){
+        var clone = it.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        track.appendChild(clone);
+      });
+    }
+    if (btn && box){
+      btn.addEventListener("click", function(){
+        var paused = box.classList.toggle("paused");
+        btn.setAttribute("aria-pressed", paused ? "true" : "false");
+        btn.textContent = paused ? "继续" : "暂停";
+        btn.setAttribute("aria-label", paused ? "继续滚动字幕" : "暂停滚动字幕");
+      });
+    }
+  })();
+
+  /* ---------- blob buttons ---------- */
+  document.querySelectorAll(".btn").forEach(function(btn){
+    var blob = btn.querySelector(".blob");
+    if (!blob) return;
+    function place(e){
+      var r = btn.getBoundingClientRect();
+      var x = (e && e.clientX ? e.clientX : r.left + r.width / 2) - r.left;
+      var y = (e && e.clientY ? e.clientY : r.top + r.height / 2) - r.top;
+      var d = Math.ceil(2 * Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y)));
+      blob.style.width = d + "px";
+      blob.style.height = d + "px";
+      blob.style.left = x + "px";
+      blob.style.top = y + "px";
+      blob.style.transform = "translate(-50%,-50%) scale(1)";
+    }
+    if (!fine) return;
+    btn.addEventListener("pointerenter", place);
+    btn.addEventListener("focus", function(){ place(null); });
+    btn.addEventListener("pointerleave", function(){
+      blob.style.transform = "translate(-50%,-50%) scale(0)";
+    });
+    btn.addEventListener("blur", function(){
+      blob.style.transform = "translate(-50%,-50%) scale(0)";
+    });
+  });
+
+  /* ---------- hero title split ---------- */
+  (function splitTitle(){
+    var h1 = document.getElementById("heroTitle");
+    if (!h1) return;
+    var pword = h1.querySelector(".pword");
+    var idx = 0;
+    function makeChar(ch){
+      var wrap = document.createElement("span");
+      wrap.className = "ch";
+      var inner = document.createElement("span");
+      inner.textContent = ch;
+      inner.style.setProperty("--d", (idx * 26 + 180) + "ms");
+      wrap.appendChild(inner);
+      idx++;
+      return wrap;
+    }
+    var lines = h1.querySelectorAll(".line");
+    lines.forEach(function(line){
+      var nodes = Array.prototype.slice.call(line.childNodes);
+      nodes.forEach(function(node){
+        if (node.nodeType === 3){
+          var frag = document.createDocumentFragment();
+          var text = node.textContent;
+          for (var i = 0; i < text.length; i++){
+            var ch = text[i];
+            if (ch === " " || ch === "\n"){ frag.appendChild(document.createTextNode(ch)); continue; }
+            frag.appendChild(makeChar(ch));
+          }
+          line.replaceChild(frag, node);
+        } else if (node.nodeType === 1 && !node.classList.contains("pword")){
+          var text2 = node.textContent || "";
+          var frag2 = document.createDocumentFragment();
+          for (var j = 0; j < text2.length; j++) frag2.appendChild(makeChar(text2[j]));
+          line.replaceChild(frag2, node);
+        }
+      });
+    });
+    h1.classList.add("split");
+    if (reduce){
+      h1.querySelectorAll(".ch > span").forEach(function(s){ s.style.animation = "none"; s.style.transform = "none"; });
+    }
+  })();
+
+  /* ---------- particle word ---------- */
+  (function particleWord(){
+    var wrap = document.querySelector(".pword");
+    if (!wrap) return;
+    var src = wrap.querySelector(".pword-src");
+    var canvas = wrap.querySelector(".pword-canvas");
+    if (!canvas || !src) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var particles = [];
+    var W = 0, H = 0, fs = 0, running = true;
+    var pointer = { x: -9999, y: -9999, active: false };
+
+    function sample(){
+      var rect = wrap.getBoundingClientRect();
+      if (!rect.width || !rect.height) return false;
+      var cs = getComputedStyle(wrap);
+      fs = parseFloat(cs.fontSize);
+      W = rect.width; H = rect.height;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var off = document.createElement("canvas");
+      off.width = Math.round(W);
+      off.height = Math.round(H);
+      var octx = off.getContext("2d");
+      octx.font = "500 " + fs + "px " + cs.fontFamily;
+      octx.textBaseline = "middle";
+      octx.textAlign = "center";
+      octx.fillStyle = "#fff";
+      octx.fillText(src.textContent, W / 2, H / 2 + fs * 0.04);
+      var data = octx.getImageData(0, 0, off.width, off.height).data;
+      var gap = Math.max(2, Math.round(fs / 42));
+      particles = [];
+      for (var y = 0; y < off.height; y += gap){
+        for (var x = 0; x < off.width; x += gap){
+          var a = data[(y * off.width + x) * 4 + 3];
+          if (a > 120){
+            particles.push({ hx: x, hy: y, x: x, y: y, vx: 0, vy: 0, r: (fs > 56 ? 1.5 : 1.2) + Math.random() * 0.55, o: 0.8 + Math.random() * 0.2 });
+          }
+        }
+      }
+      wrap.classList.add("ready");
+      src.style.opacity = "0";
+      return true;
+    }
+
+    function draw(){
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = "#dedede";
+      for (var i = 0; i < particles.length; i++){
+        var p = particles[i];
+        ctx.globalAlpha = p.o;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    var raf = null, idle = 0;
+
+    function step(){
+      raf = null;
+      var moving = pointer.active;
+      for (var i = 0; i < particles.length; i++){
+        var p = particles[i];
+        if (pointer.active){
+          var dx = p.x - pointer.x, dy = p.y - pointer.y;
+          var d2 = dx * dx + dy * dy;
+          var R = 76;
+          if (d2 < R * R && d2 > 0.01){
+            var d = Math.sqrt(d2);
+            var f = (1 - d / R) * 5.4;
+            p.vx += (dx / d) * f;
+            p.vy += (dy / d) * f;
+          }
+        }
+        p.vx += (p.hx - p.x) * 0.085;
+        p.vy += (p.hy - p.y) * 0.085;
+        p.vx *= 0.83; p.vy *= 0.83;
+        p.x += p.vx; p.y += p.vy;
+        if (Math.abs(p.vx) + Math.abs(p.vy) > 0.06) moving = true;
+      }
+      draw();
+      idle = moving ? 0 : idle + 1;
+      if (running && idle < 14) raf = requestAnimationFrame(step);
+    }
+
+    function start(){
+      if (!running || raf || reduce || !particles.length) return;
+      idle = 0;
+      raf = requestAnimationFrame(step);
+    }
+
+    function init(){
+      if (!sample()){ setTimeout(init, 150); return; }
+      if (reduce){ draw(); return; }
+      running = true;
+      start();
+    }
+
+    if (fine){
+      wrap.addEventListener("pointermove", function(e){
+        var r = canvas.getBoundingClientRect();
+        pointer.x = e.clientX - r.left;
+        pointer.y = e.clientY - r.top;
+        pointer.active = true;
+        start();
+      });
+      wrap.addEventListener("pointerleave", function(){ pointer.active = false; start(); });
+    }
+
+    if ("ResizeObserver" in window){
+      var ro = new ResizeObserver(function(){
+        running = false;
+        if (raf){ cancelAnimationFrame(raf); raf = null; }
+        setTimeout(function(){
+          if (!sample()) return;
+          if (reduce){ draw(); return; }
+          running = true;
+          start();
+        }, 160);
+      });
+      ro.observe(wrap);
+    }
+
+    if (document.fonts && document.fonts.ready){
+      document.fonts.ready.then(init);
+    } else {
+      window.addEventListener("load", init);
+    }
+  })();
+
+  /* ---------- work: cursor pill + lightbox ---------- */
+  (function work(){
+    var pill = document.getElementById("cursorPill");
+    var medias = document.querySelectorAll(".work-media");
+    var lightbox = document.getElementById("lightbox");
+    var lbImg = document.getElementById("lbImg");
+    var lbCap = document.getElementById("lbCap");
+    var lbClose = document.getElementById("lbClose");
+    var lastFocus = null;
+    var tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+
+    function loop(){
+      cx += (tx - cx) * 0.2;
+      cy += (ty - cy) * 0.2;
+      if (pill){ pill.style.left = cx + "px"; pill.style.top = cy + "px"; }
+      if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4){ raf = requestAnimationFrame(loop); }
+      else { raf = null; }
+    }
+    function move(e){
+      tx = e.clientX; ty = e.clientY;
+      if (!raf) raf = requestAnimationFrame(loop);
+    }
+
+    medias.forEach(function(m){
+      if (fine && pill){
+        m.addEventListener("pointerenter", function(e){
+          pill.classList.add("on");
+          tx = e.clientX; ty = e.clientY; cx = tx; cy = ty;
+          m.addEventListener("pointermove", move);
+        });
+        m.addEventListener("pointerleave", function(){
+          pill.classList.remove("on");
+          m.removeEventListener("pointermove", move);
+        });
+      }
+      m.addEventListener("click", function(e){
+        e.preventDefault();
+        lastFocus = document.activeElement;
+        lbImg.src = m.getAttribute("data-full");
+        var inner = m.querySelector("img");
+        lbImg.alt = inner ? inner.alt : "";
+        lbCap.textContent = m.getAttribute("data-cap") || "";
+        lightbox.classList.add("open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.documentElement.style.overflow = "hidden";
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ if (lbClose) lbClose.focus(); });
+        });
+      });
+    });
+
+    function close(){
+      lightbox.classList.remove("open");
+      lightbox.setAttribute("aria-hidden", "true");
+      document.documentElement.style.overflow = "";
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    if (lbClose) lbClose.addEventListener("click", close);
+    if (lightbox) lightbox.addEventListener("click", function(e){ if (e.target === lightbox) close(); });
+    document.addEventListener("keydown", function(e){
+      if (!lightbox || !lightbox.classList.contains("open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "Tab"){ e.preventDefault(); if (lbClose) lbClose.focus(); }
+    });
+  })();
+
+  /* ---------- sticky stack scaling ---------- */
+  (function stack(){
+    var steps = Array.prototype.slice.call(document.querySelectorAll(".step"));
+    if (!steps.length || reduce) return;
+    function update(){
+      var sticky = window.innerHeight * 0.32 - 25;
+      steps.forEach(function(el, i){
+        var next = steps[i + 1];
+        if (!next) { el.style.transform = ""; return; }
+        var r = next.getBoundingClientRect();
+        var p = (sticky - r.top) / (window.innerHeight * 0.5);
+        p = Math.max(0, Math.min(1, p));
+        el.style.transform = "scale(" + (1 - p * 0.045).toFixed(4) + ")";
+      });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  })();
+
+  /* ---------- path cards: pointer glow ---------- */
+  (function glow(){
+    if (!fine) return;
+    document.querySelectorAll(".path").forEach(function(card){
+      card.addEventListener("pointermove", function(e){
+        var r = card.getBoundingClientRect();
+        card.style.setProperty("--bx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+        card.style.setProperty("--by", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+      });
+    });
+  })();
+
+  /* ---------- copy command ---------- */
+  (function copy(){
+    var btn = document.getElementById("copyBtn");
+    var txt = document.getElementById("copyText");
+    var status = document.getElementById("copyStatus");
+    if (!btn || !txt) return;
+    btn.addEventListener("click", function(){
+      var cmd = "npx skills add shanchuann/better-web-controls";
+      function done(){
+        txt.textContent = "已复制";
+        if (status) status.textContent = "安装命令已复制到剪贴板";
+        setTimeout(function(){
+          txt.textContent = "复制";
+          if (status) status.textContent = "";
+        }, 1800);
+      }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = cmd;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch(err){}
+        document.body.removeChild(ta);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(cmd).then(done).catch(fallback);
+      } else { fallback(); }
+    });
+  })();
+
+})();
+</script>
+</body>
+</html></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">张念川</div><div class="author-info-description">玉袍长剑堪风流，山川不念旧</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">99</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/shanchuann"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">由于极为严重的失误，个人网站代码包括内容完全丢失，正在重建中。另外《C语言圣经》编写工作正在稳步进行。</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/26/Specialized%20courses%20regain%20their%20former%20vitality/" title="AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春"><img src="/images/tokyo-night-top.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春"/></a><div class="content"><a class="title" href="/2026/10/26/Specialized%20courses%20regain%20their%20former%20vitality/" title="AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春">AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春</a><time datetime="2026-10-26T00:43:15.000Z" title="发表于 2026-10-26 08:43:15">2026-10-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/05/LangChain%20%E6%B5%8B%E8%AF%95%E4%B8%8E%20LangSmith%20%E8%A7%82%E6%B5%8B/" title="LangChain 测试与 LangSmith 观测"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain 测试与 LangSmith 观测"/></a><div class="content"><a class="title" href="/2026/10/05/LangChain%20%E6%B5%8B%E8%AF%95%E4%B8%8E%20LangSmith%20%E8%A7%82%E6%B5%8B/" title="LangChain 测试与 LangSmith 观测">LangChain 测试与 LangSmith 观测</a><time datetime="2026-10-05T05:50:34.000Z" title="发表于 2026-10-05 13:50:34">2026-10-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/05/LangChain%20MCP/" title="LangChain MCP"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain MCP"/></a><div class="content"><a class="title" href="/2026/10/05/LangChain%20MCP/" title="LangChain MCP">LangChain MCP</a><time datetime="2026-10-05T05:21:42.000Z" title="发表于 2026-10-05 13:21:42">2026-10-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/04/LangChain%20Multi-agent/" title="LangChain Multi-agent"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain Multi-agent"/></a><div class="content"><a class="title" href="/2026/10/04/LangChain%20Multi-agent/" title="LangChain Multi-agent">LangChain Multi-agent</a><time datetime="2026-10-04T15:35:23.000Z" title="发表于 2026-10-04 23:35:23">2026-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/04/LangChain%20Guardrails/" title="LangChain Guardrails"><img src="https://s2.loli.net/2025/11/15/NS4g8bRiYu7z31f.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LangChain Guardrails"/></a><div class="content"><a class="title" href="/2026/10/04/LangChain%20Guardrails/" title="LangChain Guardrails">LangChain Guardrails</a><time datetime="2026-10-04T12:00:00.000Z" title="发表于 2026-10-04 20:00:00">2026-10-04</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            <a class="card-more-btn" href="/categories/" title="查看更多">
+      <i class="fas fa-angle-right"></i></a>
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/AI/"><span class="card-category-list-name">AI</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/C-%E8%BF%98%E5%AD%A6%E4%B8%8D%E4%BC%9A%EF%BC%9F/"><span class="card-category-list-name">C++还学不会？</span><span class="card-category-list-count">41</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Effective-Modern-C/"><span class="card-category-list-name">Effective Modern C++</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/LangChain/"><span class="card-category-list-name">LangChain</span><span class="card-category-list-count">16</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Linux%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/"><span class="card-category-list-name">Linux从入门到入土</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Rust/"><span class="card-category-list-name">Rust</span><span class="card-category-list-count">2</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/leetcode%E7%83%AD%E9%A2%98100/"><span class="card-category-list-name">leetcode热题100</span><span class="card-category-list-count">3</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%89%8D%E7%AB%AF/"><span class="card-category-list-name">前端</span><span class="card-category-list-count">10</span></a></li>
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/AI/" style="font-size: 1.15em; color: rgb(50, 189, 94);">AI</a><a href="/tags/C%E8%AF%AD%E8%A8%80/" style="font-size: 1.15em; color: rgb(50, 74, 50);">C语言</a><a href="/tags/CMake/" style="font-size: 1.15em; color: rgb(167, 163, 141);">CMake</a><a href="/tags/Cursor/" style="font-size: 1.15em; color: rgb(124, 104, 85);">Cursor</a><a href="/tags/%E9%AB%98%E6%95%88%E7%8E%B0%E4%BB%A3C/" style="font-size: 1.15em; color: rgb(50, 50, 93);">高效现代C++</a><a href="/tags/hexo/" style="font-size: 1.19em; color: rgb(56, 69, 111);">hexo</a><a href="/tags/Gitbook/" style="font-size: 1.15em; color: rgb(134, 50, 72);">Gitbook</a><a href="/tags/Advanced/" style="font-size: 1.32em; color: rgb(105, 55, 50);">Advanced</a><a href="/tags/Core-components/" style="font-size: 1.36em; color: rgb(73, 50, 165);">Core components</a><a href="/tags/Practice/" style="font-size: 1.19em; color: rgb(149, 104, 148);">Practice</a><a href="/tags/Get-started/" style="font-size: 1.15em; color: rgb(50, 125, 50);">Get started</a><a href="/tags/Linux%E5%9F%BA%E7%A1%80/" style="font-size: 1.28em; color: rgb(50, 197, 171);">Linux基础</a><a href="/tags/C-11/" style="font-size: 1.36em; color: rgb(104, 50, 50);">C++11</a><a href="/tags/Rust/" style="font-size: 1.19em; color: rgb(178, 65, 112);">Rust</a><a href="/tags/C-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 1.45em; color: rgb(105, 196, 197);">C++面向对象</a><a href="/tags/Vibe-Coding/" style="font-size: 1.15em; color: rgb(156, 169, 99);">Vibe Coding</a><a href="/tags/C-%E5%9F%BA%E7%A1%80/" style="font-size: 1.41em; color: rgb(193, 191, 146);">C++基础</a><a href="/tags/C-%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/" style="font-size: 1.28em; color: rgb(50, 94, 50);">C++智能指针</a><a href="/tags/spec-kit/" style="font-size: 1.15em; color: rgb(63, 126, 67);">spec-kit</a><a href="/tags/C-%E5%AE%9E%E6%88%98/" style="font-size: 1.28em; color: rgb(169, 66, 64);">C++实战</a><a href="/tags/C-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 1.15em; color: rgb(69, 70, 173);">C++设计模式</a><a href="/tags/%E5%B0%8F%E8%AF%B4/" style="font-size: 1.19em; color: rgb(50, 170, 172);">小说</a><a href="/tags/React-Native/" style="font-size: 1.15em; color: rgb(156, 119, 175);">React Native</a><a href="/tags/CSS/" style="font-size: 1.15em; color: rgb(50, 50, 50);">CSS</a><a href="/tags/JavaScript/" style="font-size: 1.15em; color: rgb(169, 173, 167);">JavaScript</a><a href="/tags/ES6/" style="font-size: 1.15em; color: rgb(200, 144, 119);">ES6</a><a href="/tags/Trao/" style="font-size: 1.19em; color: rgb(168, 185, 78);">Trao</a><a href="/tags/React/" style="font-size: 1.15em; color: rgb(63, 136, 92);">React</a><a href="/tags/%E5%89%8D%E7%AB%AF%E5%AE%9E%E6%88%98/" style="font-size: 1.15em; color: rgb(101, 71, 164);">前端实战</a><a href="/tags/PC-H5%E5%BC%80%E5%8F%91/" style="font-size: 1.15em; color: rgb(50, 168, 119);">PC/H5开发</a><a href="/tags/TypeScript/" style="font-size: 1.15em; color: rgb(150, 198, 50);">TypeScript</a><a href="/tags/HTML/" style="font-size: 1.15em; color: rgb(129, 76, 50);">HTML</a><a href="/tags/%E5%90%8E%E5%8F%B0%E5%BC%80%E5%8F%91/" style="font-size: 1.15em; color: rgb(105, 50, 123);">后台开发</a><a href="/tags/%E5%B0%8F%E7%A8%8B%E5%BA%8F/" style="font-size: 1.15em; color: rgb(127, 157, 50);">小程序</a><a href="/tags/C-17/" style="font-size: 1.19em; color: rgb(158, 50, 160);">C++17</a><a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 1.24em; color: rgb(50, 50, 72);">算法</a><a href="/tags/%E8%BD%BB%E9%87%8F%E4%BA%91/" style="font-size: 1.15em; color: rgb(138, 55, 50);">轻量云</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      <a class="card-more-btn" href="/archives/"
+            title="查看更多">
+            <i class="fas fa-angle-right"></i>
+          </a>
+    </div>
+  
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/10/">
+            <span class="card-archive-list-date">
+              十月 2026
+            </span>
+            <span class="card-archive-list-count">9</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/09/">
+            <span class="card-archive-list-date">
+              九月 2026
+            </span>
+            <span class="card-archive-list-count">7</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/05/">
+            <span class="card-archive-list-date">
+              五月 2026
+            </span>
+            <span class="card-archive-list-count">1</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/04/">
+            <span class="card-archive-list-date">
+              四月 2026
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/03/">
+            <span class="card-archive-list-date">
+              三月 2026
+            </span>
+            <span class="card-archive-list-count">26</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/02/">
+            <span class="card-archive-list-date">
+              二月 2026
+            </span>
+            <span class="card-archive-list-count">8</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/01/">
+            <span class="card-archive-list-date">
+              一月 2026
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2025/11/">
+            <span class="card-archive-list-date">
+              十一月 2025
+            </span>
+            <span class="card-archive-list-count">10</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">99</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-10-28T06:25:58.956Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/images/tokyo-night-top.jpg);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By 张念川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.0.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div><div class="footer_custom_text">满堂花醉三千客，一剑霜寒十四州 | <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/"><span>备案号：陕ICP备2026009958号-1</span></a> <img class="icp-icon" src="/images/beian-badge.png" alt="公安备案"> <a href="https://beian.mps.gov.cn/#/query/webSearch?code=61040202000893" rel="noreferrer" target="_blank">陕公网安备61040202000893号</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="chat-btn" type="button" title="聊天" style="display:none"><i class="fas fa-message"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '1kGP51o4WjaiJX72Yfdy5T6k-gzGzoHsz',
+      appKey: 'OeiTKeZqnH8VrxSF1s69kyOf',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script src="/js/parallax.js"></script><script src="/js/dsh-pet.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="255,0178,102" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script>(() => {
+  window.$crisp = ['safe', true]
+  window.CRISP_WEBSITE_ID = "2f8661da-b522-4dfb-a0f3-ce177151f169"
+
+  btf.getScript('https://client.crisp.chat/l.js').then(() => {
+    const isChatBtn = true
+    const isChatHideShow = false
+
+    if (isChatBtn) {
+      const open = () => {
+        $crisp.push(["do", "chat:show"])
+        $crisp.push(["do", "chat:open"])
+      }
+
+      const close = () => $crisp.push(["do", "chat:hide"])
+
+      close()
+
+      $crisp.push(["on", "chat:closed", close])
+
+      window.chatBtnFn = () => $crisp.is("chat:visible") ? close() : open()
+
+      document.getElementById('chat-btn').style.display = 'block'
+    } else if (isChatHideShow) {
+      window.chatBtn = {
+        hide: () => $crisp.push(["do", "chat:hide"]),
+        show: () => $crisp.push(["do", "chat:show"])
+      }
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div id="algolia-search-input"><div class="ais-SearchBox"><form class="ais-SearchBox-form" action="" role="search" novalidate=""><input class="ais-SearchBox-input" type="search" placeholder="搜索文章" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="512" aria-label="Search"/><button class="ais-SearchBox-submit" type="submit" title="Submit the search query" style="display:none;"><svg class="ais-SearchBox-submitIcon" width="10" height="10" viewBox="0 0 40 40" aria-hidden="true"><path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"></path></svg></button></form></div><hr/><div id="algolia-search-results"><div id="algolia-hits"><div id="algolia-hits-empty" style="display:none;"></div><div class="ais-Hits" style="display:none;"><ol class="ais-Hits-list"></ol></div></div><div class="ais-Pagination" id="algolia-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="algolia-info"><span class="ais-Stats-text"></span><a class="algolia-poweredBy" href="https://www.algolia.com/?utm_source=algoliasearch.js&amp;utm_medium=website&amp;utm_content=localhost&amp;utm_campaign=poweredby" target="_blank" aria-label="Search by Algolia" rel="noopener noreferrer"><svg class="ais-PoweredBy-logo" height="1.2em" viewBox="0 0 572 64" style="width: auto;"><path fill="#36395A" d="M16 48.3c-3.4 0-6.3-.6-8.7-1.7A12.4 12.4 0 0 1 1.9 42C.6 40 0 38 0 35.4h6.5a6.7 6.7 0 0 0 3.9 6c1.4.7 3.3 1.1 5.6 1.1 2.2 0 4-.3 5.4-1a7 7 0 0 0 3-2.4 6 6 0 0 0 1-3.4c0-1.5-.6-2.8-1.9-3.7-1.3-1-3.3-1.6-5.9-1.8l-4-.4c-3.7-.3-6.6-1.4-8.8-3.4a10 10 0 0 1-3.3-7.9c0-2.4.6-4.6 1.8-6.4a12 12 0 0 1 5-4.3c2.2-1 4.7-1.6 7.5-1.6s5.5.5 7.6 1.6a12 12 0 0 1 5 4.4c1.2 1.8 1.8 4 1.8 6.7h-6.5a6.4 6.4 0 0 0-3.5-5.9c-1-.6-2.6-1-4.4-1s-3.2.3-4.4 1c-1.1.6-2 1.4-2.6 2.4-.5 1-.8 2-.8 3.1a5 5 0 0 0 1.5 3.6c1 1 2.6 1.7 4.7 1.9l4 .3c2.8.2 5.2.8 7.2 1.8 2.1 1 3.7 2.2 4.9 3.8a9.7 9.7 0 0 1 1.7 5.8c0 2.5-.7 4.7-2 6.6a13 13 0 0 1-5.6 4.4c-2.4 1-5.2 1.6-8.4 1.6Zm35.6 0c-2.6 0-4.8-.4-6.7-1.3a13 13 0 0 1-4.7-3.5 17.1 17.1 0 0 1-3.6-10.4v-1c0-2 .3-3.8 1-5.6a13 13 0 0 1 7.3-8.3 15 15 0 0 1 6.3-1.4A13.2 13.2 0 0 1 64 24.3c1 2.2 1.6 4.6 1.6 7.2V34H39.4v-4.3h21.8l-1.8 2.2c0-2-.3-3.7-.9-5.1a7.3 7.3 0 0 0-2.7-3.4c-1.2-.7-2.7-1.1-4.6-1.1s-3.4.4-4.7 1.3a8 8 0 0 0-2.9 3.6c-.6 1.5-.9 3.3-.9 5.4 0 2 .3 3.7 1 5.3a7.9 7.9 0 0 0 2.8 3.7c1.3.8 3 1.3 5 1.3s3.8-.5 5.1-1.3c1.3-1 2.1-2 2.4-3.2h6a11.8 11.8 0 0 1-7 8.7 16 16 0 0 1-6.4 1.2ZM80 48c-2.2 0-4-.3-5.7-1a8.4 8.4 0 0 1-3.7-3.3 9.7 9.7 0 0 1-1.3-5.2c0-2 .5-3.8 1.5-5.2a9 9 0 0 1 4.3-3.1c1.8-.7 4-1 6.7-1H89v4.1h-7.5c-2 0-3.4.5-4.4 1.4-1 1-1.6 2.1-1.6 3.6s.5 2.7 1.6 3.6c1 1 2.5 1.4 4.4 1.4 1.1 0 2.2-.2 3.2-.7 1-.4 1.9-1 2.6-2 .6-1 1-2.4 1-4.2l1.7 2.1c-.2 2-.7 3.8-1.5 5.2a9 9 0 0 1-3.4 3.3 12 12 0 0 1-5.3 1Zm9.5-.7v-8.8h-1v-10c0-1.8-.5-3.2-1.4-4.1-1-1-2.4-1.4-4.2-1.4a142.9 142.9 0 0 0-10.2.4v-5.6a74.8 74.8 0 0 1 8.6-.4c3 0 5.5.4 7.5 1.2s3.4 2 4.4 3.6c1 1.7 1.4 4 1.4 6.7v18.4h-5Zm12.9 0V17.8h5v12.3h-.2c0-4.2 1-7.4 2.8-9.5a11 11 0 0 1 8.3-3.1h1v5.6h-2a9 9 0 0 0-6.3 2.2c-1.5 1.5-2.2 3.6-2.2 6.4v15.6h-6.4Zm34.4 1a15 15 0 0 1-6.6-1.3c-1.9-.9-3.4-2-4.7-3.5a15.5 15.5 0 0 1-2.7-5c-.6-1.7-1-3.6-1-5.4v-1c0-2 .4-3.8 1-5.6a15 15 0 0 1 2.8-4.9c1.3-1.5 2.8-2.6 4.6-3.5a16.4 16.4 0 0 1 13.3.2c2 1 3.5 2.3 4.8 4a12 12 0 0 1 2 6H144c-.2-1.6-1-3-2.2-4.1a7.5 7.5 0 0 0-5.2-1.7 8 8 0 0 0-4.7 1.3 8 8 0 0 0-2.8 3.6 13.8 13.8 0 0 0 0 10.3c.6 1.5 1.5 2.7 2.8 3.6s2.8 1.3 4.8 1.3c1.5 0 2.7-.2 3.8-.8a7 7 0 0 0 2.6-2c.7-1 1-2 1.2-3.2h6.2a11 11 0 0 1-2 6.2 15.1 15.1 0 0 1-11.8 5.5Zm19.7-1v-40h6.4V31h-1.3c0-3 .4-5.5 1.1-7.6a9.7 9.7 0 0 1 3.5-4.8A9.9 9.9 0 0 1 172 17h.3c3.5 0 6 1.1 7.9 3.5 1.7 2.3 2.6 5.7 2.6 10v16.8h-6.4V29.6c0-2.1-.6-3.8-1.8-5a6.4 6.4 0 0 0-4.8-1.8c-2 0-3.7.7-5 2a7.8 7.8 0 0 0-1.9 5.5v17h-6.4Zm63.8 1a12.2 12.2 0 0 1-10.9-6.2 19 19 0 0 1-1.8-7.3h1.4v12.5h-5.1v-40h6.4v19.8l-2 3.5c.2-3.1.8-5.7 1.9-7.7a11 11 0 0 1 4.4-4.5c1.8-1 3.9-1.5 6.1-1.5a13.4 13.4 0 0 1 12.8 9.1c.7 1.9 1 3.8 1 6v1c0 2.2-.3 4.1-1 6a13.6 13.6 0 0 1-13.2 9.4Zm-1.2-5.5a8.4 8.4 0 0 0 7.9-5c.7-1.5 1.1-3.3 1.1-5.3s-.4-3.8-1.1-5.3a8.7 8.7 0 0 0-3.2-3.6 9.6 9.6 0 0 0-9.2-.2 8.5 8.5 0 0 0-3.3 3.2c-.8 1.4-1.3 3-1.3 5v2.3a9 9 0 0 0 1.3 4.8 9 9 0 0 0 3.4 3c1.4.7 2.8 1 4.4 1Zm27.3 3.9-10-28.9h6.5l9.5 28.9h-6Zm-7.5 12.2v-5.7h4.9c1 0 2-.1 2.9-.4a4 4 0 0 0 2-1.4c.4-.7.9-1.6 1.2-2.7l8.6-30.9h6.2l-9.3 32.4a14 14 0 0 1-2.5 5 8.9 8.9 0 0 1-4 2.8c-1.5.6-3.4.9-5.6.9h-4.4Zm9-12.2v-5.2h6.4v5.2H248Z"></path><path fill="#003DFF" d="M534.4 9.1H528a.8.8 0 0 1-.7-.7V1.8c0-.4.2-.7.6-.8l6.5-1c.4 0 .8.2.9.6v7.8c0 .4-.4.7-.8.7zM428 35.2V.8c0-.5-.3-.8-.7-.8h-.2l-6.4 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.5 0 .8-.4.8-.8V43c0-.4-.3-.7-.6-.8-4.5-.5-4.5-6-4.5-7zm106.5-21.8H528c-.4 0-.7.4-.7.8v34c0 .4.3.8.7.8h6.5c.4 0 .8-.4.8-.8v-34c0-.5-.4-.8-.8-.8zm-17.7 21.8V.8c0-.5-.3-.8-.8-.8l-6.5 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.4 0 .8-.4.8-.8V43c0-.4-.3-.7-.7-.8-4.4-.5-4.4-6-4.4-7zm-22.2-20.6a16.5 16.5 0 0 1 8.6 9.3c.8 2.2 1.3 4.8 1.3 7.5a19.4 19.4 0 0 1-4.6 12.6 14.8 14.8 0 0 1-5.2 3.6c-2 .9-5.2 1.4-6.8 1.4a21 21 0 0 1-6.7-1.4 15.4 15.4 0 0 1-8.6-9.3 21.3 21.3 0 0 1 0-14.4 15.2 15.2 0 0 1 8.6-9.3c2-.8 4.3-1.2 6.7-1.2s4.6.4 6.7 1.2zm-6.7 27.6c2.7 0 4.7-1 6.2-3s2.2-4.3 2.2-7.8-.7-6.3-2.2-8.3-3.5-3-6.2-3-4.7 1-6.1 3c-1.5 2-2.2 4.8-2.2 8.3s.7 5.8 2.2 7.8 3.5 3 6.2 3zm-88.8-28.8c-6.2 0-11.7 3.3-14.8 8.2a18.6 18.6 0 0 0 4.8 25.2c1.8 1.2 4 1.8 6.2 1.7s.1 0 .1 0h.9c4.2-.7 8-4 9.1-8.1v7.4c0 .4.3.7.8.7h6.4a.7.7 0 0 0 .7-.7V14.2c0-.5-.3-.8-.7-.8h-13.5zm6.3 26.5a9.8 9.8 0 0 1-5.7 2h-.5a10 10 0 0 1-9.2-14c1.4-3.7 5-6.3 9-6.3h6.4v18.3zm152.3-26.5h13.5c.5 0 .8.3.8.7v33.7c0 .4-.3.7-.8.7h-6.4a.7.7 0 0 1-.8-.7v-7.4c-1.2 4-4.8 7.4-9 8h-.1a4.2 4.2 0 0 1-.5.1h-.9a10.3 10.3 0 0 1-7-2.6c-4-3.3-6.5-8.4-6.5-14.2 0-3.7 1-7.2 3-10 3-5 8.5-8.3 14.7-8.3zm.6 28.4c2.2-.1 4.2-.6 5.7-2V21.7h-6.3a9.8 9.8 0 0 0-9 6.4 10.2 10.2 0 0 0 9.1 13.9h.5zM452.8 13.4c-6.2 0-11.7 3.3-14.8 8.2a18.5 18.5 0 0 0 3.6 24.3 10.4 10.4 0 0 0 13 .6c2.2-1.5 3.8-3.7 4.5-6.1v7.8c0 2.8-.8 5-2.2 6.3-1.5 1.5-4 2.2-7.5 2.2l-6-.3c-.3 0-.7.2-.8.5l-1.6 5.5c-.1.4.1.8.5 1h.1c2.8.4 5.5.6 7 .6 6.3 0 11-1.4 14-4.1 2.7-2.5 4.2-6.3 4.5-11.4V14.2c0-.5-.4-.8-.8-.8h-13.5zm6.3 8.2v18.3a9.6 9.6 0 0 1-5.6 2h-1a10.3 10.3 0 0 1-8.8-14c1.4-3.7 5-6.3 9-6.3h6.4zM291 31.5A32 32 0 0 1 322.8 0h30.8c.6 0 1.2.5 1.2 1.2v61.5c0 1.1-1.3 1.7-2.2 1l-19.2-17a18 18 0 0 1-11 3.4 18.1 18.1 0 1 1 18.2-14.8c-.1.4-.5.7-.9.6-.1 0-.3 0-.4-.2l-3.8-3.4c-.4-.3-.6-.8-.7-1.4a12 12 0 1 0-2.4 8.3c.4-.4 1-.5 1.6-.2l14.7 13.1v-46H323a26 26 0 1 0 10 49.7c.8-.4 1.6-.2 2.3.3l3 2.7c.3.2.3.7 0 1l-.2.2a32 32 0 0 1-47.2-28.6z"></path></svg></a></div></div></div></div><div id="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/algoliasearch/dist/lite/builds/browser.umd.min.js"></script><script src="/js/search/algolia.js"></script></div></div></body></html>
