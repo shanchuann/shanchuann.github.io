@@ -1,30 +1,30 @@
 [
   {
-    "title": "AI Coding Prompts",
-    "url": "https://shanchuann.cn/2026/10/28/AI Coding Prompts/",
-    "date": "2026-10-28T03:13:55.000Z",
-    "updated": "2026-10-28T06:27:23.785Z",
-    "excerpt": ""
+    "title": "导学阶段-NPC 把 Agent 挂到仓库里",
+    "url": "https://shanchuann.cn/2026/11/06/导学阶段-NPC 把 Agent 挂到仓库里/",
+    "date": "2026-11-06T11:30:00.000Z",
+    "updated": "2026-11-06T10:56:33.302Z",
+    "excerpt": "从评论触发的仓库角色讲到日志驱动的常驻形态，用一套真实实现说明事件、定位与回写三件事怎么落地。"
   },
   {
-    "title": "AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春",
-    "url": "https://shanchuann.cn/2026/10/26/Specialized courses regain their former vitality/",
-    "date": "2026-10-26T00:43:15.000Z",
-    "updated": "2026-10-26T00:45:17.740Z",
-    "excerpt": ""
+    "title": "导学阶段-Skills 按需加载的领域知识",
+    "url": "https://shanchuann.cn/2026/11/06/导学阶段-Skills 按需加载的领域知识/",
+    "date": "2026-11-06T11:00:00.000Z",
+    "updated": "2026-11-06T10:53:59.650Z",
+    "excerpt": "从扩展成本出发解释 Skill 的存在理由，拆解 SKILL.md 的结构、两级渐进加载机制，以及它带来的分发与安全新问题。"
   },
   {
-    "title": "LangChain 测试与 LangSmith 观测",
-    "url": "https://shanchuann.cn/2026/10/05/LangChain 测试与 LangSmith 观测/",
-    "date": "2026-10-05T05:50:34.000Z",
-    "updated": "2026-10-05T05:39:44.007Z",
-    "excerpt": ""
+    "title": "导学阶段-整合与形态",
+    "url": "https://shanchuann.cn/2026/11/06/导学阶段-整合与形态/",
+    "date": "2026-11-06T10:30:00.000Z",
+    "updated": "2026-11-06T11:24:19.927Z",
+    "excerpt": "把各章零件按单向数据流组装成完整 Coding Agent，并讨论 REPL、Solo、WebUI 三种形态如何共用一个内核。"
   },
   {
-    "title": "LangChain MCP",
-    "url": "https://shanchuann.cn/2026/10/05/LangChain MCP/",
-    "date": "2026-10-05T05:21:42.000Z",
-    "updated": "2026-10-05T05:39:16.163Z",
-    "excerpt": ""
+    "title": "导学阶段-工具的设计哲学",
+    "url": "https://shanchuann.cn/2026/11/06/导学阶段-工具的设计哲学/",
+    "date": "2026-11-06T10:00:00.000Z",
+    "updated": "2026-11-06T11:23:02.826Z",
+    "excerpt": "行号漂移、唯一性约束、bash 安全闸门与错误返回字符串，四个设计选择决定了模型能否在工具失败后自己纠正。"
   }
 ]

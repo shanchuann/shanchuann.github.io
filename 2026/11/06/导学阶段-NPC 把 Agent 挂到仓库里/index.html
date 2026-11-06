@@ -1,0 +1,383 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>导学阶段-NPC 把 Agent 挂到仓库里 | 山川不念旧</title><meta name="author" content="张念川"><meta name="copyright" content="张念川"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0b131b"><meta name="description" content="从评论触发的仓库角色讲到日志驱动的常驻形态，用一套真实实现说明事件、定位与回写三件事怎么落地。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="导学阶段-NPC 把 Agent 挂到仓库里">
+<meta property="og:url" content="https://shanchuann.cn/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/index.html">
+<meta property="og:site_name" content="山川不念旧">
+<meta property="og:description" content="从评论触发的仓库角色讲到日志驱动的常驻形态，用一套真实实现说明事件、定位与回写三件事怎么落地。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png">
+<meta property="article:published_time" content="2026-11-06T11:30:00.000Z">
+<meta property="article:modified_time" content="2026-11-06T10:56:33.302Z">
+<meta property="article:author" content="张念川">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "导学阶段-NPC 把 Agent 挂到仓库里",
+  "url": "https://shanchuann.cn/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/",
+  "image": "https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png",
+  "datePublished": "2026-11-06T11:30:00.000Z",
+  "dateModified": "2026-11-06T10:56:33.302Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "张念川",
+      "url": "https://shanchuann.cn"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://s2.loli.net/2025/09/25/NAM3XhUgxbjpVrJ.png"><link rel="canonical" href="https://shanchuann.cn/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0b131b')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#eef2f6')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: {"appId":"L7P2ELNLTD","apiKey":"d6168abb683b7c70b4ef9bbee1fa469a","indexName":"Shanchuan","hitsPerPage":6,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，耗时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#9a4d1a","bgDark":"#16242f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '导学阶段-NPC 把 Agent 挂到仓库里',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start --><link rel="preload" as="image" href="/images/sensoji-dusk.jpg"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.0.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background-image: url(/images/sensoji-dusk.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">38</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">14</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://dietary-planning.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 饮食计划</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://green-seed-two.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 青禾招聘</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://lingo-quest-green.vercel.app/"><i class="fa-fw fas fa-code"></i><span> LingoQuest</span></a></li><li><a class="site-page child" href="/html/better-web-controls/"><i class="fa-fw fas fa-code"></i><span> Better Web Controls</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">山川不念旧</span></a><a class="nav-page-title" href="/"><span class="site-name">导学阶段-NPC 把 Agent 挂到仓库里</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> 分类</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-handshake"></i><span> 友链</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 电子书</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener" href="https://shanchuan-1.gitbook.io/clanguagebook/"><i class="fa-fw fas fa-archive"></i><span> C语言圣经</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 好无聊</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/html/lion/"><i class="fa-fw fas fa-code"></i><span> Chill the lion</span></a></li><li><a class="site-page child" href="/html/xistudy/index.html"><i class="fa-fw fas fa-book"></i><span> 习思想背诵</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="http://uqbank.shanchuann.cn/"><i class="fa-fw fas fa-code"></i><span> UQBank</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://dietary-planning.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 饮食计划</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://green-seed-two.vercel.app/"><i class="fa-fw fas fa-code"></i><span> 青禾招聘</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://lingo-quest-green.vercel.app/"><i class="fa-fw fas fa-code"></i><span> LingoQuest</span></a></li><li><a class="site-page child" href="/html/better-web-controls/"><i class="fa-fw fas fa-code"></i><span> Better Web Controls</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">导学阶段-NPC 把 Agent 挂到仓库里</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-06T11:30:00.000Z" title="发表于 2026-11-06 19:30:00">2026-11-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-06T10:56:33.302Z" title="更新于 2026-11-06 18:56:33">2026-11-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Learning-AI-Camp-2026/">Learning AI Camp 2026</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>本文整理自 CNB 上的开源课程 <a target="_blank" rel="noopener" href="https://cnb.cool/shanchuann.cn/vibe-agent-course">《Vibe Agent：从零搭建 Coding Agent》</a>。课程讲义、示例代码与练习仓库均在 CNB 上公开，文中示例出自该仓库对应章节。</p>
+</blockquote>
+<p>前几节做完的 Agent 跑在自己的终端里。要让它干活，需要打开命令行、输入任务、等待返回。这套流程对个人够用，对团队不行：同事不会为了请人看一个 bug 而先学会启动一个脚本。</p>
+<p>NPC 处理的是交付方式。它把同一个 Agent 搬到仓库里，用事件触发，用评论交付。游戏里的 NPC 不主动行动，玩家走上去对话它才给任务；仓库里的 NPC 同理，没人 @ 它的时候它不存在，有人 @ 就接活，干完把结果发回同一条评论。</p>
+<h2 id="两种形态的差别"><a href="#两种形态的差别" class="headerlink" title="两种形态的差别"></a>两种形态的差别</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>本地 Agent</th>
+<th>仓库 NPC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>谁在跑</td>
+<td>本机</td>
+<td>云端容器</td>
+</tr>
+<tr>
+<td>谁触发</td>
+<td>仅本人</td>
+<td>仓库里任何有权限的人</td>
+</tr>
+<tr>
+<td>何时跑</td>
+<td>手动启动</td>
+<td>事件触发</td>
+</tr>
+<tr>
+<td>结果去哪</td>
+<td>终端</td>
+<td>自动回写评论</td>
+</tr>
+</tbody></table>
+<p>关键变化在最后一行。本地跑的时候，操作者是唯一的读者，输出打在屏幕上就完事；挂到仓库之后没有屏幕可看，评论就是结果本身。这个差别决定了入口脚本的写法。</p>
+<h2 id="三样配置"><a href="#三样配置" class="headerlink" title="三样配置"></a>三样配置</h2><p>把 Agent 变成仓库 NPC，需要准备三样东西。</p>
+<p>角色设定定义这个 NPC 是谁：名字、头像、口吻、擅长什么、遵循什么约束。这段文本在每次任务时拼进 prompt，相当于一段 system prompt 前缀。</p>
+<p>事件绑定定义谁触发、跑什么。平台需要知道评论里出现哪个名字对应执行哪条流水线，因此要建立角色名到镜像的映射，并约定没有点名时的默认角色。</p>
+<p>入口脚本是容器的启动点。它从平台注入的环境变量里读出评论内容、仓库地址、issue 编号，组装成任务描述，驱动 Agent 执行，最后把结果发回原评论。</p>
+<p>三样东西里入口脚本最容易写错。它运行在非交互容器里，没有终端，没人看得见它的输出。任何只打印不发送的实现，效果都等于什么都没做。</p>
+<p>一次触发经过的环节是这样：评论 @ 角色，平台匹配事件，拉起镜像，入口脚本读环境变量并组装 prompt，Agent 干活，回写评论。中间的 Agent 部分与前几节完全一致，改变的是输入来源和输出目的地。</p>
+<h2 id="另一种触发源：日志"><a href="#另一种触发源：日志" class="headerlink" title="另一种触发源：日志"></a>另一种触发源：日志</h2><p>评论触发适合”人发现问题之后求助”的场景。还有一类问题不需要人发现，系统自己就会报错，这时触发源是日志。</p>
+<p>HyperTicket 的 log_ai_detector 是一个可以直接对照的实现。它把触发、定位、回写三件事拆成独立模块，串成一条常驻链路：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">日志轮询（inode + offset，支持滚动）</span><br><span class="line">  → 解析 ERROR / FATAL 行，取出 level、文件、函数、行号、消息</span><br><span class="line">  → codegraph 检索相关源码位置</span><br><span class="line">  → 组装上下文交给模型分析</span><br><span class="line">  → 生成 Markdown 报告，落盘并推送通知</span><br></pre></td></tr></table></figure>
+
+<p>触发源不同，后面几步的设计就跟着变。评论内容是自然语言，模型可以从中读出意图；日志是一行结构化文本，必须先解析出错误级别、源文件、函数名和行号，模型才有定位的起点。这也是这类系统把日志解析单独抽成一个模块的原因。</p>
+<h2 id="从日志行到源码位置"><a href="#从日志行到源码位置" class="headerlink" title="从日志行到源码位置"></a>从日志行到源码位置</h2><p>日志能说明”哪里炸了”，说不清”为什么炸”。从前者走到后者，靠的是代码索引。</p>
+<p>log_ai_detector 把 codegraph 的调用封装成可配置命令模板，索引、检索、增量更新三类命令都写在环境变量里，上游命令行变化时不必改代码。检索用的查询词就是日志里解析出来的函数名、源文件名和错误消息片段，一次失败可以换关键词再试，最多取三段结果。</p>
+<p>索引不可用时有一条降级路径：按日志里的源文件名在项目里定位文件，取报错行上下各二十行作为上下文。这条路径精度低，但比没有强，也让整个系统不依赖单一外部工具。</p>
+<p>索引还需要跟着代码变。仓库里有一个 git hook：检测到 feat 类型的提交，就增量更新 codegraph 索引，其他类型的提交跳过，更新失败不阻断提交。没有这一步，索引很快会和代码脱节，定位质量随提交次数下降。</p>
+<h2 id="拼一个够用的上下文"><a href="#拼一个够用的上下文" class="headerlink" title="拼一个够用的上下文"></a>拼一个够用的上下文</h2><p>定位日志问题需要的材料不止一段源码。这个实现把四类信息拼在一起送进模型：</p>
+<ul>
+<li>触发事件的原始字段：时间、级别、线程、文件、行号、函数、消息；</li>
+<li>该行前后的日志上下文，放大器场景下按字节截断；</li>
+<li>另一侧的联调日志：事件来自前端就附上后端日志尾部，反之亦然；</li>
+<li>代码索引结果，以及最近一次 feat 提交的 diff。</li>
+</ul>
+<p>第三项值得单独说。前后端分离的系统里，一个前端报错往往只是后端失败的结果，只看一侧日志容易把责任判错方向。把同一时间窗口内另一侧的日志尾部一起给出，模型才有可能判断问题出在协议、数据还是某一侧的代码。</p>
+<p>第四项解决的是”最近改了什么”的问题。大量线上错误由最近的提交引入，把 feat diff 作为线索附上，定位命中率会明显提高。</p>
+<h2 id="交付形态也不一样"><a href="#交付形态也不一样" class="headerlink" title="交付形态也不一样"></a>交付形态也不一样</h2><p>评论触发的结果是回复，日志触发的结果是报告。</p>
+<p>这个实现让模型按固定章节输出：摘要、严重程度、检查方向、检查思路、问题定位、修复建议、需要补充的信息。修复建议要求给出具体文件、函数、行号，以及修改前后的 diff，涉及数据修复时给出带 WHERE 条件的 SQL 并提醒先查影响行数。</p>
+<p>报告写入报告目录，同时通过 webhook 或邮件推送，另有一个 Web 界面可以查看历史报告、切换模型、对单个日志文件触发一次分析。这就是这条链路里”回写”的位置：评论型 NPC 写回评论，日志型 NPC 写回报告与通知。</p>
+<h2 id="为什么不做成自动改代码"><a href="#为什么不做成自动改代码" class="headerlink" title="为什么不做成自动改代码"></a>为什么不做成自动改代码</h2><p>这套系统有定位能力，也有生成修复方案的能力，但没有让模型直接改代码。</p>
+<p>原因有两层。一层是证据：日志只记录了失败瞬间的状态，很多错误需要复现步骤、数据库现状或配置才能确认，仅凭一段上下文给出的修复方案可能是错的。另一层是影响面：自动修改意味着自动提交，错误修改会进入主干并影响其他人。</p>
+<p>所以它的提示词里明确要求只给建议，不输出任何要求系统自动执行的指令或结构化修复块，所有修复由开发者人工评估后执行。这个边界不是能力不足，而是对”谁来承担后果”的回答。</p>
+<p>评论触发的 NPC 有一条类似的边界。它可以读代码、跑命令、给结论，但写操作要限定范围，危险操作要拦截，改动要能从评论记录里还原。</p>
+<h2 id="打包成镜像"><a href="#打包成镜像" class="headerlink" title="打包成镜像"></a>打包成镜像</h2><p>课程把 Docker 打包留成课后实验，这里补一条能直接照做的最小路径。</p>
+<p>镜像是把内核和入口脚本装在一起：前者是前面几章写好的 LLMClient、ToolRegistry、Agent 与工具集，后者负责读事件、调内核、写回结果。依赖控制在标准库加一个 SDK，镜像体积和启动时间都可控。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> python:<span class="number">3.12</span>-slim</span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /app</span></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> agent/ /app/agent/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> entrypoint.py /app/</span></span><br><span class="line"><span class="keyword">ENV</span> PYTHONUNBUFFERED=<span class="number">1</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="string">&quot;python&quot;</span>, <span class="string">&quot;/app/entrypoint.py&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>入口脚本的骨架只有三步：读环境变量、驱动 Agent、写回结果。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> agent <span class="keyword">import</span> build_agent</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>() -&gt; <span class="literal">None</span>:</span><br><span class="line">    body = os.environ.get(<span class="string">&quot;COMMENT_BODY&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">    repo = os.environ.get(<span class="string">&quot;REPO_SLUG&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">    number = os.environ.get(<span class="string">&quot;ISSUE_NUMBER&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">    task = <span class="string">f&quot;仓库 <span class="subst">&#123;repo&#125;</span> 第 <span class="subst">&#123;number&#125;</span> 条评论：<span class="subst">&#123;body&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line">    agent = build_agent(workspace=os.environ.get(<span class="string">&quot;WORKSPACE&quot;</span>, <span class="string">&quot;/workspace&quot;</span>))</span><br><span class="line">    answer = agent.run(task)</span><br><span class="line">    <span class="built_in">print</span>(answer)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>变量名取决于平台注入什么，具体以平台文档为准；这里用一组自定义名字示意，入口脚本负责把它们翻译成任务描述。写回评论通常走平台的 API，或者在流水线配置里把标准输出接到评论接口，两条路选一条即可。</p>
+<p>镜像做好之后，事件绑定就落在仓库的流水线配置里。课程仓库自己用的写法是把角色名映到一条流水线，stage 只声明镜像，由镜像的入口接管执行：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">小光:</span></span><br><span class="line">  <span class="attr">issue.comment@npc:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">stages:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">run</span> <span class="string">agent</span> <span class="string">and</span> <span class="string">reply</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">$&#123;CNB_DOCKER_REGISTRY&#125;/$&#123;CNB_NPC_SLUG_LOWERCASE&#125;:latest</span></span><br></pre></td></tr></table></figure>
+
+<p>有几个容器环境特有的约束值得提前处理。第一，没有终端，所有中间输出都必须落进日志或报告；第二，进程退出即销毁，回写评论这一步必须在退出前完成，超时时间要显式设置；第三，失败也要回写，否则用户只看到一条永远没有回复的评论；第四，镜像里不要放长期有效的凭据，用平台注入的服务身份。</p>
+<h2 id="落到自己项目上"><a href="#落到自己项目上" class="headerlink" title="落到自己项目上"></a>落到自己项目上</h2><p>把 Agent 做成”挂在工作流里自动干活”的形态，要回答的问题其实只有三个。</p>
+<p>哪个事件值得触发。评论区里有人 @，日志里出现 ERROR，提交里出现 feat，都是明确的事件源。事件选得越准，无效调用越少。</p>
+<p>去哪里找定位信息。代码索引、最近提交、日志上下文、联调日志，这几类材料决定了模型能看到什么。没有索引就只能在文本里猜，定位质量会差一个量级。</p>
+<p>结果交付给谁。评论、报告、通知、Web 界面，选一个真正会被人看到的位置。跑完没人知道，等于没跑。</p>
+<p>能力来自工具集，行为来自 Skills，可达性来自 NPC。三者叠加，一个 Agent 才具备被他人使用的条件。缺任何一环，它都还停留在”作者自己的工具”这个阶段。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://shanchuann.cn">张念川</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://shanchuann.cn/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/">https://shanchuann.cn/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://shanchuann.cn" target="_blank">山川不念旧</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a></div><div class="post-share"><div class="social-share" data-image="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Skills%20%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD%E7%9A%84%E9%A2%86%E5%9F%9F%E7%9F%A5%E8%AF%86/" title="导学阶段-Skills 按需加载的领域知识"><img class="cover" src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">导学阶段-Skills 按需加载的领域知识</div></div><div class="info-2"><div class="info-item-1">从扩展成本出发解释 Skill 的存在理由，拆解 SKILL.md 的结构、两级渐进加载机制，以及它带来的分发与安全新问题。</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/10/26/Specialized%20courses%20regain%20their%20former%20vitality/" title="AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春"><img class="cover" src="/images/tokyo-night-top.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-26</div><div class="info-item-2">AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春</div></div><div class="info-2"><div class="info-item-1">AI时代，那些曾经被我们嫌弃的专业课，正在焕发第二春。 “学校的专业课已经过时了，工作的时候基本用不到。” 上大学时，我和周围很多计算机专业的学生都有过类似的想法。 学 C、C++、Java，要记语法、写练习题，学了半年也未必能做出什么实际的东西；学操作系统和计算机网络，面对一堆概念和原理，总觉得离开发很远；至于软件工程、软件项目管理，更容易被当成考前背一背就能应付过去的课。 相比之下，前端框架、后端开发、数据库以及各种新技术更有吸引力。学会一个框架，当天就能搭出页面；掌握一套开发流程，很快就能做出一个可以运行的项目。对刚开始学编程的人来说，这种看得见的成果比课本上的理论更有成就感。 这种想法并不难理解。过去很多开发任务确实需要亲手写大量代码，熟练的编程语言和工具掌握程度直接决定效率。但随着 Coding Agent 逐渐普及，原本要花数小时甚至更久的工作，现在用自然语言描述清楚，就能得到一个初步实现。 代码可以让 AI 来写，但程序是否合理、系统能否稳定运行、最终产品能否解决实际问题，仍然需要有人判断。过去不太受重视的专业课，价值正是在这些地方重新显现出来。 复杂项目的麻烦常常...</div></div></div></a><a class="pagination-related" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Agent%20v2%20%E6%95%B4%E5%90%88/" title="导学阶段-Agent v2 整合"><img class="cover" src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-06</div><div class="info-item-2">导学阶段-Agent v2 整合</div></div><div class="info-2"><div class="info-item-1">把上下文压缩与向量记忆接进 Agent 循环，讲清召回注入、压缩回写和事实槽并集三个容易做错的细节。</div></div></div></a><a class="pagination-related" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Function%20Calling%20%E5%8D%8F%E8%AE%AE/" title="导学阶段-Function Calling 协议"><img class="cover" src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-06</div><div class="info-item-2">导学阶段-Function Calling 协议</div></div><div class="info-2"><div class="info-item-1">模型决定调工具时直接返回结构化的 tool_calls 字段；消息流从三种角色变成四种，一次任务由此可追溯。</div></div></div></a><a class="pagination-related" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Coding%20Agent%20%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" title="导学阶段-Coding Agent 的工作模式"><img class="cover" src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-06</div><div class="info-item-2">导学阶段-Coding Agent 的工作模式</div></div><div class="info-2"><div class="info-item-1">浏览、定位、理解、修改、验证五个阶段构成 Coding Agent 的基本循环，工具集与阶段之间的数据流决定这套循环能否跑通。</div></div></div></a><a class="pagination-related" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Agent%20%E4%B8%8E%20Chatbot%20%E7%9A%84%E5%8C%BA%E5%88%AB/" title="导学阶段-Agent 与 Chatbot 的区别"><img class="cover" src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-06</div><div class="info-item-2">导学阶段-Agent 与 Chatbot 的区别</div></div><div class="info-2"><div class="info-item-1">同一道要联网还要做除法的题，一次调用只能靠编，加上循环和工具才能算对，差别在外层这层程序上。</div></div></div></a><a class="pagination-related" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-LLM%20%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%B7%A5%E5%85%B7%E4%B8%8E%E4%B8%8A%E4%B8%8B%E6%96%87/" title="导学阶段-LLM 为什么需要工具与上下文"><img class="cover" src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-06</div><div class="info-item-2">导学阶段-LLM 为什么需要工具与上下文</div></div><div class="info-2"><div class="info-item-1">实时信息、私有文档、训练截止之后的事件与执行结果，都不在模型参数里，补上这个缺口有两条路。</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://s2.loli.net/2025/09/25/tIKcNp3fvn5aOU4.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">张念川</div><div class="author-info-description">玉袍长剑堪风流，山川不念旧</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">121</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">38</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">14</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/shanchuann"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">由于极为严重的失误，个人网站代码包括内容完全丢失，正在重建中。另外《C语言圣经》编写工作正在稳步进行。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8D%E5%BD%A2%E6%80%81%E7%9A%84%E5%B7%AE%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">两种形态的差别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E6%A0%B7%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">三样配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A6%E5%8F%91%E6%BA%90%EF%BC%9A%E6%97%A5%E5%BF%97"><span class="toc-number">3.</span> <span class="toc-text">另一种触发源：日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E6%97%A5%E5%BF%97%E8%A1%8C%E5%88%B0%E6%BA%90%E7%A0%81%E4%BD%8D%E7%BD%AE"><span class="toc-number">4.</span> <span class="toc-text">从日志行到源码位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8B%BC%E4%B8%80%E4%B8%AA%E5%A4%9F%E7%94%A8%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-number">5.</span> <span class="toc-text">拼一个够用的上下文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%A4%E4%BB%98%E5%BD%A2%E6%80%81%E4%B9%9F%E4%B8%8D%E4%B8%80%E6%A0%B7"><span class="toc-number">6.</span> <span class="toc-text">交付形态也不一样</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%81%9A%E6%88%90%E8%87%AA%E5%8A%A8%E6%94%B9%E4%BB%A3%E7%A0%81"><span class="toc-number">7.</span> <span class="toc-text">为什么不做成自动改代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%93%E5%8C%85%E6%88%90%E9%95%9C%E5%83%8F"><span class="toc-number">8.</span> <span class="toc-text">打包成镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%90%BD%E5%88%B0%E8%87%AA%E5%B7%B1%E9%A1%B9%E7%9B%AE%E4%B8%8A"><span class="toc-number">9.</span> <span class="toc-text">落到自己项目上</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/" title="导学阶段-NPC 把 Agent 挂到仓库里"><img src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="导学阶段-NPC 把 Agent 挂到仓库里"/></a><div class="content"><a class="title" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-NPC%20%E6%8A%8A%20Agent%20%E6%8C%82%E5%88%B0%E4%BB%93%E5%BA%93%E9%87%8C/" title="导学阶段-NPC 把 Agent 挂到仓库里">导学阶段-NPC 把 Agent 挂到仓库里</a><time datetime="2026-11-06T11:30:00.000Z" title="发表于 2026-11-06 19:30:00">2026-11-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Skills%20%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD%E7%9A%84%E9%A2%86%E5%9F%9F%E7%9F%A5%E8%AF%86/" title="导学阶段-Skills 按需加载的领域知识"><img src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="导学阶段-Skills 按需加载的领域知识"/></a><div class="content"><a class="title" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Skills%20%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD%E7%9A%84%E9%A2%86%E5%9F%9F%E7%9F%A5%E8%AF%86/" title="导学阶段-Skills 按需加载的领域知识">导学阶段-Skills 按需加载的领域知识</a><time datetime="2026-11-06T11:00:00.000Z" title="发表于 2026-11-06 19:00:00">2026-11-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-%E6%95%B4%E5%90%88%E4%B8%8E%E5%BD%A2%E6%80%81/" title="导学阶段-整合与形态"><img src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="导学阶段-整合与形态"/></a><div class="content"><a class="title" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-%E6%95%B4%E5%90%88%E4%B8%8E%E5%BD%A2%E6%80%81/" title="导学阶段-整合与形态">导学阶段-整合与形态</a><time datetime="2026-11-06T10:30:00.000Z" title="发表于 2026-11-06 18:30:00">2026-11-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-%E5%B7%A5%E5%85%B7%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6/" title="导学阶段-工具的设计哲学"><img src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="导学阶段-工具的设计哲学"/></a><div class="content"><a class="title" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-%E5%B7%A5%E5%85%B7%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6/" title="导学阶段-工具的设计哲学">导学阶段-工具的设计哲学</a><time datetime="2026-11-06T10:00:00.000Z" title="发表于 2026-11-06 18:00:00">2026-11-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Coding%20Agent%20%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" title="导学阶段-Coding Agent 的工作模式"><img src="https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="导学阶段-Coding Agent 的工作模式"/></a><div class="content"><a class="title" href="/2026/11/06/%E5%AF%BC%E5%AD%A6%E9%98%B6%E6%AE%B5-Coding%20Agent%20%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F/" title="导学阶段-Coding Agent 的工作模式">导学阶段-Coding Agent 的工作模式</a><time datetime="2026-11-06T09:30:00.000Z" title="发表于 2026-11-06 17:30:00">2026-11-06</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://files.seeusercontent.com/2026/11/06/9iQt/Development-of-AI-Agents.png);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By 张念川</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.0.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div><div class="footer_custom_text">满堂花醉三千客，一剑霜寒十四州 | <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/"><span>备案号：陕ICP备2026009958号-1</span></a> <img class="icp-icon" src="/images/beian-badge.png" alt="公安备案"> <a href="https://beian.mps.gov.cn/#/query/webSearch?code=61040202000893" rel="noreferrer" target="_blank">陕公网安备61040202000893号</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="聊天" style="display:none"><i class="fas fa-message"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '1kGP51o4WjaiJX72Yfdy5T6k-gzGzoHsz',
+      appKey: 'OeiTKeZqnH8VrxSF1s69kyOf',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script src="/js/parallax.js"></script><script src="/js/dsh-pet.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="255,0178,102" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script>(() => {
+  window.$crisp = ['safe', true]
+  window.CRISP_WEBSITE_ID = "2f8661da-b522-4dfb-a0f3-ce177151f169"
+
+  btf.getScript('https://client.crisp.chat/l.js').then(() => {
+    const isChatBtn = true
+    const isChatHideShow = false
+
+    if (isChatBtn) {
+      const open = () => {
+        $crisp.push(["do", "chat:show"])
+        $crisp.push(["do", "chat:open"])
+      }
+
+      const close = () => $crisp.push(["do", "chat:hide"])
+
+      close()
+
+      $crisp.push(["on", "chat:closed", close])
+
+      window.chatBtnFn = () => $crisp.is("chat:visible") ? close() : open()
+
+      document.getElementById('chat-btn').style.display = 'block'
+    } else if (isChatHideShow) {
+      window.chatBtn = {
+        hide: () => $crisp.push(["do", "chat:hide"]),
+        show: () => $crisp.push(["do", "chat:show"])
+      }
+    }
+  })
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div id="algolia-search-input"><div class="ais-SearchBox"><form class="ais-SearchBox-form" action="" role="search" novalidate=""><input class="ais-SearchBox-input" type="search" placeholder="搜索文章" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="512" aria-label="Search"/><button class="ais-SearchBox-submit" type="submit" title="Submit the search query" style="display:none;"><svg class="ais-SearchBox-submitIcon" width="10" height="10" viewBox="0 0 40 40" aria-hidden="true"><path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"></path></svg></button></form></div><hr/><div id="algolia-search-results"><div id="algolia-hits"><div id="algolia-hits-empty" style="display:none;"></div><div class="ais-Hits" style="display:none;"><ol class="ais-Hits-list"></ol></div></div><div class="ais-Pagination" id="algolia-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="algolia-info"><span class="ais-Stats-text"></span><a class="algolia-poweredBy" href="https://www.algolia.com/?utm_source=algoliasearch.js&amp;utm_medium=website&amp;utm_content=localhost&amp;utm_campaign=poweredby" target="_blank" aria-label="Search by Algolia" rel="noopener noreferrer"><svg class="ais-PoweredBy-logo" height="1.2em" viewBox="0 0 572 64" style="width: auto;"><path fill="#36395A" d="M16 48.3c-3.4 0-6.3-.6-8.7-1.7A12.4 12.4 0 0 1 1.9 42C.6 40 0 38 0 35.4h6.5a6.7 6.7 0 0 0 3.9 6c1.4.7 3.3 1.1 5.6 1.1 2.2 0 4-.3 5.4-1a7 7 0 0 0 3-2.4 6 6 0 0 0 1-3.4c0-1.5-.6-2.8-1.9-3.7-1.3-1-3.3-1.6-5.9-1.8l-4-.4c-3.7-.3-6.6-1.4-8.8-3.4a10 10 0 0 1-3.3-7.9c0-2.4.6-4.6 1.8-6.4a12 12 0 0 1 5-4.3c2.2-1 4.7-1.6 7.5-1.6s5.5.5 7.6 1.6a12 12 0 0 1 5 4.4c1.2 1.8 1.8 4 1.8 6.7h-6.5a6.4 6.4 0 0 0-3.5-5.9c-1-.6-2.6-1-4.4-1s-3.2.3-4.4 1c-1.1.6-2 1.4-2.6 2.4-.5 1-.8 2-.8 3.1a5 5 0 0 0 1.5 3.6c1 1 2.6 1.7 4.7 1.9l4 .3c2.8.2 5.2.8 7.2 1.8 2.1 1 3.7 2.2 4.9 3.8a9.7 9.7 0 0 1 1.7 5.8c0 2.5-.7 4.7-2 6.6a13 13 0 0 1-5.6 4.4c-2.4 1-5.2 1.6-8.4 1.6Zm35.6 0c-2.6 0-4.8-.4-6.7-1.3a13 13 0 0 1-4.7-3.5 17.1 17.1 0 0 1-3.6-10.4v-1c0-2 .3-3.8 1-5.6a13 13 0 0 1 7.3-8.3 15 15 0 0 1 6.3-1.4A13.2 13.2 0 0 1 64 24.3c1 2.2 1.6 4.6 1.6 7.2V34H39.4v-4.3h21.8l-1.8 2.2c0-2-.3-3.7-.9-5.1a7.3 7.3 0 0 0-2.7-3.4c-1.2-.7-2.7-1.1-4.6-1.1s-3.4.4-4.7 1.3a8 8 0 0 0-2.9 3.6c-.6 1.5-.9 3.3-.9 5.4 0 2 .3 3.7 1 5.3a7.9 7.9 0 0 0 2.8 3.7c1.3.8 3 1.3 5 1.3s3.8-.5 5.1-1.3c1.3-1 2.1-2 2.4-3.2h6a11.8 11.8 0 0 1-7 8.7 16 16 0 0 1-6.4 1.2ZM80 48c-2.2 0-4-.3-5.7-1a8.4 8.4 0 0 1-3.7-3.3 9.7 9.7 0 0 1-1.3-5.2c0-2 .5-3.8 1.5-5.2a9 9 0 0 1 4.3-3.1c1.8-.7 4-1 6.7-1H89v4.1h-7.5c-2 0-3.4.5-4.4 1.4-1 1-1.6 2.1-1.6 3.6s.5 2.7 1.6 3.6c1 1 2.5 1.4 4.4 1.4 1.1 0 2.2-.2 3.2-.7 1-.4 1.9-1 2.6-2 .6-1 1-2.4 1-4.2l1.7 2.1c-.2 2-.7 3.8-1.5 5.2a9 9 0 0 1-3.4 3.3 12 12 0 0 1-5.3 1Zm9.5-.7v-8.8h-1v-10c0-1.8-.5-3.2-1.4-4.1-1-1-2.4-1.4-4.2-1.4a142.9 142.9 0 0 0-10.2.4v-5.6a74.8 74.8 0 0 1 8.6-.4c3 0 5.5.4 7.5 1.2s3.4 2 4.4 3.6c1 1.7 1.4 4 1.4 6.7v18.4h-5Zm12.9 0V17.8h5v12.3h-.2c0-4.2 1-7.4 2.8-9.5a11 11 0 0 1 8.3-3.1h1v5.6h-2a9 9 0 0 0-6.3 2.2c-1.5 1.5-2.2 3.6-2.2 6.4v15.6h-6.4Zm34.4 1a15 15 0 0 1-6.6-1.3c-1.9-.9-3.4-2-4.7-3.5a15.5 15.5 0 0 1-2.7-5c-.6-1.7-1-3.6-1-5.4v-1c0-2 .4-3.8 1-5.6a15 15 0 0 1 2.8-4.9c1.3-1.5 2.8-2.6 4.6-3.5a16.4 16.4 0 0 1 13.3.2c2 1 3.5 2.3 4.8 4a12 12 0 0 1 2 6H144c-.2-1.6-1-3-2.2-4.1a7.5 7.5 0 0 0-5.2-1.7 8 8 0 0 0-4.7 1.3 8 8 0 0 0-2.8 3.6 13.8 13.8 0 0 0 0 10.3c.6 1.5 1.5 2.7 2.8 3.6s2.8 1.3 4.8 1.3c1.5 0 2.7-.2 3.8-.8a7 7 0 0 0 2.6-2c.7-1 1-2 1.2-3.2h6.2a11 11 0 0 1-2 6.2 15.1 15.1 0 0 1-11.8 5.5Zm19.7-1v-40h6.4V31h-1.3c0-3 .4-5.5 1.1-7.6a9.7 9.7 0 0 1 3.5-4.8A9.9 9.9 0 0 1 172 17h.3c3.5 0 6 1.1 7.9 3.5 1.7 2.3 2.6 5.7 2.6 10v16.8h-6.4V29.6c0-2.1-.6-3.8-1.8-5a6.4 6.4 0 0 0-4.8-1.8c-2 0-3.7.7-5 2a7.8 7.8 0 0 0-1.9 5.5v17h-6.4Zm63.8 1a12.2 12.2 0 0 1-10.9-6.2 19 19 0 0 1-1.8-7.3h1.4v12.5h-5.1v-40h6.4v19.8l-2 3.5c.2-3.1.8-5.7 1.9-7.7a11 11 0 0 1 4.4-4.5c1.8-1 3.9-1.5 6.1-1.5a13.4 13.4 0 0 1 12.8 9.1c.7 1.9 1 3.8 1 6v1c0 2.2-.3 4.1-1 6a13.6 13.6 0 0 1-13.2 9.4Zm-1.2-5.5a8.4 8.4 0 0 0 7.9-5c.7-1.5 1.1-3.3 1.1-5.3s-.4-3.8-1.1-5.3a8.7 8.7 0 0 0-3.2-3.6 9.6 9.6 0 0 0-9.2-.2 8.5 8.5 0 0 0-3.3 3.2c-.8 1.4-1.3 3-1.3 5v2.3a9 9 0 0 0 1.3 4.8 9 9 0 0 0 3.4 3c1.4.7 2.8 1 4.4 1Zm27.3 3.9-10-28.9h6.5l9.5 28.9h-6Zm-7.5 12.2v-5.7h4.9c1 0 2-.1 2.9-.4a4 4 0 0 0 2-1.4c.4-.7.9-1.6 1.2-2.7l8.6-30.9h6.2l-9.3 32.4a14 14 0 0 1-2.5 5 8.9 8.9 0 0 1-4 2.8c-1.5.6-3.4.9-5.6.9h-4.4Zm9-12.2v-5.2h6.4v5.2H248Z"></path><path fill="#003DFF" d="M534.4 9.1H528a.8.8 0 0 1-.7-.7V1.8c0-.4.2-.7.6-.8l6.5-1c.4 0 .8.2.9.6v7.8c0 .4-.4.7-.8.7zM428 35.2V.8c0-.5-.3-.8-.7-.8h-.2l-6.4 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.5 0 .8-.4.8-.8V43c0-.4-.3-.7-.6-.8-4.5-.5-4.5-6-4.5-7zm106.5-21.8H528c-.4 0-.7.4-.7.8v34c0 .4.3.8.7.8h6.5c.4 0 .8-.4.8-.8v-34c0-.5-.4-.8-.8-.8zm-17.7 21.8V.8c0-.5-.3-.8-.8-.8l-6.5 1c-.4 0-.7.4-.7.8v35c0 1.6 0 11.8 12.3 12.2.4 0 .8-.4.8-.8V43c0-.4-.3-.7-.7-.8-4.4-.5-4.4-6-4.4-7zm-22.2-20.6a16.5 16.5 0 0 1 8.6 9.3c.8 2.2 1.3 4.8 1.3 7.5a19.4 19.4 0 0 1-4.6 12.6 14.8 14.8 0 0 1-5.2 3.6c-2 .9-5.2 1.4-6.8 1.4a21 21 0 0 1-6.7-1.4 15.4 15.4 0 0 1-8.6-9.3 21.3 21.3 0 0 1 0-14.4 15.2 15.2 0 0 1 8.6-9.3c2-.8 4.3-1.2 6.7-1.2s4.6.4 6.7 1.2zm-6.7 27.6c2.7 0 4.7-1 6.2-3s2.2-4.3 2.2-7.8-.7-6.3-2.2-8.3-3.5-3-6.2-3-4.7 1-6.1 3c-1.5 2-2.2 4.8-2.2 8.3s.7 5.8 2.2 7.8 3.5 3 6.2 3zm-88.8-28.8c-6.2 0-11.7 3.3-14.8 8.2a18.6 18.6 0 0 0 4.8 25.2c1.8 1.2 4 1.8 6.2 1.7s.1 0 .1 0h.9c4.2-.7 8-4 9.1-8.1v7.4c0 .4.3.7.8.7h6.4a.7.7 0 0 0 .7-.7V14.2c0-.5-.3-.8-.7-.8h-13.5zm6.3 26.5a9.8 9.8 0 0 1-5.7 2h-.5a10 10 0 0 1-9.2-14c1.4-3.7 5-6.3 9-6.3h6.4v18.3zm152.3-26.5h13.5c.5 0 .8.3.8.7v33.7c0 .4-.3.7-.8.7h-6.4a.7.7 0 0 1-.8-.7v-7.4c-1.2 4-4.8 7.4-9 8h-.1a4.2 4.2 0 0 1-.5.1h-.9a10.3 10.3 0 0 1-7-2.6c-4-3.3-6.5-8.4-6.5-14.2 0-3.7 1-7.2 3-10 3-5 8.5-8.3 14.7-8.3zm.6 28.4c2.2-.1 4.2-.6 5.7-2V21.7h-6.3a9.8 9.8 0 0 0-9 6.4 10.2 10.2 0 0 0 9.1 13.9h.5zM452.8 13.4c-6.2 0-11.7 3.3-14.8 8.2a18.5 18.5 0 0 0 3.6 24.3 10.4 10.4 0 0 0 13 .6c2.2-1.5 3.8-3.7 4.5-6.1v7.8c0 2.8-.8 5-2.2 6.3-1.5 1.5-4 2.2-7.5 2.2l-6-.3c-.3 0-.7.2-.8.5l-1.6 5.5c-.1.4.1.8.5 1h.1c2.8.4 5.5.6 7 .6 6.3 0 11-1.4 14-4.1 2.7-2.5 4.2-6.3 4.5-11.4V14.2c0-.5-.4-.8-.8-.8h-13.5zm6.3 8.2v18.3a9.6 9.6 0 0 1-5.6 2h-1a10.3 10.3 0 0 1-8.8-14c1.4-3.7 5-6.3 9-6.3h6.4zM291 31.5A32 32 0 0 1 322.8 0h30.8c.6 0 1.2.5 1.2 1.2v61.5c0 1.1-1.3 1.7-2.2 1l-19.2-17a18 18 0 0 1-11 3.4 18.1 18.1 0 1 1 18.2-14.8c-.1.4-.5.7-.9.6-.1 0-.3 0-.4-.2l-3.8-3.4c-.4-.3-.6-.8-.7-1.4a12 12 0 1 0-2.4 8.3c.4-.4 1-.5 1.6-.2l14.7 13.1v-46H323a26 26 0 1 0 10 49.7c.8-.4 1.6-.2 2.3.3l3 2.7c.3.2.3.7 0 1l-.2.2a32 32 0 0 1-47.2-28.6z"></path></svg></a></div></div></div></div><div id="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/algoliasearch/dist/lite/builds/browser.umd.min.js"></script><script src="/js/search/algolia.js"></script></div></div></body></html>
