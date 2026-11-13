@@ -1,0 +1,47 @@
+[
+  {
+    "id": "hello",
+    "name": "羊毛账本",
+    "image": "home"
+  },
+  {
+    "id": "native",
+    "name": "原生界面",
+    "image": "home"
+  },
+  {
+    "id": "entry",
+    "name": "一句话记账",
+    "image": "new-entry"
+  },
+  {
+    "id": "week",
+    "name": "消费课表",
+    "image": "home"
+  },
+  {
+    "id": "statistics",
+    "name": "收支统计",
+    "image": "statistics"
+  },
+  {
+    "id": "assistant",
+    "name": "蓝羊羊助手",
+    "image": "assistant"
+  },
+  {
+    "id": "receipt",
+    "name": "小票报告",
+    "image": "monthly-receipt"
+  },
+  {
+    "id": "preferences",
+    "name": "个人偏好",
+    "image": "settings"
+  },
+  {
+    "id": "download",
+    "name": "获取应用",
+    "image": "settings"
+  }
+]
