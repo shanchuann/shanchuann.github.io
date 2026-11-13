@@ -79,12 +79,12 @@ components:
 
 中性颗粒灰幕、粗重中文衬线与一台持续存在的 Android 设备构成产品舞台。此系统仅适用于 `source/html/woolledger/` 官网，依据当前 `style.css`、`site.js` 和 `index.html` 记录；不约束博客全局或 Android 原生应用。
 
-用户指定的 Money Hole 构图和交互权威落实为九章全屏叙事、共享设备缩放、阻尼视差、橙色重播和手机内 DOM 示范。桌面、平板、手机共享章节状态而采用不同空间安排；手机也使用全屏章节和横向说明轮播。真实 v1.54 截图与网页示范明确区分，不将旧图描述成新版本录屏。
+用户指定的 Money Hole 构图和交互权威落实为九章全屏叙事、共享设备缩放、阻尼视差、橙色重播和手机内应用操作实录。桌面、平板、手机共享章节状态而采用不同空间安排；手机也使用全屏章节和横向说明轮播。七段录像与静态封面来自 Android API 35 模拟器上的 2.0.1 本地 debug 构建，使用演示账本。正式下载仍独立指向 2.0.0，不混淆录像和发布版本。
 
 **Key Characteristics:**
 - 中性灰与墨色反转，橙色标记交互状态。
 - 自托管中文衬线大标题与无衬线说明。
-- 持久设备、分层视差与可重播的屏内示范。
+- 持久设备、分层视差与可重播的应用实录。
 - 全屏章节导航及移动端完成后出现的功能轮播。
 
 ## Colors
@@ -120,7 +120,7 @@ components:
 - **Body**：功能段落使用 body token；手机为 12px / 18px。
 - **Label**：页头、设备外固定真实性图注等使用 11px 级文字；图注固定为 label token，不随设备缩放。
 
-**The Two Voices Rule.** 标题使用自托管衬线字形，说明与操作使用无衬线；网页演示内部字体保持应用示范语境。
+**The Two Voices Rule.** 标题使用自托管衬线字形，说明与操作使用无衬线；录屏内部字形直接来自应用，不由网页重绘。
 
 ## Layout
 
@@ -136,13 +136,11 @@ components:
 
 舞台深度由设备柔和投影、颗粒和边缘柔化组成；功能文字不放进装饰卡片。设备投影为 `drop-shadow(0 20px 18px #00000035)`。顶部和底部边缘使用 110px 高、5px backdrop blur 的渐隐区；手机缩为 28px。Canvas 颗粒 overlay 透明度 .18，256×256 tile，83ms 更新，设备像素比上限 1.25；页面隐藏或减少动态偏好时停止连续更新。
 
-屏内 DOM 示范保留自己的应用材料：提示卡 `0 14px 35px #0000001c`，toast `0 8px 20px #0002`，定位框 `0 3px 12px #00000012`。这些只描述网页示范内部，不作为网站功能文案容器规则。
-
-设备变换为 1.5s cubic-bezier(.3,0,.1,1)。左右文案和设备以归一化鼠标位置乘 12/14/20 横向幅度、9 纵向幅度，阻尼 .07。文字由 18px 位移及 8px 模糊恢复，说明分组延迟 .3/.46/.62s。演示结束后悬停设备放大 1.03；重播后恢复播放状态。减少动态偏好关闭空间视差、设备转换和示范动画，直接显示完成状态；保留信息和可操作章节。
+设备变换为 1.5s cubic-bezier(.3,0,.1,1)。左右文案和设备以归一化鼠标位置乘 12/14/20 横向幅度、9 纵向幅度，阻尼 .07。文字由 18px 位移及 8px 模糊恢复，说明分组延迟 .3/.46/.62s。演示结束后悬停设备放大 1.03；重播后恢复播放状态。减少动态偏好关闭空间视差、设备转换和录屏自动播放，直接显示实际应用静态封面与完成状态；保留信息和可操作章节。
 
 ## Shapes
 
-下载按钮使用 button 圆角，功能图标使用 app-mark，开场图标使用 opening-mark。标签为 pill，重播为圆形。持久设备基础尺寸 432×903px，截图覆盖这一坐标；屏内示范按 Android 屏幕区域裁切，圆角 56px。
+下载按钮使用 button 圆角，功能图标使用 app-mark，开场图标使用 opening-mark。标签为 pill，重播为圆形。持久设备基础尺寸 432×903px，截图覆盖这一坐标；视频按 Android 屏幕区域覆盖：inset 1.6% 3.8% 1.6% 3.1%，宽 93.1%、高 96.8%，object-fit:fill，圆角 56px。
 
 ## Components
 
@@ -164,11 +162,13 @@ components:
 
 侧边九条刻度，普通 8×1px，首尾及当前 12×2px，当前为强调色；名称悬停或聚焦显示。手机刻度宽 6px，底部微型方向键隐藏。桌面微型方向键为 6px 方块，按下短暂放大 1.35。顶部演示进度高 3px。移动端说明分页宽 28px，选中从 1px 增至 3px 并使用强调色。
 
-滚轮、键盘、触摸和导航共享章节状态；键盘支持方向键、Page、空格、Home/End，纵向触摸超过 40px 切换，横向说明独立滚动。普通章节步进有 850ms 过渡门限，可在演示结束前切换；切换会取消旧演示计时器与动画。无 JavaScript 时提供单列可读后备，不是启用交互时的移动布局。
+滚轮、键盘、触摸和导航共享章节状态；键盘支持方向键、Page、空格、Home/End，纵向触摸超过 40px 切换，横向说明独立滚动。普通章节步进有 850ms 过渡门限，可在演示结束前切换；切换会暂停旧视频、隐藏视频层、取消播放进度帧，并用播放版本标识防止旧异步结果影响新章节。无 JavaScript 时提供单列可读后备，不是启用交互时的移动布局。
 
 ### Device demonstration
 
-真实截图作为底层，DOM 输入、图表、触点和确认提示作为演示层。设备外图注明确“网页模拟演示 · v1.54 界面 · 示例账目”。演示不连接用户账本。各章播放时长为 1400/3700/6500/4800/4800/5800/4600/4200ms，结尾不播放；完成后可重播。
+设备内使用 assets/native/ 的七段实际操作 MP4：overview、entry、week、statistics、assistant、receipt、preferences，配套静态封面由同一应用采集。播放器 muted、playsinline、preload="none"，没有网页绘制的应用弹窗、图表、聊天回复、触点或提示条。固定图注明确“应用实录 · 2.0.1 本地构建 · 演示账本”；素材由 Android API 35 模拟器运行本地 debug APK 采集，不代表正式 2.0.0 下载包的录像。
+
+顶部进度直接取 currentTime/duration；ended 后进入完成状态，重播将同一片段从 0 开始。播放拒绝、媒体错误或减少动态偏好时进入完成状态，保留实际静态封面；开场与结尾没有录像。视频显示使用 .2s 透明度过渡，不添加合成应用操作。
 
 ## Do's and Don'ts
 
@@ -180,9 +180,9 @@ components:
 - **Do** 为减少动态偏好保留完成状态、说明轮播和章节操作。
 
 ### Don't:
-- **Don't** 将旧截图或 DOM 动画称为 2.0 真机录屏。
+- **Don't** 自行绘制应用中不存在的弹窗、聊天回复、图表或提示条来替代实际操作。
+- **Don't** 将 2.0.1 本地构建实录称为正式 2.0.0 下载包录像。
 - **Don't** 将移动端恢复成旧版自然滚动堆叠作为本轮交互实现。
-- **Don't** 将屏内演示卡片样式推广成官网功能说明卡片。
 - **Don't** 将独立官网的视觉规则推广到博客全局或 Android 应用。
 
-<!-- Not canonized: no new craft defect identified in the source sample. Known tradeoffs: shortest mobile viewports shrink the device to reserve readable fixed text; screenshot and DOM demonstration remain distinct from native application evidence. No UI changes in this documentation pass. -->
+<!-- Not canonized: no new craft defect identified in the source sample. Known tradeoffs: shortest mobile viewports shrink the device to reserve readable fixed text; recordings show a local 2.0.1 debug build with demonstration data, distinct from the formal 2.0.0 download. No UI changes in this documentation pass. -->

@@ -1,0 +1,74 @@
+{
+  "applicationId": "com.wool.ledger",
+  "versionName": "2.0.1",
+  "versionCode": 201,
+  "apkSha256": "24B0FEA7A0E3875043B4FE1E1057C61249CA9DEA2E88CD0B0DE05998CE26BE31",
+  "device": "Android 35 x86_64 isolated emulator",
+  "media": [
+    {
+      "file": "assistant.mp4",
+      "bytes": 103318,
+      "sha256": "CDBEB52BA2D88942CECB9321F14F0EBB63E9EB0D764980BD4B8DF689A46C9DFA"
+    },
+    {
+      "file": "assistant.png",
+      "bytes": 745649,
+      "sha256": "4CFDEF753DD6853D1FFF8F8526174E069059D13CBA3709BB7BB1B148C424671E"
+    },
+    {
+      "file": "entry.mp4",
+      "bytes": 97761,
+      "sha256": "A30020E7FAFF8A9813CD53CBD2A2C22A05FD2865C2B2DE916A0BB0ACCB5E9791"
+    },
+    {
+      "file": "home.png",
+      "bytes": 963269,
+      "sha256": "A7C8D857EF1AA3F85A6606AB1A4105E8E0856E681559003BFBCDF6D826E86F32"
+    },
+    {
+      "file": "monthly-receipt.png",
+      "bytes": 1118617,
+      "sha256": "AA84BF36CFC7173E37ED4CC274DE5ADCF7D90DA8DF5A2A224B81119F0CA87672"
+    },
+    {
+      "file": "new-entry.png",
+      "bytes": 710079,
+      "sha256": "8EEC80AF2C5C4FE23521C54A32A38C5EB2216D317716349E9C09D51CB95B7A3D"
+    },
+    {
+      "file": "overview.mp4",
+      "bytes": 141563,
+      "sha256": "8F47D13BC4DCC4C8AD450A99E921F089627CE9458FDE23CE8800DFEC09D41FFE"
+    },
+    {
+      "file": "preferences.mp4",
+      "bytes": 79533,
+      "sha256": "6C9540F7300ABC8FD16B101255B1187CDF4F81325154DDE10A9FE58E42716FA2"
+    },
+    {
+      "file": "receipt.mp4",
+      "bytes": 390230,
+      "sha256": "639BE1D7964CDAE5632ABF1A4DE058E40B35CA7D6BBB6433D82E4064CA3F29A4"
+    },
+    {
+      "file": "settings.png",
+      "bytes": 679275,
+      "sha256": "5F0040A5B53724E0DCA0F7CFB257050EBB3C329B274C24B20C58C30E9BFB7064"
+    },
+    {
+      "file": "statistics.mp4",
+      "bytes": 446033,
+      "sha256": "99A70B35D06364D72731146E3E249C0301099F3B20709275A2D4B328EEDD5127"
+    },
+    {
+      "file": "statistics.png",
+      "bytes": 1792226,
+      "sha256": "8FE7FEE6BA451B6C883DA68911C6191312CF6D45DC2450CEA3CF8DBC82A41F41"
+    },
+    {
+      "file": "week.mp4",
+      "bytes": 115012,
+      "sha256": "DC1396B45A359D39AF1422C90DB64484CA69CF10AE27D555543B48D3B86C3CD8"
+    }
+  ]
+}

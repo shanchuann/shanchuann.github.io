@@ -2,7 +2,6 @@
   'use strict';
   const root = document.documentElement;
   const body = document.body;
-  const app = document.getElementById('app');
   const canvas = document.querySelector('.design-canvas');
   const frame = document.querySelector('.design-frame');
   const scenes = [...document.querySelectorAll('.scene')];
@@ -11,26 +10,23 @@
   const stage = document.querySelector('.device-stage');
   const caption = document.getElementById('device-caption');
   const layers = [...document.querySelectorAll('.device-image')];
-  const splash = document.querySelector('.app-splash');
+  const video = document.querySelector('.device-recording');
   const replay = document.querySelector('.replay');
   const progress = document.querySelector('.demo-progress');
   const progressBar = progress.querySelector('i');
-  const card = document.querySelector('.demo-card');
-  const toast = document.querySelector('.demo-toast');
-  const focus = document.querySelector('.demo-focus');
-  const cursor = document.querySelector('.demo-cursor');
   const theme = document.querySelector('.theme-button');
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const coarse = matchMedia('(hover:none), (pointer:coarse)');
   const config = window.WOOL_LEDGER_CONFIG || {};
   const names = chapters.map(a => a.getAttribute('aria-label'));
-  const demoDurations = [1400, 3700, 6500, 4800, 4800, 5800, 4600, 4200, 0];
+  const recordings = [null,'overview','entry','week','statistics','assistant','receipt','preferences',null];
   let index = 0, scale = 1, width = 1280, height = 832, compact = false, mobile = false;
   let playing = false, transitionUntil = 0, imageLayer = 0, imageRevision = 0;
-  let timers = [], animations = [], progressFrame = 0, demoStart = 0, demoDuration = 0;
+  let timers = [], progressFrame = 0;
   let pointerX = -1, pointerY = -1, hover = false;
   let tx = 0, ty = 0, px = 0, py = 0, parallaxFrame = 0;
   let trackingFrame = 0;
+  let playbackRevision = 0;
 
   document.querySelectorAll('[data-download]').forEach(a => {
     if (config.downloadUrl) a.href = config.downloadUrl;
@@ -41,7 +37,7 @@
     if (config.version) a.firstChild.textContent = `v${config.version} · 发布说明 `;
   });
   ['home','new-entry','statistics','assistant','monthly-receipt','settings'].forEach(name => {
-    const img = new Image(); img.src = `assets/${name}.png`;
+    const img = new Image(); img.src = `assets/native/${name}.png`;
   });
 
   function setTheme(dark) {
@@ -111,121 +107,61 @@
   }
 
   function schedule(ms, fn) { timers.push(setTimeout(fn, ms)); }
-  function animate(el, frames, duration = 450, delay = 0) {
-    if (reduced.matches) { Object.assign(el.style,frames[frames.length - 1]); return; }
-    animations.push(el.animate(frames,{duration,delay,fill:'forwards',easing:'cubic-bezier(.16,1,.3,1)'}));
-  }
   function resetDemo() {
+    playbackRevision++;
     timers.forEach(clearTimeout); timers = [];
-    animations.forEach(a => a.cancel()); animations = [];
     cancelAnimationFrame(progressFrame);
-    cursor.classList.remove('pressed');
-    [card,toast,focus,cursor].forEach(el => el.removeAttribute('style'));
-    card.innerHTML = ''; toast.textContent = '';
+    video.pause();
+    video.classList.remove('visible');
     playing = false;
     progress.classList.remove('playing');
     progress.setAttribute('aria-valuenow','0'); progressBar.style.transform = 'scaleX(0)';
   }
-  function setCursor(x, y, press = false) {
-    const from = cursor.dataset.xy ? JSON.parse(cursor.dataset.xy) : [x + 25,y + 40];
-    cursor.dataset.xy = JSON.stringify([x,y]);
-    animate(cursor,[{opacity:1,transform:`translate(${from[0]}px,${from[1]}px)`},{opacity:1,transform:`translate(${x}px,${y}px)`}],600);
-    if (press) { schedule(600,() => cursor.classList.add('pressed')); schedule(820,() => cursor.classList.remove('pressed')); }
-  }
-  function highlight(x,y,w,h) {
-    Object.assign(focus.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
-    animate(focus,[{opacity:0},{opacity:1}],350);
-  }
-  function showCard(html,top='33%') {
-    card.innerHTML = html; card.style.top = top;
-    animate(card,[{opacity:0,transform:'translateY(20px)'},{opacity:1,transform:'translateY(0)'}]);
-  }
-  function notify(text) {
-    toast.textContent = text;
-    animate(toast,[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],350);
-  }
   function finishDemo() {
     playing = false;
-    animate(cursor,[{opacity:1},{opacity:0}],200);
-    animate(focus,[{opacity:1},{opacity:0}],200);
     scenes[index].classList.add('finished');
     progressBar.style.transform = 'scaleX(1)'; progress.setAttribute('aria-valuenow','100');
     schedule(600,() => progress.classList.remove('playing'));
     placePhone(); positionReplay();
   }
-  function progressTick(now) {
+  function progressTick() {
     if (!playing || document.hidden) return;
-    const p = Math.min(1,(now - demoStart) / demoDuration);
-    progressBar.style.transform = `scaleX(${p})`;
-    progress.setAttribute('aria-valuenow',String(Math.round(p * 100)));
-    if (p < 1) progressFrame = requestAnimationFrame(progressTick);
+    const p = Number.isFinite(video.duration) && video.duration > 0 ? Math.min(1,video.currentTime/video.duration) : 0;
+    progressBar.style.transform = 'scaleX('+p+')';
+    progress.setAttribute('aria-valuenow',String(Math.round(p*100)));
+    progressFrame = requestAnimationFrame(progressTick);
   }
   function runDemo() {
     resetDemo();
     scenes[index].classList.remove('finished');
     placePhone();
-    if (index === 8) return;
-    if (reduced.matches) { splash.style.opacity = index === 0 ? '1' : '0'; finishDemo(); return; }
-    playing = true; demoDuration = demoDurations[index]; demoStart = performance.now();
+    if (!recordings[index] || reduced.matches) { finishDemo(); return; }
+    playing = true;
     replay.classList.remove('visible');
-    if (index > 0) progress.classList.add('playing');
-    progressFrame = requestAnimationFrame(progressTick);
-    if (index === 0) {
-      splash.style.opacity = '1';
-      animate(splash.querySelector('img'),[{opacity:0,transform:'scale(.72)',filter:'blur(8px)'},{opacity:1,transform:'scale(1)',filter:'blur(0)'}],1000);
-    } else if (index === 1) {
-      splash.style.opacity = '1';
-      schedule(550,() => { splash.style.opacity = '0'; });
-      schedule(1100,() => setCursor(263,166));
-      schedule(2000,() => { setCursor(263,166,true); highlight(234,142,42,45); });
-      schedule(2900,() => animate(focus,[{opacity:1},{opacity:0}],250));
-    } else if (index === 2) {
-      splash.style.opacity = '0';
-      schedule(500,() => { setCursor(175,320,true); showCard('<strong>一句话记账</strong><div class="demo-input"></div><div class="voice-bars">'+Array.from({length:18},()=>'<i></i>').join('')+'</div><div class="demo-caption">输入示例 · 午饭食堂 15，昨天打车 23</div>'); });
-      const text = '午饭食堂 15，昨天打车 23';
-      [...text].forEach((c,i) => schedule(1250+i*85,() => { const el=card.querySelector('.demo-input'); if(el)el.textContent+=c; }));
-      schedule(3300,() => { showCard('<strong>识别到两笔支出</strong><div class="demo-row"><span>餐饮 · 食堂</span><b>¥15.00</b></div><div class="demo-row"><span>交通 · 打车</span><b>¥23.00</b></div><div class="demo-confirm">确认记录 · ¥38.00</div><div class="demo-caption">网页示例，不写入真实账本</div>'); setCursor(200,520); });
-      schedule(4700,() => setCursor(200,520,true));
-      schedule(5700,() => notify('已整理 2 笔记录 · 合计 ¥38.00'));
-    } else if (index === 3) {
-      splash.style.opacity = '0';
-      schedule(600,() => { highlight(230,178,42,43); setCursor(251,199,true); });
-      schedule(1800,() => { setCursor(205,242); highlight(182,222,45,43); });
-      schedule(2900,() => showCard('<strong>周四 · 午间</strong><div class="demo-row"><span>餐饮 · 可乐</span><b>¥3.50</b></div><div class="demo-caption">用时间格子回看每一笔消费</div>','42%'));
-      schedule(3900,() => notify('按天、按时段，收支都有迹可循'));
-    } else if (index === 4) {
-      splash.style.opacity = '0';
-      schedule(500,() => setCursor(135,261,true));
-      schedule(1500,() => showCard('<strong>这一周，花在哪里？</strong><div class="demo-chart">'+[45,72,38,95,60,80,51].map(h=>`<i style="height:${h}%"></i>`).join('')+'</div><div class="demo-row"><span>餐饮</span><b>¥68.50</b></div><div class="demo-row"><span>交通</span><b>¥23.00</b></div><div class="demo-caption">分类动画示例 · 非真机实时数据</div>','30%'));
-      schedule(3100,() => { setCursor(220,456,true); notify('从统计下钻，看清每笔明细'); });
-    } else if (index === 5) {
-      splash.style.opacity = '0';
-      schedule(600,() => { setCursor(150,690,true); showCard('<strong>蓝羊羊</strong><div class="demo-input">这周吃饭花了多少？</div><div class="demo-caption">正在查看示例账目…</div>','42%'); });
-      schedule(2300,() => showCard('<strong>这周餐饮支出 ¥68.50</strong><div class="demo-row"><span>食堂 · 午饭</span><b>¥15.00</b></div><div class="demo-row"><span>其余餐饮记录</span><b>¥53.50</b></div><div class="demo-caption">2.0 能力的网页演示 · 未连接你的账本</div>','42%'));
-      schedule(4100,() => notify('写账先预览，确认后执行，可撤销'));
-    } else if (index === 6) {
-      splash.style.opacity = '0';
-      schedule(600,() => setCursor(190,185,true));
-      schedule(1600,() => showCard('<strong>本月消费小票</strong><div class="demo-row"><span>总支出</span><b>¥221.56</b></div><div class="demo-row"><span>预算</span><b>¥1,200.00</b></div><div class="demo-row"><span>预算使用</span><b>18%</b></div><div class="demo-caption">把生活的细碎，整理成一张小票</div>','34%'));
-      schedule(3500,() => notify('日、周、月总结，留住自己的生活节奏'));
-    } else {
-      splash.style.opacity = '0';
-      schedule(600,() => { setCursor(225,385,true); highlight(45,350,310,55); });
-      schedule(1700,() => showCard('<strong>按自己的节奏来</strong><div class="demo-row"><span>月度预算</span><b>¥1,200</b></div><div class="demo-row"><span>账期起始日</span><b>每月 1 日</b></div><div class="demo-row"><span>账目保存</span><b>本机</b></div><div class="demo-caption">偏好设置展示 · 可在应用中修改</div>','40%'));
-      schedule(3100,() => notify('你的账本，由你自己掌握'));
-    }
-    schedule(demoDuration,finishDemo);
+    const src='assets/native/'+recordings[index]+'.mp4';
+    if (video.getAttribute('src') !== src) { video.src=src; video.load(); }
+    else video.currentTime=0;
+    video.poster='assets/native/'+scenes[index].dataset.image+'.png';
+    const revision=playbackRevision;
+    video.play().then(() => {
+      if (revision!==playbackRevision || !playing) return;
+      video.classList.add('visible');
+      progress.classList.add('playing');
+      progressFrame=requestAnimationFrame(progressTick);
+    }).catch(() => { if(revision===playbackRevision)finishDemo(); });
   }
+  video.addEventListener('ended',() => { if(playing && video.ended)finishDemo(); });
+  video.addEventListener('error',() => { if(playing)finishDemo(); });
 
   async function changeImage(name) {
     const revision = ++imageRevision;
     const next = layers[1-imageLayer];
-    next.src = `assets/${name}.png`;
+    next.src = `assets/native/${name}.png`;
     try { await next.decode(); } catch (_) { return; }
     if (revision !== imageRevision) return;
     next.style.opacity = '1'; layers[imageLayer].style.opacity = '0';
     imageLayer = 1-imageLayer;
-    next.alt = `${names[index]}真机界面（v1.54）`;
+    next.alt = `${names[index]}应用实录画面（2.0.1 本地构建）`;
     next.removeAttribute('aria-hidden'); layers[1-imageLayer].alt=''; layers[1-imageLayer].setAttribute('aria-hidden','true');
   }
   function go(target, force = false) {
@@ -239,7 +175,7 @@
     chapters.forEach((a,i) => { if(i===index)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current'); });
     device.classList.toggle('at-title',index===0); device.classList.toggle('at-end',index===8);
     body.classList.toggle('ending',index===8);
-    if (index !== 0 && index !== 8) changeImage(scenes[index].dataset.image);
+    if (index !== 8) changeImage(scenes[index].dataset.image);
     history.replaceState(null,'',`#${scenes[index].id}`);
     document.querySelector('.announcer').textContent = names[index];
     if (oldScene) chapters[index].focus({preventScroll:true});
@@ -276,7 +212,7 @@
   let wheelTime=0,wheelTotal=0,wheelLocked=false;
   window.addEventListener('wheel',e=>{
     if(e.ctrlKey)return;
-    if(e.target.closest('.detail-track')&&Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
+    if(e.target.closest?.('.detail-track')&&Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
     e.preventDefault();
     const now=performance.now();if(now-wheelTime>160){wheelLocked=false;wheelTotal=0;}wheelTime=now;
     if(wheelLocked||now<transitionUntil)return;
@@ -327,7 +263,7 @@
   window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{layout();sizeGrain();});});
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){resetDemo();cancelAnimationFrame(parallaxFrame);parallaxFrame=0;}
-    else{splash.style.opacity=index===0?'1':'0';scenes[index].classList.add('finished');placePhone();positionReplay();drawGrain();}
+    else{scenes[index].classList.add('finished');placePhone();positionReplay();drawGrain();}
   });
 
   const grain=document.getElementById('grain'),ctx=grain.getContext('2d',{alpha:false});
