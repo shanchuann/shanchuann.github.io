@@ -28,6 +28,7 @@
   let trackingFrame = 0;
   let playbackRevision = 0;
   let titleMotionTimer = 0;
+  let parallaxTime = 0;
 
   document.querySelectorAll('[data-download]').forEach(a => {
     if (config.downloadUrl) a.href = config.downloadUrl;
@@ -240,8 +241,8 @@
   function positionReplay() {
     const r=stage.getBoundingClientRect();
     caption.hidden=index===0||index===8;
-    caption.style.top=(r.bottom+10)+'px';
     const half=caption.offsetWidth/2;
+    caption.style.top=(r.bottom+10)+'px';
     caption.style.left=Math.max(half+14,Math.min(innerWidth-half-14,(r.left+r.right)/2))+'px';
     const left=Math.max(0,r.left),right=Math.min(innerWidth,r.right),top=Math.max(0,r.top),bottom=Math.min(innerHeight,r.bottom);
     const inside=pointerX>=left&&pointerX<=right&&pointerY>=top&&pointerY<=bottom&&right>left&&bottom>top;
@@ -252,20 +253,26 @@
     replay.style.left=(mobile?right+9:(left+right)/2)+'px';
     replay.style.top=(mobile?bottom-40:(top+bottom)/2)+'px';
   }
-  function parallaxTick() {
+  function parallaxTick(now) {
     parallaxFrame=0;
-    px+=(tx-px)*.07;py+=(ty-py)*.07;
+    const dt=parallaxTime ? Math.min(48,now-parallaxTime) : 1000/60;
+    parallaxTime=now;
+    const damping=1-Math.exp(-dt/220);
+    px+=(tx-px)*damping;py+=(ty-py)*damping;
+    const settled=Math.abs(tx-px)<.001&&Math.abs(ty-py)<.001;
+    if(settled){px=tx;py=ty;}
     canvas.style.setProperty('--left-x',(px*12).toFixed(2));
     canvas.style.setProperty('--center-x',(px*14).toFixed(2));
     canvas.style.setProperty('--right-x',(px*20).toFixed(2));
     canvas.style.setProperty('--move-y',(py*9).toFixed(2));
     positionReplay();
-    if(Math.abs(tx-px)>.001||Math.abs(ty-py)>.001)parallaxFrame=requestAnimationFrame(parallaxTick);
+    if(!settled)parallaxFrame=requestAnimationFrame(parallaxTick);
+    else parallaxTime=0;
   }
   window.addEventListener('pointermove',e=>{
     pointerX=e.clientX;pointerY=e.clientY;
     if(!reduced.matches&&!coarse.matches){tx=(pointerX/innerWidth-.5)*2;ty=(pointerY/innerHeight-.5)*2;if(!parallaxFrame)parallaxFrame=requestAnimationFrame(parallaxTick);}
-    positionReplay();
+    else positionReplay();
   },{passive:true});
   document.addEventListener('pointerleave',()=>{pointerX=-1;pointerY=-1;tx=ty=0;if(!parallaxFrame)parallaxFrame=requestAnimationFrame(parallaxTick);positionReplay();});
   replay.addEventListener('focus',positionReplay);
@@ -282,15 +289,13 @@
   const grain=document.getElementById('grain'),ctx=grain.getContext('2d',{alpha:false});
   const tile=document.createElement('canvas');tile.width=256;tile.height=256;
   const tc=tile.getContext('2d',{alpha:false});
-  let grainTimer=0;
   function sizeGrain(){grain.width=Math.ceil(innerWidth*Math.min(devicePixelRatio,1.25));grain.height=Math.ceil(innerHeight*Math.min(devicePixelRatio,1.25));drawGrain();}
   function drawGrain(){
-    clearTimeout(grainTimer);
     if(!ctx||!tc)return;
     const data=tc.createImageData(256,256),pixels=new Uint32Array(data.data.buffer);
     for(let i=0;i<pixels.length;i++){const n=70+Math.random()*116|0;pixels[i]=(255<<24)|(n<<16)|(n<<8)|n;}
     tc.putImageData(data,0,0);ctx.fillStyle=ctx.createPattern(tile,'repeat');ctx.fillRect(0,0,grain.width,grain.height);
-    if(!document.hidden&&!reduced.matches)grainTimer=setTimeout(drawGrain,83);
+    // Keep the paper texture still: changing noise over the phone caused shimmer.
   }
   const initial=scenes.findIndex(s=>`#${s.id}`===location.hash);
   go(initial>=0?initial:0,true);sizeGrain();
