@@ -27,6 +27,7 @@
   let tx = 0, ty = 0, px = 0, py = 0, parallaxFrame = 0;
   let trackingFrame = 0;
   let playbackRevision = 0;
+  let titleMotionTimer = 0;
 
   document.querySelectorAll('[data-download]').forEach(a => {
     if (config.downloadUrl) a.href = config.downloadUrl;
@@ -37,7 +38,7 @@
     if (config.version) a.firstChild.textContent = `v${config.version} · 发布说明 `;
   });
   ['home','new-entry','statistics','assistant','monthly-receipt','settings'].forEach(name => {
-    const img = new Image(); img.src = `assets/native/${name}.png`;
+    const img = new Image(); img.src = `assets/native/${name}-screen.png`;
   });
 
   function setTheme(dark) {
@@ -56,14 +57,15 @@
 
   function placePhone() {
     let x, y, zoom;
-    device.style.transition = reduced.matches ? 'none' : '';
     if (mobile) {
       if (index === 0) { zoom = Math.min(1.1,(width - 35) / 432); y = 452; }
       else {
-        const copy = scenes[index].querySelector('.copy');
-        const details = scenes[index].querySelector('.details');
-        const top = copy ? copy.offsetTop + copy.offsetHeight + 24 : 280;
-        const reserve = scenes[index].classList.contains('finished') && details ? details.offsetHeight + 70 : 36;
+        const features = scenes.slice(1,8);
+        const top = Math.max(...features.map(scene => {
+          const copy=scene.querySelector('.copy');
+          return copy.offsetTop+copy.offsetHeight;
+        }))+24;
+        const reserve = Math.max(...features.map(scene => scene.querySelector('.details').offsetHeight))+70;
         zoom = Math.max(.15, Math.min((width - 35) / 432,(height - top - reserve) / 903));
         y = top;
       }
@@ -141,13 +143,21 @@
     const src='assets/native/'+recordings[index]+'.mp4';
     if (video.getAttribute('src') !== src) { video.src=src; video.load(); }
     else video.currentTime=0;
-    video.poster='assets/native/'+scenes[index].dataset.image+'.png';
+    video.defaultPlaybackRate=video.playbackRate=1.5;
+    // A video poster must contain only the display, never a second device frame.
+    video.poster='assets/native/'+scenes[index].dataset.image+'-screen.png';
     const revision=playbackRevision;
     video.play().then(() => {
       if (revision!==playbackRevision || !playing) return;
-      video.classList.add('visible');
-      progress.classList.add('playing');
-      progressFrame=requestAnimationFrame(progressTick);
+      const reveal = () => {
+        if (revision!==playbackRevision || !playing) return;
+        video.classList.add('visible');
+        progress.classList.add('playing');
+        progressFrame=requestAnimationFrame(progressTick);
+      };
+      // Keep the unframed still visible until an actual video frame is ready.
+      if (video.readyState>=2) reveal();
+      else video.addEventListener('loadeddata',reveal,{once:true});
     }).catch(() => { if(revision===playbackRevision)finishDemo(); });
   }
   video.addEventListener('ended',() => { if(playing && video.ended)finishDemo(); });
@@ -156,7 +166,7 @@
   async function changeImage(name) {
     const revision = ++imageRevision;
     const next = layers[1-imageLayer];
-    next.src = `assets/native/${name}.png`;
+    next.src = `assets/native/${name}-screen.png`;
     try { await next.decode(); } catch (_) { return; }
     if (revision !== imageRevision) return;
     next.style.opacity = '1'; layers[imageLayer].style.opacity = '0';
@@ -169,8 +179,12 @@
     if (!force && target === index) return;
     const focused = document.activeElement;
     const oldScene = focused?.closest('.scene');
+    const animateTitle = !force && !reduced.matches && (index === 0 || target === 0);
+    clearTimeout(titleMotionTimer);
+    device.classList.toggle('title-transition',animateTitle);
+    if (animateTitle) titleMotionTimer = setTimeout(() => device.classList.remove('title-transition'),1550);
     resetDemo(); index = target;
-    transitionUntil = performance.now() + (reduced.matches ? 0 : 850);
+    transitionUntil = performance.now() + (reduced.matches ? 0 : animateTitle ? 1500 : 850);
     scenes.forEach((scene,i) => {scene.classList.toggle('active',i===index);scene.classList.remove('finished');scene.inert=i!==index;});
     chapters.forEach((a,i) => { if(i===index)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current'); });
     device.classList.toggle('at-title',index===0); device.classList.toggle('at-end',index===8);
@@ -232,7 +246,6 @@
     const left=Math.max(0,r.left),right=Math.min(innerWidth,r.right),top=Math.max(0,r.top),bottom=Math.min(innerHeight,r.bottom);
     const inside=pointerX>=left&&pointerX<=right&&pointerY>=top&&pointerY<=bottom&&right>left&&bottom>top;
     hover=!mobile&&inside&&index!==8;
-    device.classList.toggle('hovering',hover&&!playing);
     const visible=index>0&&index<8&&!playing&&(mobile||hover||replay.matches(':focus-visible'));
     replay.tabIndex=index>0&&index<8&&!playing?0:-1;
     replay.classList.toggle('visible',visible);

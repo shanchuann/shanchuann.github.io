@@ -6,6 +6,11 @@
   "device": "Android 35 x86_64 isolated emulator",
   "media": [
     {
+      "file": "assistant-screen.png",
+      "bytes": 58885,
+      "sha256": "828B6D587AADDD7CB8497EC29FEBE5351E91EBA16AAAA3EC9A71FEF786E66470"
+    },
+    {
       "file": "assistant.mp4",
       "bytes": 103318,
       "sha256": "CDBEB52BA2D88942CECB9321F14F0EBB63E9EB0D764980BD4B8DF689A46C9DFA"
@@ -16,9 +21,19 @@
       "sha256": "4CFDEF753DD6853D1FFF8F8526174E069059D13CBA3709BB7BB1B148C424671E"
     },
     {
+      "file": "device-frame.png",
+      "bytes": 962876,
+      "sha256": "5456C953FD0315DB227154A5C6B4095A068E04379E4617011D95FEB57820B386"
+    },
+    {
       "file": "entry.mp4",
       "bytes": 97761,
       "sha256": "A30020E7FAFF8A9813CD53CBD2A2C22A05FD2865C2B2DE916A0BB0ACCB5E9791"
+    },
+    {
+      "file": "home-screen.png",
+      "bytes": 79208,
+      "sha256": "4FEE4EAC1CCAF5E9FBE2FCAEE629FBF900D7E79DFA18A107693033594DE950AF"
     },
     {
       "file": "home.png",
@@ -26,9 +41,19 @@
       "sha256": "A7C8D857EF1AA3F85A6606AB1A4105E8E0856E681559003BFBCDF6D826E86F32"
     },
     {
+      "file": "monthly-receipt-screen.png",
+      "bytes": 176481,
+      "sha256": "D560E4E0B133056A4390B3DE7A1F03F37710D3986719110CBA9A1388ADEE11DE"
+    },
+    {
       "file": "monthly-receipt.png",
       "bytes": 1118617,
       "sha256": "AA84BF36CFC7173E37ED4CC274DE5ADCF7D90DA8DF5A2A224B81119F0CA87672"
+    },
+    {
+      "file": "new-entry-screen.png",
+      "bytes": 50711,
+      "sha256": "908E0DD9C2453240373ED1DFE403D0016E22E8F1A368BA543AAAB4684D62B62F"
     },
     {
       "file": "new-entry.png",
@@ -51,9 +76,19 @@
       "sha256": "639BE1D7964CDAE5632ABF1A4DE058E40B35CA7D6BBB6433D82E4064CA3F29A4"
     },
     {
+      "file": "settings-screen.png",
+      "bytes": 55157,
+      "sha256": "E513F7F60CAB138B9525E74F69C5B4BEE7CA7D65BF845EE8A3686C494BDB5DB6"
+    },
+    {
       "file": "settings.png",
       "bytes": 679275,
       "sha256": "5F0040A5B53724E0DCA0F7CFB257050EBB3C329B274C24B20C58C30E9BFB7064"
+    },
+    {
+      "file": "statistics-screen.png",
+      "bytes": 309221,
+      "sha256": "2DC4C8FC71BD14FBF89F2627209F4E0B7C028975193C1D3AEB74D453F1FBC2C7"
     },
     {
       "file": "statistics.mp4",
